@@ -1,0 +1,177 @@
+###### Class com.dcloud.zxing2.oned.EAN8Reader (com.dcloud.zxing2.oned.EAN8Reader)
+.class public final Lcom/dcloud/zxing2/oned/EAN8Reader;
+.super Lcom/dcloud/zxing2/oned/UPCEANReader;
+.source "SourceFile"
+
+
+# instance fields
+.field private final decodeMiddleCounters:[I
+
+
+# direct methods
+.method public constructor <init>()V
+    .registers 2
+
+    .line 1
+    invoke-direct {p0}, Lcom/dcloud/zxing2/oned/UPCEANReader;-><init>()V
+
+    const/4 v0, 0x4
+
+    new-array v0, v0, [I
+
+    .line 2
+    iput-object v0, p0, Lcom/dcloud/zxing2/oned/EAN8Reader;->decodeMiddleCounters:[I
+
+    return-void
+.end method
+
+
+# virtual methods
+.method protected decodeMiddle(Lcom/dcloud/zxing2/common/BitArray;[ILjava/lang/StringBuilder;)I
+    .registers 12
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Lcom/dcloud/zxing2/NotFoundException;
+        }
+    .end annotation
+
+    .line 1
+    iget-object v0, p0, Lcom/dcloud/zxing2/oned/EAN8Reader;->decodeMiddleCounters:[I
+
+    const/4 v1, 0x0
+
+    .line 2
+    aput v1, v0, v1
+
+    const/4 v2, 0x1
+
+    .line 3
+    aput v1, v0, v2
+
+    const/4 v3, 0x2
+
+    .line 4
+    aput v1, v0, v3
+
+    const/4 v3, 0x3
+
+    .line 5
+    aput v1, v0, v3
+
+    .line 6
+    invoke-virtual {p1}, Lcom/dcloud/zxing2/common/BitArray;->getSize()I
+
+    move-result v3
+
+    .line 7
+    aget p2, p2, v2
+
+    const/4 v4, 0x0
+
+    :goto_15
+    const/4 v5, 0x4
+
+    if-ge v4, v5, :cond_33
+
+    if-ge p2, v3, :cond_33
+
+    .line 10
+    sget-object v5, Lcom/dcloud/zxing2/oned/UPCEANReader;->L_PATTERNS:[[I
+
+    invoke-static {p1, v0, p2, v5}, Lcom/dcloud/zxing2/oned/UPCEANReader;->decodeDigit(Lcom/dcloud/zxing2/common/BitArray;[II[[I)I
+
+    move-result v5
+
+    add-int/lit8 v5, v5, 0x30
+
+    int-to-char v5, v5
+
+    .line 11
+    invoke-virtual {p3, v5}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
+
+    .line 12
+    array-length v5, v0
+
+    const/4 v6, 0x0
+
+    :goto_28
+    if-ge v6, v5, :cond_30
+
+    aget v7, v0, v6
+
+    add-int/2addr p2, v7
+
+    add-int/lit8 v6, v6, 0x1
+
+    goto :goto_28
+
+    :cond_30
+    add-int/lit8 v4, v4, 0x1
+
+    goto :goto_15
+
+    .line 17
+    :cond_33
+    sget-object v4, Lcom/dcloud/zxing2/oned/UPCEANReader;->MIDDLE_PATTERN:[I
+
+    invoke-static {p1, p2, v2, v4}, Lcom/dcloud/zxing2/oned/UPCEANReader;->findGuardPattern(Lcom/dcloud/zxing2/common/BitArray;IZ[I)[I
+
+    move-result-object p2
+
+    .line 18
+    aget p2, p2, v2
+
+    const/4 v2, 0x0
+
+    :goto_3c
+    if-ge v2, v5, :cond_59
+
+    if-ge p2, v3, :cond_59
+
+    .line 21
+    sget-object v4, Lcom/dcloud/zxing2/oned/UPCEANReader;->L_PATTERNS:[[I
+
+    invoke-static {p1, v0, p2, v4}, Lcom/dcloud/zxing2/oned/UPCEANReader;->decodeDigit(Lcom/dcloud/zxing2/common/BitArray;[II[[I)I
+
+    move-result v4
+
+    add-int/lit8 v4, v4, 0x30
+
+    int-to-char v4, v4
+
+    .line 22
+    invoke-virtual {p3, v4}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
+
+    .line 23
+    array-length v4, v0
+
+    const/4 v6, 0x0
+
+    :goto_4e
+    if-ge v6, v4, :cond_56
+
+    aget v7, v0, v6
+
+    add-int/2addr p2, v7
+
+    add-int/lit8 v6, v6, 0x1
+
+    goto :goto_4e
+
+    :cond_56
+    add-int/lit8 v2, v2, 0x1
+
+    goto :goto_3c
+
+    :cond_59
+    return p2
+.end method
+
+.method getBarcodeFormat()Lcom/dcloud/zxing2/BarcodeFormat;
+    .registers 2
+
+    .line 1
+    sget-object v0, Lcom/dcloud/zxing2/BarcodeFormat;->EAN_8:Lcom/dcloud/zxing2/BarcodeFormat;
+
+    return-object v0
+.end method

@@ -1,0 +1,20 @@
+package com.huawei.android.hms.pps.a;
+
+import android.content.ComponentName;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import java.util.concurrent.LinkedBlockingQueue;
+
+/* JADX INFO: loaded from: classes.dex */
+public final class a implements ServiceConnection {
+
+    /* JADX INFO: renamed from: a, reason: collision with root package name */
+    public boolean f52a = false;
+    public final LinkedBlockingQueue<IBinder> b = new LinkedBlockingQueue<>(1);
+
+    @Override // android.content.ServiceConnection
+    public final native void onServiceConnected(ComponentName componentName, IBinder iBinder);
+
+    @Override // android.content.ServiceConnection
+    public final native void onServiceDisconnected(ComponentName componentName);
+}

@@ -1,0 +1,44 @@
+###### Class com.facebook.imagepipeline.producers.BaseProducerContextCallbacks (com.facebook.imagepipeline.producers.BaseProducerContextCallbacks)
+.class public Lcom/facebook/imagepipeline/producers/BaseProducerContextCallbacks;
+.super Ljava/lang/Object;
+.source "BaseProducerContextCallbacks.java"
+
+# interfaces
+.implements Lcom/facebook/imagepipeline/producers/ProducerContextCallbacks;
+
+
+# direct methods
+.method public constructor <init>()V
+    .registers 1
+
+    .line 14
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public onCancellationRequested()V
+    .registers 1
+
+    return-void
+.end method
+
+.method public onIsIntermediateResultExpectedChanged()V
+    .registers 1
+
+    return-void
+.end method
+
+.method public onIsPrefetchChanged()V
+    .registers 1
+
+    return-void
+.end method
+
+.method public onPriorityChanged()V
+    .registers 1
+
+    return-void
+.end method

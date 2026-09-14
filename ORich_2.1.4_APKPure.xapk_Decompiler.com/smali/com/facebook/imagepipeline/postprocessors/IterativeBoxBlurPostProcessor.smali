@@ -1,0 +1,183 @@
+###### Class com.facebook.imagepipeline.postprocessors.IterativeBoxBlurPostProcessor (com.facebook.imagepipeline.postprocessors.IterativeBoxBlurPostProcessor)
+.class public Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;
+.super Lcom/facebook/imagepipeline/request/BasePostprocessor;
+.source "IterativeBoxBlurPostProcessor.java"
+
+
+# static fields
+.field private static final DEFAULT_ITERATIONS:I = 0x3
+
+
+# instance fields
+.field private final mBlurRadius:I
+
+.field private mCacheKey:Lcom/facebook/cache/common/CacheKey;
+    .annotation runtime Ljavax/annotation/Nullable;
+    .end annotation
+.end field
+
+.field private final mIterations:I
+
+
+# direct methods
+.method public constructor <init>(I)V
+    .registers 3
+    .annotation system Ldalvik/annotation/MethodParameters;
+        accessFlags = {
+            0x0
+        }
+        names = {
+            "blurRadius"
+        }
+    .end annotation
+
+    const/4 v0, 0x3
+
+    .line 35
+    invoke-direct {p0, v0, p1}, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;-><init>(II)V
+
+    return-void
+.end method
+
+.method public constructor <init>(II)V
+    .registers 6
+    .annotation system Ldalvik/annotation/MethodParameters;
+        accessFlags = {
+            0x0,
+            0x0
+        }
+        names = {
+            "iterations",
+            "blurRadius"
+        }
+    .end annotation
+
+    .line 38
+    invoke-direct {p0}, Lcom/facebook/imagepipeline/request/BasePostprocessor;-><init>()V
+
+    const/4 v0, 0x1
+
+    const/4 v1, 0x0
+
+    if-lez p1, :cond_9
+
+    const/4 v2, 0x1
+
+    goto :goto_a
+
+    :cond_9
+    const/4 v2, 0x0
+
+    .line 39
+    :goto_a
+    invoke-static {v2}, Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;
+
+    move-result-object v2
+
+    invoke-static {v2}, Lcom/facebook/common/internal/Preconditions;->checkArgument(Ljava/lang/Boolean;)V
+
+    if-lez p2, :cond_14
+
+    goto :goto_15
+
+    :cond_14
+    const/4 v0, 0x0
+
+    .line 40
+    :goto_15
+    invoke-static {v0}, Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;
+
+    move-result-object v0
+
+    invoke-static {v0}, Lcom/facebook/common/internal/Preconditions;->checkArgument(Ljava/lang/Boolean;)V
+
+    .line 41
+    iput p1, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mIterations:I
+
+    .line 42
+    iput p2, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mBlurRadius:I
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public getPostprocessorCacheKey()Lcom/facebook/cache/common/CacheKey;
+    .registers 5
+    .annotation runtime Ljavax/annotation/Nullable;
+    .end annotation
+
+    .line 53
+    iget-object v0, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mCacheKey:Lcom/facebook/cache/common/CacheKey;
+
+    if-nez v0, :cond_29
+
+    const/4 v0, 0x0
+
+    .line 54
+    check-cast v0, Ljava/util/Locale;
+
+    const/4 v1, 0x2
+
+    new-array v1, v1, [Ljava/lang/Object;
+
+    const/4 v2, 0x0
+
+    iget v3, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mIterations:I
+
+    invoke-static {v3}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object v3
+
+    aput-object v3, v1, v2
+
+    const/4 v2, 0x1
+
+    iget v3, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mBlurRadius:I
+
+    invoke-static {v3}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object v3
+
+    aput-object v3, v1, v2
+
+    const-string v2, "i%dr%d"
+
+    invoke-static {v0, v2, v1}, Ljava/lang/String;->format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+
+    move-result-object v0
+
+    .line 55
+    new-instance v1, Lcom/facebook/cache/common/SimpleCacheKey;
+
+    invoke-direct {v1, v0}, Lcom/facebook/cache/common/SimpleCacheKey;-><init>(Ljava/lang/String;)V
+
+    iput-object v1, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mCacheKey:Lcom/facebook/cache/common/CacheKey;
+
+    .line 57
+    :cond_29
+    iget-object v0, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mCacheKey:Lcom/facebook/cache/common/CacheKey;
+
+    return-object v0
+.end method
+
+.method public process(Landroid/graphics/Bitmap;)V
+    .registers 4
+    .annotation system Ldalvik/annotation/MethodParameters;
+        accessFlags = {
+            0x0
+        }
+        names = {
+            "bitmap"
+        }
+    .end annotation
+
+    .line 47
+    iget v0, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mIterations:I
+
+    iget v1, p0, Lcom/facebook/imagepipeline/postprocessors/IterativeBoxBlurPostProcessor;->mBlurRadius:I
+
+    invoke-static {p1, v0, v1}, Lcom/facebook/imagepipeline/nativecode/NativeBlurFilter;->iterativeBoxBlur(Landroid/graphics/Bitmap;II)V
+
+    return-void
+.end method

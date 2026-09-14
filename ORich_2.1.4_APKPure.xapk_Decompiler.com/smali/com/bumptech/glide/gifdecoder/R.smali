@@ -1,0 +1,13 @@
+###### Class com.bumptech.glide.gifdecoder.R (com.bumptech.glide.gifdecoder.R)
+.class public final Lcom/bumptech/glide/gifdecoder/R;
+.super Ljava/lang/Object;
+
+
+# direct methods
+.method private constructor <init>()V
+    .registers 1
+
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    return-void
+.end method

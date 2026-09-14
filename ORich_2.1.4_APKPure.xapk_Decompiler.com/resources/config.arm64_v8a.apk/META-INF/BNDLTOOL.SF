@@ -1,0 +1,53 @@
+Signature-Version: 1.0
+Created-By: 1.0 (Android)
+SHA1-Digest-Manifest: LelK44SSPlMgGxYK+tqd5/2Ne1s=
+X-Android-APK-Signed: 2, 3
+
+Name: AndroidManifest.xml
+SHA1-Digest: /freJ+/ejfwGiS4Ke20iuCiwsI0=
+
+Name: lib/arm64-v8a/lib39285EFA.so
+SHA1-Digest: u0ZALhtW+Tozs86D4+oiwI4ODoc=
+
+Name: lib/arm64-v8a/libc++_shared.so
+SHA1-Digest: 6OaBYMhD+rYCIJWG7CqJiqvWhQ4=
+
+Name: lib/arm64-v8a/libgetuiext3.so
+SHA1-Digest: mTQ2JiqHuWSqrH2ezW60Aqvs9Hw=
+
+Name: lib/arm64-v8a/libgifimage.so
+SHA1-Digest: avLq8cRWMvtsch60/Hila5j4aYM=
+
+Name: lib/arm64-v8a/libimagepipeline.so
+SHA1-Digest: 192ztdXLKMbuZS2HCy+esi1HOBg=
+
+Name: lib/arm64-v8a/liblamemp3.so
+SHA1-Digest: mHej+UQxv4DYqY7vp3Pe8Ctxnc8=
+
+Name: lib/arm64-v8a/libnative-filters.so
+SHA1-Digest: 7ujTyL03XX+LAXz9sMHTbV26ksw=
+
+Name: lib/arm64-v8a/libnative-imagetranscoder.so
+SHA1-Digest: IWcNjjdcaVV63yxxuMLs2W0YJ3I=
+
+Name: lib/arm64-v8a/libpl_droidsonroids_gif.so
+SHA1-Digest: WPOdt39YJE6PKYVVN7EHq6Lswd8=
+
+Name: lib/arm64-v8a/libstatic-webp.so
+SHA1-Digest: v/z1KbprLFxRwSpNXc8qWvqJBbI=
+
+Name: lib/arm64-v8a/libweexcore.so
+SHA1-Digest: Er+KP1sDBshnWLgYdOA5t6CV+oA=
+
+Name: lib/arm64-v8a/libweexjsb.so
+SHA1-Digest: uaoglij94/T2dwhUX2/lUV0IaxA=
+
+Name: lib/arm64-v8a/libweexjss.so
+SHA1-Digest: WHI49jnY0oB1s9puTZ8NPFPlWnw=
+
+Name: lib/arm64-v8a/libweexjst.so
+SHA1-Digest: 6AXkXrJ/Y7k6CP7VfEcovYP6QBQ=
+
+Name: stamp-cert-sha256
+SHA1-Digest: Bs40BvDZ1xrbgQrPTD2x5w/NfHQ=
+

@@ -1,0 +1,13 @@
+###### Class com.facebook.common.time.Clock (com.facebook.common.time.Clock)
+.class public interface abstract Lcom/facebook/common/time/Clock;
+.super Ljava/lang/Object;
+.source "Clock.java"
+
+
+# static fields
+.field public static final MAX_TIME:J = 0x7fffffffffffffffL
+
+
+# virtual methods
+.method public abstract now()J
+.end method

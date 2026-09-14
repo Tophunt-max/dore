@@ -1,0 +1,9 @@
+package com.igexin.a;
+
+import android.content.Context;
+import java.io.File;
+
+/* JADX INFO: loaded from: classes.dex */
+public interface d {
+    void a(Context context, String[] strArr, String str, File file, h hVar);
+}

@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="214"
+    android:versionName="2.1.4"
+    android:compileSdkVersion="30"
+    android:compileSdkVersionCodename="11"
+    package="com.orich.orichrelease"
+    platformBuildVersionCode="30"
+    platformBuildVersionName="11">
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="30"/>
+    <supports-screens
+        android:anyDensity="true"
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true"
+        android:resizeable="true"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.FLASHLIGHT"/>
+    <uses-feature android:name="android.hardware.camera"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="getui.permission.GetuiService.com.orich.orichrelease"/>
+    <permission
+        android:name="getui.permission.GetuiService.com.orich.orichrelease"
+        android:protectionLevel="normal"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE"/>
+    <uses-permission android:name="com.vivo.notification.permission.BADGE_ICON"/>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.DEFAULT"/>
+        </intent>
+    </queries>
+    <uses-permission android:name="com.asus.msa.SupplementaryDID.ACCESS"/>
+    <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <application
+        android:label="@string/app_name"
+        android:icon="@drawable/icon"
+        android:name="io.dcloud.application.DCloudApplication"
+        android:allowClearUserData="true"
+        android:debuggable="false"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:largeHeap="true"
+        android:supportsRtl="true"
+        android:extractNativeLibs="true"
+        android:fullBackupContent="@xml/appsflyer_backup_rules"
+        android:usesCleartextTraffic="true"
+        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+        android:isSplitRequired="true">
+        <activity
+            android:theme="@style/DCloudSplashTheme"
+            android:label="@string/app_name"
+            android:name="io.dcloud.PandoraEntry"
+            android:screenOrientation="user"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|screenLayout|orientation|navigation|keyboardHidden|keyboard|mnc|mcc"
+            android:windowSoftInputMode="adjustResize"
+            android:hardwareAccelerated="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:theme="@style/DCloudActivityTheme"
+            android:label="@string/app_name"
+            android:name="io.dcloud.PandoraEntryActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|screenLayout|orientation|navigation|keyboardHidden|keyboard|mnc|mcc"
+            android:windowSoftInputMode="adjustResize"
+            android:hardwareAccelerated="true"/>
+        <meta-data
+            android:name="DCLOUD_READ_PHONE_STATE"
+            android:value="once"/>
+        <meta-data
+            android:name="DCLOUD_AD_ID"
+            android:value="2147483647"/>
+        <meta-data
+            android:name="DCLOUD_STREAMAPP_CHANNEL"
+            android:value="com.orich.orichrelease|__UNI__F330A24|124829160408|google"/>
+        <meta-data
+            android:name="DCLOUD_UNISTATISTICS"
+            android:value="true"/>
+        <meta-data
+            android:name="dcloud_uninview_background"
+            android:value="true"/>
+        <meta-data
+            android:name="android.notch_support"
+            android:value="true"/>
+        <meta-data
+            android:name="notch.config"
+            android:value="portrait"/>
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="2.5"/>
+        <meta-data
+            android:name="APPS_FLYER_DEV_KEY"
+            android:value="GZiKW5bGuX9KxmN2FtJYkm"/>
+        <receiver
+            android:name="com.appsflyer.MultipleInstallBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.taobao.weex.WXGlobalEventReceiver"
+            android:enabled="true"
+            android:exported="false"/>
+        <service android:name="io.dcloud.feature.unipush.GTNormalIntentService"/>
+        <service
+            android:label="NotificationCenter"
+            android:name="com.igexin.sdk.PushService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"
+            android:process=":pushservice">
+            <intent-filter>
+                <action android:name="com.igexin.sdk.action.service.message"/>
+            </intent-filter>
+        </service>
+        <receiver
+            android:name="io.dcloud.feature.unipush.GTNotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="com.orich.orichrelease.__CREATE_NOTIFICATION"/>
+                <action android:name="com.orich.orichrelease.__REMOVE_NOTIFICATION"/>
+                <action android:name="com.orich.orichrelease.__CLEAR_NOTIFICATION"/>
+                <action android:name="com.orich.orichrelease.__CLILK_NOTIFICATION"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.igexin.sdk.PushReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.intent.action.USER_PRESENT"/>
+                <action android:name="com.igexin.sdk.action.refreshls"/>
+                <action android:name="android.intent.action.MEDIA_MOUNTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+            </intent-filter>
+        </receiver>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.igexin.sdk.PushActivity"
+            android:exported="false"
+            android:process=":pushservice"
+            android:taskAffinity="com.igexin.sdk.PushActivityTask"
+            android:excludeFromRecents="true"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.igexin.sdk.GActivity"
+            android:exported="true"
+            android:process=":pushservice"
+            android:taskAffinity="com.igexin.sdk.PushActivityTask"
+            android:excludeFromRecents="true"/>
+        <meta-data
+            android:name="PUSH_APPID"
+            android:value="WqAl8MNBEk6m6k7IqJyKA"/>
+        <meta-data
+            android:name="PUSH_APPKEY"
+            android:value="Hf5sxWIOdo888ltBRdhLq7"/>
+        <meta-data
+            android:name="PUSH_APPSECRET"
+            android:value="T7L6rcZmqM7050yt97R3Z4"/>
+        <service
+            android:label="PushService"
+            android:name="io.dcloud.feature.unipush.GTPushDevService"
+            android:exported="true"
+            android:process=":pushservice"/>
+        <activity
+            android:name="io.dcloud.feature.unipush.PrivacyActivity"
+            android:exported="false"/>
+        <service
+            android:name="io.dcloud.feature.aps.ApsActionService"
+            android:exported="false"/>
+        <activity
+            android:name="io.dcloud.imagepick.CustomGalleryActivity"
+            android:exported="false"
+            android:noHistory="true"/>
+        <activity
+            android:theme="@style/DeviceDefault.Light"
+            android:name="io.dcloud.feature.nativeObj.photoview.PhotoActivity"
+            android:exported="false"
+            android:screenOrientation="behind"
+            android:configChanges="orientation|keyboardHidden"
+            android:noHistory="false"/>
+        <activity
+            android:theme="@style/DCloudTheme"
+            android:label="@string/stream_my"
+            android:icon="@drawable/dcloud_recent"
+            android:name="io.dcloud.WebAppActivity"
+            android:taskAffinity=":stream"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:configChanges="fontScale|screenSize|orientation|keyboardHidden|mnc|mcc"
+            android:windowSoftInputMode="adjustResize"
+            android:hardwareAccelerated="true"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="io.dcloud.ProcessMediator"
+            android:exported="false"
+            android:excludeFromRecents="true"/>
+        <activity
+            android:theme="@style/ThemeNoTitleBar"
+            android:name="io.dcloud.WebviewActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"/>
+        <receiver
+            android:name="io.dcloud.common.adapter.io.DownloadReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED"/>
+                <data android:scheme="package"/>
+            </intent-filter>
+        </receiver>
+        <activity
+            android:theme="@style/DeviceDefault.Light"
+            android:name="com.dmcbig.mediapicker.PickerActivity"
+            android:exported="false"
+            android:configChanges="screenSize|orientation"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
+        <activity
+            android:theme="@style/DeviceDefault.Light"
+            android:name="com.dmcbig.mediapicker.PreviewActivity"
+            android:exported="false"
+            android:configChanges="screenSize|orientation"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
+        <provider
+            android:name="io.dcloud.common.util.DCloud_FileProvider"
+            android:exported="false"
+            android:authorities="com.orich.orichrelease.dc.fileprovider"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/dcloud_file_provider"/>
+        </provider>
+        <activity
+            android:theme="@style/ImageEditTheme"
+            android:name="io.dcloud.feature.gallery.imageedit.IMGEditActivity"
+            android:exported="false"
+            android:configChanges="screenSize|orientation|keyboardHidden"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
+        <service
+            android:name="io.dcloud.ads.base.service.DownloadService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"/>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@android:color/holo_red_light"/>
+        <service android:name="com.igexin.sdk.FcmPushService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name="com.igexin.sdk.FcmIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <service
+            android:name="com.igexin.sdk.FcmPushIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:process=":pushservice"/>
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter android:priority="-500">
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <receiver
+            android:name="com.google.android.gms.measurement.AppMeasurementReceiver"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name="com.google.android.gms.measurement.AppMeasurementService"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name="com.google.android.gms.measurement.AppMeasurementJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name="com.google.firebase.components.ComponentDiscoveryService"
+            android:exported="false"
+            android:directBootAware="true">
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+        </service>
+        <receiver
+            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="com.google.firebase.iid.FirebaseInstanceIdService"
+            android:exported="true">
+            <intent-filter android:priority="-500">
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:exported="false"
+            android:authorities="com.orich.orichrelease.firebaseinitprovider"
+            android:initOrder="100"
+            android:directBootAware="true"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+            android:exported="false"/>
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
+        <meta-data
+            android:name="com.android.vending.splits.required"
+            android:value="true"/>
+        <meta-data
+            android:name="com.android.stamp.source"
+            android:value="https://play.google.com/store"/>
+        <meta-data
+            android:name="com.android.stamp.type"
+            android:value="STAMP_TYPE_DISTRIBUTION_APK"/>
+        <meta-data
+            android:name="com.android.vending.splits"
+            android:resource="@xml/splits0"/>
+        <meta-data
+            android:name="com.android.vending.derived.apk.id"
+            android:value="2"/>
+    </application>
+</manifest>

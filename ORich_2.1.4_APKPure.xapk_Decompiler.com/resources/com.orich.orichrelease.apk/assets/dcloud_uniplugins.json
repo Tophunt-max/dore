@@ -1,0 +1,1 @@
+{"nativePlugins":[{"plugins":[{"type":"module","name":"sn-appsflyer","class":"com.itfenbao.snplugin.appsflyer.AppsFlyerModule"}],"version":"1.0.8","hooksClass":"com.itfenbao.snplugin.appsflyer.AppsFlyerProxy"},{"plugins":[{"type":"module","name":"sn-firebase-analytics","class":"com.itfenbao.snplugin.firebase.analytics.AnalyticsModule"}],"version":"1.0.2"}]}

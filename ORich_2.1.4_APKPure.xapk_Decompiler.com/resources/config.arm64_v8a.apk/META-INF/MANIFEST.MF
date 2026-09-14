@@ -1,0 +1,50 @@
+Manifest-Version: 1.0
+
+Name: AndroidManifest.xml
+SHA1-Digest: nQoTfZ2rRf0N+QUrUApuCJqGl/Q=
+
+Name: lib/arm64-v8a/lib39285EFA.so
+SHA1-Digest: nv2kIawPlgzVF1Z1OvkPF4VNw1I=
+
+Name: lib/arm64-v8a/libc++_shared.so
+SHA1-Digest: 7fqm8mc/5hKgJBNg9NRa6mSGOGQ=
+
+Name: lib/arm64-v8a/libgetuiext3.so
+SHA1-Digest: EJJnzIw8hXu+j3+UT+OPMz8u2dQ=
+
+Name: lib/arm64-v8a/libgifimage.so
+SHA1-Digest: EY4FDOM/iuWztYS5JvYkaGlzc78=
+
+Name: lib/arm64-v8a/libimagepipeline.so
+SHA1-Digest: iwp1TF7WfrCU1EZw/NMTJROlkCw=
+
+Name: lib/arm64-v8a/liblamemp3.so
+SHA1-Digest: F5YYGyeJbMTuIaFjmwBGwniyxpA=
+
+Name: lib/arm64-v8a/libnative-filters.so
+SHA1-Digest: 67NFjJG1w1GmSJ7Cp/lZQo4wat8=
+
+Name: lib/arm64-v8a/libnative-imagetranscoder.so
+SHA1-Digest: FxVbndhtJKEKM1jcdFJFtchc+to=
+
+Name: lib/arm64-v8a/libpl_droidsonroids_gif.so
+SHA1-Digest: y7z5gWf1bQZbCNpz7Bc5a+orJUw=
+
+Name: lib/arm64-v8a/libstatic-webp.so
+SHA1-Digest: jj4OLDgbqTBsyrckWYjTTnvt4TQ=
+
+Name: lib/arm64-v8a/libweexcore.so
+SHA1-Digest: xBiLIrC4dQLtGsPSsyK2mKw/59A=
+
+Name: lib/arm64-v8a/libweexjsb.so
+SHA1-Digest: aTgJcD3FCIWVeVARv8k1KzggJZ4=
+
+Name: lib/arm64-v8a/libweexjss.so
+SHA1-Digest: M93FWsWlwNV40ZtbU46A1fmL+Ho=
+
+Name: lib/arm64-v8a/libweexjst.so
+SHA1-Digest: aTgJcD3FCIWVeVARv8k1KzggJZ4=
+
+Name: stamp-cert-sha256
+SHA1-Digest: 5vTkm69vqAbusD/fho7oWwc7j+I=
+

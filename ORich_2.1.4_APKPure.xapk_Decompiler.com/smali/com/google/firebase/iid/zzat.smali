@@ -1,0 +1,16 @@
+###### Class com.google.firebase.iid.zzat (com.google.firebase.iid.zzat)
+.class interface abstract Lcom/google/firebase/iid/zzat;
+.super Ljava/lang/Object;
+
+
+# virtual methods
+.method public abstract zzs()Lcom/google/android/gms/tasks/Task;
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "()",
+            "Lcom/google/android/gms/tasks/Task<",
+            "Lcom/google/firebase/iid/InstanceIdResult;",
+            ">;"
+        }
+    .end annotation
+.end method

@@ -1,0 +1,19 @@
+package com.bun.miitmdid.c.h;
+
+import android.content.Context;
+import android.net.Uri;
+
+/* JADX INFO: loaded from: classes.dex */
+public class a {
+
+    /* JADX INFO: renamed from: a, reason: collision with root package name */
+    private static Uri f26a = Uri.parse("content://cn.nubia.identity/identity");
+
+    public static native String a(Context context);
+
+    public static native String a(Context context, String str);
+
+    public static native String b(Context context, String str);
+
+    public static native boolean b(Context context);
+}
