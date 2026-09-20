@@ -37,8 +37,13 @@ app.use('*', requestContext);
 app.use(
   '*',
   cors({
-    origin: (origin, c) =>
-      !origin || origin === c.env.API_ORIGIN ? origin : '',
+    origin: (origin, c) => {
+      if (!origin) return origin;
+      const allowed = c.env.API_ORIGIN.split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+      return allowed.includes(origin) ? origin : '';
+    },
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: [
       'Authorization',

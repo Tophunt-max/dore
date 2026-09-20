@@ -11,4 +11,21 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
+// On the web platform there is no hardware-backed secure store, so redirect
+// `expo-secure-store` to a localStorage-based shim. Native builds are untouched.
+const secureStoreWebShim = path.resolve(
+  projectRoot,
+  'src/shims/secure-store.web.ts',
+);
+const originalResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform === 'web' && moduleName === 'expo-secure-store') {
+    return { type: 'sourceFile', filePath: secureStoreWebShim };
+  }
+  if (originalResolveRequest) {
+    return originalResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 module.exports = config;

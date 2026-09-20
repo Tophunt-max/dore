@@ -6,7 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "APP_ENV": "production",
-    "API_ORIGIN": "http://localhost:8081",
+    "API_ORIGIN": "https://oriva-admin.pages.dev,https://oriva-user.pages.dev",
     "PUBLIC_ASSET_BASE": "https://assets.example.com",
     "OTP_PROVIDER_URL": "https://otp-provider.example.com/messages",
     "OTP_DEV_MODE": "false",
@@ -15,7 +15,7 @@
     {
       "binding": "DB",
       "database_name": "oriva-db",
-      "database_id": "replace-with-d1-database-id",
+      "database_id": "fa74d4b5-91f8-4082-b2d2-b0c53b7d8f50",
       "migrations_dir": "migrations",
     },
   ],
@@ -60,7 +60,7 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_classes": [
+      "new_sqlite_classes": [
         "WalletCoordinator",
         "CampaignCoordinator",
         "OtpRateLimiter",
