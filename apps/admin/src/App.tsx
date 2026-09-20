@@ -118,12 +118,18 @@ export function App() {
     adminApi.hasSession() ? adminApi.sessionUser() : null,
   );
   const [page, setPage] = useState<Page>('dashboard');
+  const [navOpen, setNavOpen] = useState(false);
   if (!user) return <Login onAuthenticated={setUser} />;
   const visibleNavigation = navigation.filter((item) =>
     item.roles.includes(user.role),
   );
   return (
-    <div className="app-shell">
+    <div className={navOpen ? 'app-shell nav-open' : 'app-shell'}>
+      <button
+        className="nav-scrim"
+        aria-label="Close menu"
+        onClick={() => setNavOpen(false)}
+      />
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">◇</div>
@@ -131,6 +137,13 @@ export function App() {
             <strong>Oriva</strong>
             <span>Operations</span>
           </div>
+          <button
+            className="nav-close"
+            aria-label="Close menu"
+            onClick={() => setNavOpen(false)}
+          >
+            ✕
+          </button>
         </div>
         <nav>
           {visibleNavigation.map((item, index) => (
@@ -141,7 +154,10 @@ export function App() {
               ) : null}
               <button
                 className={page === item.page ? 'nav active' : 'nav'}
-                onClick={() => setPage(item.page)}
+                onClick={() => {
+                  setPage(item.page);
+                  setNavOpen(false);
+                }}
               >
                 {label(item.page)}
               </button>
@@ -154,6 +170,7 @@ export function App() {
             adminApi.logout();
             setUser(null);
             setPage('dashboard');
+            setNavOpen(false);
           }}
         >
           Sign out
@@ -161,9 +178,20 @@ export function App() {
       </aside>
       <main className="main">
         <header>
-          <div>
-            <p className="eyebrow">Secure operations console</p>
-            <h1>{label(page)}</h1>
+          <div className="header-left">
+            <button
+              className="nav-toggle"
+              aria-label="Open menu"
+              onClick={() => setNavOpen(true)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+            <div>
+              <p className="eyebrow">Secure operations console</p>
+              <h1>{label(page)}</h1>
+            </div>
           </div>
           <div className="identity">
             <strong>{user.displayName ?? user.phoneMasked}</strong>

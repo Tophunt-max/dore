@@ -806,50 +806,130 @@ textarea:focus {
   line-height: 1.5;
 }
 
+/* ───────── Header left + mobile menu controls (hidden on desktop) ───────── */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.nav-toggle,
+.nav-close,
+.nav-scrim {
+  display: none;
+}
+
 /* ───────── Responsive ───────── */
 @media (max-width: 1100px) {
   .metrics {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
 @media (max-width: 900px) {
   .app-shell {
     display: block;
   }
-  .sidebar {
-    position: static;
-    height: auto;
-    padding: 16px;
-  }
-  .sidebar nav {
-    grid-template-columns: repeat(3, 1fr);
-    max-height: 260px;
-  }
   .main {
-    padding: 20px 16px 36px;
+    padding: 18px 16px 36px;
   }
   .main header {
-    position: static;
-    margin: -20px -16px 20px;
-    padding: 16px;
+    position: sticky;
+    margin: 0 0 18px;
+    padding: 12px 2px;
+  }
+  .main h1 {
+    font-size: 21px;
+  }
+
+  /* Off-canvas drawer sidebar (opens on hamburger click) */
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 284px;
+    max-width: 84vw;
+    height: 100vh;
+    z-index: 60;
+    padding: 20px 14px;
+    transform: translateX(-100%);
+    transition: transform 0.26s ease;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  }
+  .app-shell.nav-open .sidebar {
+    transform: translateX(0);
+  }
+  .sidebar nav {
+    grid-template-columns: 1fr;
+    max-height: none;
+  }
+  .nav {
+    text-align: left;
+    padding: 12px 14px;
+  }
+
+  /* Scrim behind the open drawer */
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    border: 0;
+    padding: 0;
+    background: rgba(15, 22, 38, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.26s ease,
+      visibility 0.26s ease;
+    cursor: pointer;
+  }
+  .app-shell.nav-open .nav-scrim {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Hamburger button in the header */
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: 44px;
+    height: 44px;
+    padding: 0 11px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    flex: none;
+  }
+  .nav-toggle span {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--text);
+  }
+
+  /* Close button inside the drawer header */
+  .nav-close {
+    display: grid;
+    place-items: center;
+    margin-left: auto;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
   }
 }
+
 @media (max-width: 720px) {
   .metrics {
     grid-template-columns: 1fr;
-  }
-  .sidebar nav {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .nav {
-    text-align: center;
-    padding: 10px 6px;
-  }
-  .nav.active::before {
-    display: none;
-  }
-  .nav-group {
-    grid-column: 1 / -1;
   }
   .panel {
     padding: 16px;
