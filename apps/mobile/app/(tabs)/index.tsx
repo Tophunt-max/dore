@@ -31,12 +31,25 @@ export default function HomeScreen() {
   const { t, formatMoney } = useI18n();
   const user = useAuthStore((state) => state.user);
   const [category, setCategory] = useState('all');
-  const campaigns = useQuery({ queryKey: ['campaigns'], queryFn: api.campaigns });
+  const campaigns = useQuery({
+    queryKey: ['campaigns'],
+    queryFn: () => api.campaigns(),
+  });
   const winners = useQuery({ queryKey: ['winners'], queryFn: api.winners });
   const banners = useQuery({ queryKey: ['banners'], queryFn: api.banners });
-  const active = (campaigns.data?.items ?? []).filter(
-    (item) => item.status === 'active',
-  );
+  const categorySlug: Record<string, string> = {
+    gifts: 'gifts',
+    cash: 'cash-award',
+    high: 'high-winning',
+  };
+  const active = (campaigns.data?.items ?? [])
+    .filter((item) => item.status === 'active')
+    .filter((item) => {
+      if (category === 'all') return true;
+      if (category === 'soon')
+        return new Date(item.startsAt).getTime() > Date.now();
+      return item.category?.slug === categorySlug[category];
+    });
   const refresh = () =>
     Promise.all([
       campaigns.refetch(),
