@@ -11,6 +11,7 @@ export type OperationsPageName =
   | 'support-tickets'
   | 'notifications'
   | 'banners'
+  | 'categories'
   | 'memberships-discounts'
   | 'finance-offers'
   | 'game-config'
@@ -334,6 +335,40 @@ const sections: Record<Exclude<OperationsPageName, 'reports'>, Section[]> = {
           type: 'select',
           options: ['draft', 'active', 'archived'],
           defaultValue: 'draft',
+        },
+      ],
+    },
+  ],
+  categories: [
+    {
+      title: 'Categories',
+      description: 'Product categories used to group and filter draws on home.',
+      endpoint: 'categories',
+      statuses: ['draft', 'active', 'archived'],
+      columns: [
+        { key: 'name', label: 'Name' },
+        { key: 'slug', label: 'Slug' },
+        { key: 'sort_order', label: 'Order' },
+        { key: 'status', label: 'Status' },
+      ],
+      createLabel: 'New category',
+      createRoles: adminOnly,
+      createFields: [
+        { name: 'name', label: 'Name', required: true },
+        { name: 'slug', label: 'Slug (lowercase-hyphen)', required: true },
+        { name: 'imageKey', label: 'Icon image', type: 'image' },
+        {
+          name: 'status',
+          label: 'Status',
+          type: 'select',
+          options: ['draft', 'active', 'archived'],
+          defaultValue: 'draft',
+        },
+        {
+          name: 'sortOrder',
+          label: 'Sort order',
+          type: 'number',
+          defaultValue: '0',
         },
       ],
     },

@@ -4,6 +4,9 @@ import type {
   Banner,
   Campaign,
   CampaignDraw,
+  CampaignHistoryItem,
+  CampaignParticipant,
+  Category,
   CoinSummary,
   ContentPage,
   CreateOrderInput,
@@ -25,6 +28,9 @@ import type {
   PayoutBeneficiaryInput,
   PaymentMethod,
   Prize,
+  ReferralConsumer,
+  ReferralRebate,
+  ReferralSummary,
   RequestOtpInput,
   SharePost,
   SubmitPaymentInput,
@@ -82,8 +88,22 @@ export const api = {
       body: input,
     }),
 
-  campaigns: () => apiRequest<{ items: Campaign[] }>('/api/v1/campaigns'),
+  campaigns: (category?: string) =>
+    apiRequest<{ items: Campaign[] }>(
+      category
+        ? `/api/v1/campaigns?category=${encodeURIComponent(category)}`
+        : '/api/v1/campaigns',
+    ),
   campaign: (id: string) => apiRequest<Campaign>(`/api/v1/campaigns/${id}`),
+  campaignParticipants: (id: string) =>
+    apiRequest<{ items: CampaignParticipant[] }>(
+      `/api/v1/campaigns/${id}/participants`,
+    ),
+  campaignHistory: (id: string) =>
+    apiRequest<{ items: CampaignHistoryItem[] }>(
+      `/api/v1/campaigns/${id}/history`,
+    ),
+  categories: () => apiRequest<{ items: Category[] }>('/api/v1/categories'),
   campaignDraw: (id: string) =>
     apiRequest<CampaignDraw>(`/api/v1/winners/draws/${id}`),
   createOrder: (input: CreateOrderInput) =>
@@ -172,6 +192,11 @@ export const api = {
       body: { addressId },
     }),
   team: () => apiRequest<{ items: TeamMember[] }>('/api/v1/team'),
+  teamSummary: () => apiRequest<ReferralSummary>('/api/v1/team/summary'),
+  teamConsumption: () =>
+    apiRequest<{ items: ReferralConsumer[] }>('/api/v1/team/consumption'),
+  teamRebates: () =>
+    apiRequest<{ items: ReferralRebate[] }>('/api/v1/team/rebates'),
   shares: () => apiRequest<{ items: SharePost[] }>('/api/v1/shares'),
   createShare: (input: CreateSharePostInput) =>
     apiRequest<{ id: string }>('/api/v1/shares', {

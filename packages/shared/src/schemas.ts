@@ -278,6 +278,18 @@ export const bannerInputSchema = z.object({
   endsAt: z.number().int().positive().nullable().optional(),
   sortOrder: z.number().int().min(0).max(1000).default(0),
 });
+export const categoryInputSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .regex(/^[a-z0-9-]+$/, 'Use lowercase letters, numbers, and hyphens'),
+  imageKey: z.string().trim().max(500).nullable().optional(),
+  status: z.enum(['draft', 'active', 'archived']).default('draft'),
+  sortOrder: z.number().int().min(0).max(1000).default(0),
+});
 export const financeOfferInputSchema = z.object({
   providerName: z.string().trim().min(2).max(120),
   title: z.string().trim().min(2).max(160),

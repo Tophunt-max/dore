@@ -10,6 +10,24 @@ export const publicRoutes = new Hono<AppEnv>();
 const toIso = (value: unknown) =>
   value == null ? null : new Date(Number(value) * 1000).toISOString();
 
+publicRoutes.get('/categories', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT id,name,slug,image_key,sort_order FROM categories
+     WHERE status='active' ORDER BY sort_order,created_at DESC`,
+  ).all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      id: String(row.id),
+      name: String(row.name),
+      slug: String(row.slug),
+      imageUrl: row.image_key
+        ? `${c.env.PUBLIC_ASSET_BASE}/${String(row.image_key)}`
+        : null,
+      sortOrder: Number(row.sort_order),
+    })),
+  });
+});
+
 publicRoutes.get('/banners', async (c) => {
   const now = nowSeconds();
   const result = await c.env.DB.prepare(

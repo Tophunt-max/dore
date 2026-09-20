@@ -367,6 +367,65 @@ export interface Banner {
   sortOrder: number;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  imageUrl: string | null;
+  sortOrder: number;
+}
+
+export interface CampaignParticipant {
+  userId: string;
+  displayName: string | null;
+  phoneMasked: string;
+  entryCount: number;
+  latestEntryAt: string;
+}
+
+export interface CampaignHistoryItem {
+  campaignId: string;
+  status: string;
+  totalEntries: number;
+  soldEntries: number;
+  endsAt: string;
+  winner: {
+    userId: string;
+    displayName: string | null;
+    phoneMasked: string;
+    entryNumber: number;
+    announcedAt: string;
+  } | null;
+}
+
+export interface ReferralSummary {
+  totalInvited: number;
+  qualified: number;
+  rewarded: number;
+  rewardMinor: number;
+  rewardCoins: number;
+  currency: string;
+}
+
+export interface ReferralConsumer {
+  userId: string;
+  displayName: string | null;
+  phoneMasked: string;
+  consumptionMinor: number;
+  currency: string;
+}
+
+export interface ReferralRebate {
+  id: string;
+  role: 'referrer' | 'referred';
+  amountMinor: number;
+  coinAmount: number;
+  currency: string;
+  fromDisplayName: string | null;
+  fromPhoneMasked: string | null;
+  createdAt: string;
+}
+
 export interface FinanceOffer {
   id: string;
   providerName: string;

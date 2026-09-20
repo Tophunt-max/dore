@@ -41,7 +41,7 @@ app.use(
     origin: (origin, c) => {
       if (!origin) return origin;
       const allowed = c.env.API_ORIGIN.split(',')
-        .map((value) => value.trim())
+        .map((value: string) => value.trim())
         .filter(Boolean);
       return allowed.includes(origin) ? origin : '';
     },

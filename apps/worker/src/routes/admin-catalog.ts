@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import {
   bannerInputSchema,
+  categoryInputSchema,
   broadcastSchema,
   discountOfferInputSchema,
   financeOfferInputSchema,
@@ -225,6 +226,19 @@ const catalogConfigs: CatalogConfig[] = [
       ['status', 'status'],
       ['startsAt', 'starts_at'],
       ['endsAt', 'ends_at'],
+      ['sortOrder', 'sort_order'],
+    ],
+  },
+  {
+    path: 'categories',
+    table: 'categories',
+    createSchema: categoryInputSchema,
+    updateSchema: categoryInputSchema.partial(),
+    fields: [
+      ['name', 'name'],
+      ['slug', 'slug'],
+      ['imageKey', 'image_key'],
+      ['status', 'status'],
       ['sortOrder', 'sort_order'],
     ],
   },

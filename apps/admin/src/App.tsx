@@ -45,6 +45,7 @@ const navigation: NavItem[] = [
   { page: 'content', roles: adminOnly, group: 'Platform' },
   { page: 'prizes', roles: adminOnly, group: 'Platform' },
   { page: 'banners', roles: adminOnly, group: 'Platform' },
+  { page: 'categories', roles: adminOnly, group: 'Platform' },
   { page: 'memberships-discounts', roles: adminOnly, group: 'Platform' },
   { page: 'game-config', roles: adminOnly, group: 'Platform' },
   { page: 'users', roles: support, group: 'People' },
