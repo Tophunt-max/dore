@@ -518,6 +518,11 @@ export const catalog = {
     hi: 'खरीदें',
     zh: '购买',
   },
+  'campaign.insufficient': {
+    en: 'Insufficient wallet balance. Please recharge to continue.',
+    hi: 'वॉलेट बैलेंस कम है। जारी रखने के लिए रिचार्ज करें।',
+    zh: '钱包余额不足，请充值后继续。',
+  },
   'winners.title': {
     en: 'Latest winners',
     hi: 'नवीनतम विजेता',

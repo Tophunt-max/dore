@@ -114,6 +114,8 @@ export const api = {
     apiRequest<Order>('/api/v1/orders', { method: 'POST', body: input }),
   orders: () => apiRequest<{ items: Order[] }>('/api/v1/orders'),
   order: (id: string) => apiRequest<Order>(`/api/v1/orders/${id}`),
+  payOrderWallet: (id: string) =>
+    apiRequest<Order>(`/api/v1/orders/${id}/pay-wallet`, { method: 'POST' }),
   winners: () => apiRequest<{ items: Winner[] }>('/api/v1/winners'),
 
   wallet: () => apiRequest<WalletSummary>('/api/v1/wallet'),

@@ -61,6 +61,12 @@ interface FinancePurchaseRequest {
   principalMinor: number;
   idempotencyKey: string;
 }
+interface OrderPurchaseRequest {
+  operation: 'order.purchase';
+  userId: string;
+  orderId: string;
+  amountMinor: number;
+}
 type WalletRequest =
   | CreditRequest
   | RewardRequest
@@ -69,7 +75,8 @@ type WalletRequest =
   | WithdrawRequest
   | WithdrawalTransitionRequest
   | MembershipPurchaseRequest
-  | FinancePurchaseRequest;
+  | FinancePurchaseRequest
+  | OrderPurchaseRequest;
 
 export class WalletCoordinator implements DurableObject {
   constructor(
@@ -103,6 +110,8 @@ export class WalletCoordinator implements DurableObject {
         return this.membershipPurchase(input);
       case 'finance.purchase':
         return this.financePurchase(input);
+      case 'order.purchase':
+        return this.orderPurchase(input);
       default:
         return this.withdraw(input);
     }
@@ -508,6 +517,73 @@ export class WalletCoordinator implements DurableObject {
       orderId,
       principalMinor: input.principalMinor,
     });
+  }
+
+  // Pay for a reserved campaign entry order directly from the wallet balance.
+  // Serialized per-user by this Durable Object so concurrent buys can't
+  // double-spend. Debiting is idempotent per order (via the ledger entry) and
+  // guarded by the order still being pending, so a refunded/failed order is not
+  // silently re-charged.
+  private async orderPurchase(input: OrderPurchaseRequest): Promise<Response> {
+    if (!input.orderId || !validAmount(input.amountMinor)) return invalidAmount();
+    const order = await this.env.DB.prepare(
+      'SELECT id,user_id,status,amount_minor FROM orders WHERE id=? AND user_id=?',
+    )
+      .bind(input.orderId, input.userId)
+      .first<{
+        id: string;
+        user_id: string;
+        status: string;
+        amount_minor: number;
+      }>();
+    if (!order)
+      return Response.json({ message: 'Order not found' }, { status: 404 });
+    if (order.status === 'paid' || order.status === 'fulfilled')
+      return Response.json({ status: 'already_paid' });
+    if (order.status !== 'pending')
+      return Response.json(
+        { message: 'Order is not payable' },
+        { status: 409 },
+      );
+    if (order.amount_minor !== input.amountMinor)
+      return Response.json(
+        { message: 'Order amount mismatch' },
+        { status: 409 },
+      );
+    const duplicate = await this.env.DB.prepare(
+      `SELECT id FROM ledger_entries WHERE reference_type='order' AND reference_id=?
+       AND entry_type='order_purchase' AND direction='debit'`,
+    )
+      .bind(input.orderId)
+      .first();
+    if (duplicate) return Response.json({ status: 'already_applied' });
+    const wallet = await this.wallet(input.userId);
+    if (!wallet || wallet.available_minor < input.amountMinor)
+      return Response.json(
+        { message: 'Insufficient wallet balance' },
+        { status: 409 },
+      );
+    const now = nowSeconds();
+    const transactionId = crypto.randomUUID();
+    await this.env.DB.batch([
+      this.env.DB.prepare(
+        `UPDATE wallet_accounts SET available_minor=available_minor-?,version=version+1,updated_at=?
+         WHERE user_id=? AND available_minor>=?`,
+      ).bind(input.amountMinor, now, input.userId, input.amountMinor),
+      ledger(
+        this.env.DB,
+        transactionId,
+        input.userId,
+        'debit',
+        input.amountMinor,
+        'order_purchase',
+        'Campaign entry purchase',
+        'order',
+        input.orderId,
+        now,
+      ),
+    ]);
+    return Response.json({ status: 'applied', transactionId });
   }
 
   private async withdraw(input: WithdrawRequest): Promise<Response> {
