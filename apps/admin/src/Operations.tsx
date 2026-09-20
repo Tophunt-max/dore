@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AdminApiError, adminApi, type AdminRole } from './api';
 
@@ -21,7 +21,7 @@ type Column = { key: string; label: string };
 type CreateField = {
   name: string;
   label: string;
-  type?: 'text' | 'textarea' | 'number' | 'select';
+  type?: 'text' | 'textarea' | 'number' | 'select' | 'image';
   options?: string[];
   required?: boolean;
   defaultValue?: string;
@@ -356,7 +356,7 @@ const sections: Record<Exclude<OperationsPageName, 'reports'>, Section[]> = {
       createFields: [
         { name: 'title', label: 'Title', required: true },
         { name: 'body', label: 'Body', type: 'textarea' },
-        { name: 'imageKey', label: 'Image key' },
+        { name: 'imageKey', label: 'Banner image', type: 'image' },
         { name: 'actionUrl', label: 'Action URL' },
         {
           name: 'status',
@@ -883,6 +883,13 @@ function CreateOperationForm({
                     <option key={option}>{option}</option>
                   ))}
                 </select>
+              ) : field.type === 'image' ? (
+                <ImageUploadField
+                  value={values[field.name] ?? ''}
+                  onChange={(key) =>
+                    setValues({ ...values, [field.name]: key })
+                  }
+                />
               ) : (
                 <input
                   required={field.required}
@@ -901,6 +908,49 @@ function CreateOperationForm({
           {busy ? 'Saving…' : 'Save'}
         </button>
       </form>
+    </div>
+  );
+}
+
+function ImageUploadField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (key: string) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [preview, setPreview] = useState<string | null>(null);
+  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    setError('');
+    try {
+      const { objectKey, url } = await adminApi.uploadImage(file, 'banner');
+      onChange(objectKey);
+      setPreview(url);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Upload failed.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="image-upload">
+      {preview ? (
+        <img className="image-upload-preview" src={preview} alt="Banner preview" />
+      ) : null}
+      <input
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        disabled={busy}
+        onChange={handleFile}
+      />
+      {busy ? <small>Uploading…</small> : null}
+      {!busy && value ? <small>Uploaded ✓</small> : null}
+      {error ? <small className="error">{error}</small> : null}
     </div>
   );
 }

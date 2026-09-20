@@ -210,6 +210,54 @@ export const adminApi = {
     sessionStorage.removeItem(REFRESH_KEY);
     sessionStorage.removeItem(USER_KEY);
   },
+  // Upload an image to R2 via the 3-step upload flow and return its object key
+  // (stored as a banner/product/etc. imageKey) and public URL.
+  uploadImage: async (
+    file: File,
+    purpose: 'banner' | 'product' | 'campaign' | 'prize' = 'banner',
+  ): Promise<{ objectKey: string; url: string | null }> => {
+    const extByType: Record<string, 'jpg' | 'png' | 'webp'> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+    };
+    const fileExtension = extByType[file.type];
+    if (!fileExtension)
+      throw new AdminApiError('Use a JPG, PNG, or WebP image.', 400);
+    const session = await request<{
+      uploadId: string;
+      uploadUrl: string;
+      objectKey: string;
+    }>(
+      '/api/v1/uploads',
+      json('POST', {
+        purpose,
+        contentType: file.type,
+        contentLength: file.size,
+        fileExtension,
+      }),
+    );
+    const token = sessionStorage.getItem(ACCESS_KEY);
+    const headers = new Headers({ 'Content-Type': file.type });
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    let putResponse: Response;
+    try {
+      putResponse = await fetch(`${API_URL}${session.uploadUrl}`, {
+        method: 'PUT',
+        headers,
+        body: file,
+      });
+    } catch {
+      throw new AdminApiError('The operations API is unreachable.', 0);
+    }
+    if (!putResponse.ok)
+      throw new AdminApiError('Image upload failed.', putResponse.status);
+    const complete = await request<{ uploadId: string; url: string | null }>(
+      `/api/v1/uploads/${session.uploadId}/complete`,
+      json('POST'),
+    );
+    return { objectKey: session.objectKey, url: complete.url };
+  },
   dashboard: () => request<AdminDashboard>(adminPath('dashboard')),
   list: <T = Record<string, unknown>>(
     resource: string,

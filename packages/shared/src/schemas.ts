@@ -152,6 +152,7 @@ export const createUploadSchema = z.object({
     'product',
     'campaign',
     'prize',
+    'banner',
     'support',
     'payment_proof',
   ]),

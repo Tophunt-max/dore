@@ -670,3 +670,17 @@ textarea {
     flex-direction: column;
   }
 }
+
+
+.image-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.image-upload-preview {
+  max-width: 100%;
+  max-height: 140px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border, #ececec);
+}
