@@ -14,6 +14,8 @@ export const assets = {
   quickRecharge: require('../assets/orich/image/home/icon_Recharge.png'),
   quickWinner: require('../assets/orich/image/home/icon_Winner.png'),
   quickSupport: require('../assets/orich/image/home/icon_Support.png'),
+  quickPromotion: require('../assets/orich/image/home/icon_Promotion.png'),
+  quickFaq: require('../assets/orich/image/home/icon_FAQ.png'),
   groupBuy: require('../assets/orich/image/home/icon_1GroupBuy.png'),
   winnerDrawn: require('../assets/orich/image/home/icon_WinnerDrawn.png'),
   freeShipping: require('../assets/orich/image/home/icon_FreeShipping.png'),
