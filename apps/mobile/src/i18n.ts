@@ -437,9 +437,9 @@ export const catalog = {
     zh: '满员后开奖',
   },
   'home.quick.draws': { en: 'All Draws', hi: 'सभी ड्रॉ', zh: '全部活动' },
-  'home.quick.orders': { en: 'My Orders', hi: 'मेरे ऑर्डर', zh: '我的订单' },
   'home.quick.recharge': { en: 'Recharge', hi: 'रिचार्ज', zh: '充值' },
-  'home.quick.winners': { en: 'Winners', hi: 'विजेता', zh: '获奖者' },
+  'home.quick.invite': { en: 'Invite', hi: 'आमंत्रित करें', zh: '邀请' },
+  'home.quick.help': { en: 'Help', hi: 'मदद', zh: '帮助' },
   'home.quick.support': { en: 'Support', hi: 'सहायता', zh: '客服' },
   'home.noWinners': {
     en: 'No winner announcements yet.',

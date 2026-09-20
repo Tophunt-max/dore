@@ -40,9 +40,13 @@ const C = {
 };
 
 // ORich `.tab` is a quick-navigation strip, not a filter: five 96rpx circular
-// images. Only the icons that ship at a true 96x96 are used here, so every
-// circle is optically the same size (mixing in 38x38/54x54 art made the row
-// look ragged).
+// images. Two constraints on the choice of icons:
+//   - only art that ships at a true 96x96 is used, so every circle is
+//     optically the same size (mixing in 38x38/54x54 made the row look ragged)
+//   - the ORich set repeats itself — Category and MyOrders are the same blue
+//     grid, Recharge and Winner the same gold medal, FAQ and Guide the same
+//     pink bubble — so one icon per distinct glyph, otherwise the row looks
+//     like the same button five times.
 const quickLinks: ReadonlyArray<{
   key: string;
   labelKey: TranslationKey;
@@ -56,22 +60,22 @@ const quickLinks: ReadonlyArray<{
     href: '/products',
   },
   {
-    key: 'orders',
-    labelKey: 'home.quick.orders',
-    icon: assets.quickOrders,
-    href: '/orders',
-  },
-  {
     key: 'recharge',
     labelKey: 'home.quick.recharge',
     icon: assets.quickRecharge,
     href: '/wallet/recharge',
   },
   {
-    key: 'winners',
-    labelKey: 'home.quick.winners',
-    icon: assets.quickWinner,
-    href: '/winners',
+    key: 'invite',
+    labelKey: 'home.quick.invite',
+    icon: assets.quickPromotion,
+    href: '/referrals',
+  },
+  {
+    key: 'help',
+    labelKey: 'home.quick.help',
+    icon: assets.quickFaq,
+    href: '/help',
   },
   {
     key: 'support',
