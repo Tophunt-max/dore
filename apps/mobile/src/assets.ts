@@ -23,6 +23,7 @@ export const assets = {
   bannerWinning: require('../assets/orich/image/home/img_Winning.png'),
   goodsOne: require('../assets/orich/image/goods/goods1.png'),
   goodsTwo: require('../assets/orich/image/goods/goods2.jpg'),
+  goodsShare: require('../assets/orich/image/goods/icon_Share.png'),
   noData: require('../assets/orich/image/nodata.png'),
   walletBackground: require('../assets/orich/image/account/bg_Wallet.png'),
   accountBackground: require('../assets/orich/image/account/bg_my.png'),

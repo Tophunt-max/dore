@@ -493,6 +493,31 @@ export const catalog = {
     hi: 'यह अभियान अभी खुला नहीं है।',
     zh: '此活动目前未开放。',
   },
+  'campaign.endIn': {
+    en: 'End in {time}',
+    hi: 'समाप्ति {time}',
+    zh: '{time} 后结束',
+  },
+  'campaign.peopleParticipating': {
+    en: '{count} people are participating',
+    hi: '{count} लोग भाग ले रहे हैं',
+    zh: '{count} 人正在参与',
+  },
+  'campaign.total': {
+    en: 'Total',
+    hi: 'कुल',
+    zh: '总数',
+  },
+  'campaign.needed': {
+    en: 'Needed',
+    hi: 'आवश्यक',
+    zh: '还需',
+  },
+  'campaign.buyNow': {
+    en: 'Buy',
+    hi: 'खरीदें',
+    zh: '购买',
+  },
   'winners.title': {
     en: 'Latest winners',
     hi: 'नवीनतम विजेता',
