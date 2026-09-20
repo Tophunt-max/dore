@@ -863,6 +863,21 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'The operation failed.';
 }
 
+// A row is "archived" when it has been soft-deleted: catalog items are disabled
+// (enabled = 0/false) and status-driven records carry an "archived" status.
+// Financial records are kept in the DB for audit safety, so this only hides them
+// from the default view — they reappear via the "Show archived" toggle.
+function isArchivedRow(row: Row): boolean {
+  const enabled = row['enabled'];
+  if (enabled === 0 || enabled === false || enabled === '0') return true;
+  const status = row['status'];
+  if (typeof status === 'string') {
+    const normalized = status.toLowerCase();
+    if (normalized === 'archived' || normalized === 'disabled') return true;
+  }
+  return false;
+}
+
 function OperationalSection({
   section,
   role,
@@ -875,6 +890,7 @@ function OperationalSection({
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const [creating, setCreating] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   const query = useQuery({
     queryKey: ['admin-operation', section.endpoint, search, status, page],
     queryFn: () =>
@@ -900,10 +916,14 @@ function OperationalSection({
         queryKey: ['admin-operation', section.endpoint],
       }),
   });
-  const rows = query.data?.items ?? [];
+  const allRows = query.data?.items ?? [];
+  const archivedCount = allRows.filter(isArchivedRow).length;
+  const rows = showArchived
+    ? allRows
+    : allRows.filter((row) => !isArchivedRow(row));
   const hasNext = query.data?.total
     ? page * (query.data.pageSize ?? 25) < query.data.total
-    : rows.length === 25 || Boolean(query.data?.nextCursor);
+    : allRows.length === 25 || Boolean(query.data?.nextCursor);
   return (
     <section className="panel">
       <div className="panel-heading operational-heading">
@@ -943,6 +963,16 @@ function OperationalSection({
               </option>
             ))}
           </select>
+        ) : null}
+        {archivedCount > 0 || showArchived ? (
+          <label className="archive-toggle">
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={(event) => setShowArchived(event.target.checked)}
+            />
+            Show archived{archivedCount > 0 ? ` (${archivedCount})` : ''}
+          </label>
         ) : null}
       </div>
       {query.isPending ? (
