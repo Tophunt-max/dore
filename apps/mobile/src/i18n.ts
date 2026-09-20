@@ -572,6 +572,22 @@ export const catalog = {
     hi: 'Oriva अभियान, खाता कार्य, परिणाम और भौतिक पुरस्कार दावों को एक जगह लाता है। उपलब्ध होने पर ऐप में दिखाई गई जानकारी वर्तमान सेवाओं से आती है।',
     zh: 'Oriva 将活动、账户任务、结果和实物奖品申领集中在一处。应用中显示的信息在可用时来自当前服务。',
   },
+  'about.agreement': {
+    en: 'User Agreement',
+    hi: 'उपयोगकर्ता अनुबंध',
+    zh: '用户协议',
+  },
+  'about.checkUpdate': {
+    en: 'Check for updates',
+    hi: 'अपडेट जांचें',
+    zh: '检查更新',
+  },
+  'about.version': { en: 'Version', hi: 'संस्करण', zh: '版本' },
+  'about.latestVersion': {
+    en: 'You are on the latest version',
+    hi: 'आप नवीनतम संस्करण पर हैं',
+    zh: '已是最新版本',
+  },
   'draw.title': { en: 'Draw verification', hi: 'ड्रा सत्यापन', zh: '抽取验证' },
   'draw.kicker': {
     en: 'COMMITMENT / REVEAL',

@@ -1,0 +1,589 @@
+# pages/winner/myShare
+
+- page module: `dc08`
+- render module: `5381`
+- options module: `4e39`
+- css scope: `data-v-cc86c408`
+
+## Scoped CSS (33 rules)
+
+```css
+.winner[data-v-cc86c408]{background:#f9f9f9;height:100%}
+.img[data-v-cc86c408]{width:100%}
+.card_list[data-v-cc86c408]{border-radius:16rpx}
+.card_list .card_list_item[data-v-cc86c408]{position:relative;margin:20rpx 28rpx 16rpx 30rpx;padding:30rpx 0 30rpx 22rpx;background-color:#fff}
+.card_list .card_list_item .card_list_comment[data-v-cc86c408]{position:absolute;bottom:30rpx;right:30rpx}
+.card_list .card_list_item .card_list_comment .card_list_comment_btn[data-v-cc86c408]{width:172rpx;height:60rpx;display:flex;flex-direction:row;align-items:center;justify-content:center;background:linear-gradient(115deg,#ffe44b,#fea326);border-radius:8rpx;box-shadow:0rpx -4rpx 8rpx 0rpx rgba(255,125,0,.5) inset;font-size:26rpx;font-weight:400;color:#ad6701}
+.card_list .card_list_item .card_list_comment .card_list_comment_btn uni-image[data-v-cc86c408]{width:28rpx;height:28rpx}
+.card_list .card_list_item .card_list_item_title[data-v-cc86c408]{font-size:28rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9}
+.card_list .card_list_item .card_list_item_main[data-v-cc86c408]{margin-left:6rpx;margin-top:16rpx;display:flex}
+.card_list .card_list_item .card_list_item_main .card_list_item_main_img[data-v-cc86c408]{width:154rpx;height:154rpx}
+.card_list .card_list_item .card_list_item_main .card_list_item_main_img uni-image[data-v-cc86c408]{width:100%}
+.card_list .card_list_item .card_list_item_main .card_list_item_main_title[data-v-cc86c408]{margin-left:30rpx;padding-top:20rpx;font-family:Roboto,Roboto-Medium;font-weight:700;color:#000}
+.share_bar[data-v-cc86c408]{background:#fff;display:flex;align-items:center;justify-content:space-between;padding:18rpx 66rpx 14rpx 68rpx}
+.share_bar .share_bar_item[data-v-cc86c408]{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.share_bar .share_bar_item .share_bar_item_title[data-v-cc86c408]{font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:700;color:#b9b9b9;letter-spacing:0rpx}
+.share_bar .share_bar_item .active[data-v-cc86c408]{font-size:32rpx;color:#17273a}
+.share_bar .share_bar_item uni-text[data-v-cc86c408]{margin-left:20rpx}
+.share_bar .share_bar_item uni-image[data-v-cc86c408]{width:34rpx;height:12rpx;margin-left:6rpx}
+.main[data-v-cc86c408]{position:relative;width:100%;margin-top:16rpx;padding:30rpx 26rpx;background:#fff}
+.main .header[data-v-cc86c408]{display:flex;flex-direction:row;align-items:center;justify-content:center}
+.main .header uni-image[data-v-cc86c408]{width:56rpx;height:56rpx;margin-right:18rpx;border-radius:50%;border:2rpx solid #fff}
+.main .header .header-name[data-v-cc86c408]{flex:1;margin-right:18rpx;font-size:26rpx;font-family:Roboto,Roboto-Regular;font-weight:600;color:#17273a}
+.main .header .header-time[data-v-cc86c408]{font-size:26rpx;font-family:Roboto,Roboto-Regular;color:#b9b9b9}
+.main .title[data-v-cc86c408]{margin-top:30rpx;font-size:32rpx;font-family:Roboto,Roboto-Medium;font-weight:700;color:#17273a}
+.main .content[data-v-cc86c408]{margin-top:20rpx;margin-bottom:20rpx;font-size:28rpx;font-family:Roboto,Roboto-Regular;color:#686868}
+.main .imgArr[data-v-cc86c408]{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;margin:16rpx 0}
+.main .imgArr uni-image[data-v-cc86c408]{width:88rpx;height:88rpx;margin-top:10rpx;border-radius:8rpx;margin-right:16rpx}
+.main .goods[data-v-cc86c408]{display:flex;flex-direction:row;align-items:center;justify-content:center}
+.main .goods uni-image[data-v-cc86c408]{width:116rpx;height:116rpx;margin-right:14rpx;border-radius:8px}
+.main .goods .goods-desc[data-v-cc86c408]{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;flex:1;height:134rpx;padding:24rpx 32rpx 26rpx 32rpx;background:#f7f8f9;border-radius:24rpx}
+.main .goods .goods-desc .goods-name[data-v-cc86c408]{width:504rpx;font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:700;color:#17273a}
+.main .goods .goods-desc .goods-issue[data-v-cc86c408]{font-size:26rpx;font-family:Roboto,Roboto-Regular;color:#b9b9b9}
+.mescroll-upwarp[data-v-cc86c408]{box-sizing:border-box;min-height:55px;padding:15px 0;text-align:center;clear:both}
+```
+
+## Compiled template (literal classes/text)
+
+```js
+function(
+){var t=this,
+e=t.$createElement,
+i=t._self._c||e;return i(
+  "view",
+  {staticClass:t._$s(
+    0,
+    "sc",
+    "winner"
+  ),
+  attrs:{_i:0}},
+  [
+    i(
+      "navbar",
+      {attrs:{title:t.$t(
+        "winner.myshare"
+      ),
+      background:"#ffffff",
+      _i:1}}
+    ),
+    i(
+      "view",
+      {staticClass:t._$s(
+        2,
+        "sc",
+        "share_bar"
+      ),
+      attrs:{_i:2}},
+      t._l(
+        t._$s(
+          3,
+          "f",
+          {forItems:t.barList}
+        ),
+        (
+          function(
+            e,
+            a,
+            n,
+            r
+          ){return i(
+            "view",
+            {key:t._$s(
+              3,
+              "f",
+              {forIndex:n,
+              key:a}
+            ),
+            staticClass:t._$s(
+              "3-"+r,
+              "sc",
+              "share_bar_item"
+            ),
+            attrs:{_i:"3-"+r},
+            on:{click:function(
+              e
+            ){return t.changeTab(
+              a
+            )}}},
+            [
+              i(
+                "view",
+                {staticClass:t._$s(
+                  "4-"+r,
+                  "sc",
+                  "share_bar_item_title"
+                ),
+                class:t._$s(
+                  "4-"+r,
+                  "c",
+                  {active:a==t.tabIndex}
+                ),
+                attrs:{_i:"4-"+r}},
+                [
+                  t._v(
+                    t._$s(
+                      "4-"+r,
+                      "t0-0",
+                      t._s(
+                        e.title
+                      )
+                    )
+                  )
+                ]
+              ),
+              i(
+                "image",
+                {directives:[
+                  {name:"show",
+                  rawName:"v-show",
+                  value:t._$s(
+                    "5-"+r,
+                    "v-show",
+                    t.tabIndex==a
+                  ),
+                  expression:"_$s((\"5-\"+$30),'v-show',tabIndex == index)"}
+                ],
+                attrs:{src:t._$s(
+                  "5-"+r,
+                  "a-src",
+                  s(
+                    "23db"
+                  )
+                ),
+                _i:"5-"+r}}
+              )
+            ]
+          )}
+        )
+      ),
+      0
+    ),
+    i(
+      "mescroll-body",
+      {ref:"mescrollRef",
+      attrs:{down:t.downOption,
+      up:t.upOption,
+      _i:6},
+      on:{init:t.mescrollInit,
+      down:t.downCallback,
+      up:t.upCallback}},
+      [
+        t._$s(
+          7,
+          "i",
+          0==t.tabIndex
+        )?i(
+          "view",
+          {staticClass:t._$s(
+            7,
+            "sc",
+            "card_list"
+          ),
+          attrs:{_i:7}},
+          t._l(
+            t._$s(
+              8,
+              "f",
+              {forItems:t.cardList}
+            ),
+            (
+              function(
+                e,
+                a,
+                n,
+                r
+              ){return i(
+                "view",
+                {key:t._$s(
+                  8,
+                  "f",
+                  {forIndex:n,
+                  key:a}
+                ),
+                staticClass:t._$s(
+                  "8-"+r,
+                  "sc",
+                  "card_list_item"
+                ),
+                attrs:{_i:"8-"+r}},
+                [
+                  i(
+                    "view",
+                    {staticClass:t._$s(
+                      "9-"+r,
+                      "sc",
+                      "card_list_item_title"
+                    ),
+                    attrs:{_i:"9-"+r}},
+                    [
+                      t._v(
+                        t._$s(
+                          "9-"+r,
+                          "t0-0",
+                          t._s(
+                            e.issue
+                          )
+                        )
+                      )
+                    ]
+                  ),
+                  i(
+                    "view",
+                    {staticClass:t._$s(
+                      "10-"+r,
+                      "sc",
+                      "card_list_item_main"
+                    ),
+                    attrs:{_i:"10-"+r}},
+                    [
+                      i(
+                        "view",
+                        {staticClass:t._$s(
+                          "11-"+r,
+                          "sc",
+                          "card_list_item_main_img"
+                        ),
+                        attrs:{_i:"11-"+r}},
+                        [
+                          i(
+                            "image",
+                            {attrs:{src:t._$s(
+                              "12-"+r,
+                              "a-src",
+                              e.iconurl
+                            ),
+                            _i:"12-"+r}}
+                          )
+                        ]
+                      ),
+                      i(
+                        "view",
+                        {staticClass:t._$s(
+                          "13-"+r,
+                          "sc",
+                          "card_list_item_main_title"
+                        ),
+                        attrs:{_i:"13-"+r}},
+                        [
+                          t._v(
+                            t._$s(
+                              "13-"+r,
+                              "t0-0",
+                              t._s(
+                                e.dealname
+                              )
+                            )
+                          )
+                        ]
+                      )
+                    ]
+                  ),
+                  i(
+                    "view",
+                    {staticClass:t._$s(
+                      "14-"+r,
+                      "sc",
+                      "card_list_comment"
+                    ),
+                    attrs:{_i:"14-"+r},
+                    on:{click:function(
+                      s
+                    ){return t.toShare(
+                      e.dumid
+                    )}}},
+                    [
+                      i(
+                        "view",
+                        {staticClass:t._$s(
+                          "15-"+r,
+                          "sc",
+                          "card_list_comment_btn"
+                        ),
+                        attrs:{_i:"15-"+r}},
+                        [
+                          i(
+                            "view",
+                            [
+                              t._v(
+                                t._$s(
+                                  "16-"+r,
+                                  "t0-0",
+                                  t._s(
+                                    t.$t(
+                                      "winner.com"
+                                    )
+                                  )
+                                )
+                              )
+                            ]
+                          ),
+                          i(
+                            "image",
+                            {staticClass:t._$s(
+                              "17-"+r,
+                              "sc",
+                              "img"
+                            ),
+                            attrs:{src:t._$s(
+                              "17-"+r,
+                              "a-src",
+                              s(
+                                "82e3"
+                              )
+                            ),
+                            _i:"17-"+r}}
+                          )
+                        ]
+                      )
+                    ]
+                  )
+                ]
+              )}
+            )
+          ),
+          0
+        ):t._l(
+          t._$s(
+            18,
+            "f",
+            {forItems:t.dataList}
+          ),
+          (
+            function(
+              e,
+              s,
+              a,
+              n
+            ){return i(
+              "view",
+              {key:t._$s(
+                18,
+                "f",
+                {forIndex:a,
+                key:s}
+              ),
+              staticClass:t._$s(
+                "18-"+n,
+                "sc",
+                "main"
+              ),
+              attrs:{_i:"18-"+n}},
+              [
+                i(
+                  "view",
+                  {staticClass:t._$s(
+                    "19-"+n,
+                    "sc",
+                    "header"
+                  ),
+                  attrs:{_i:"19-"+n}},
+                  [
+                    i(
+                      "image",
+                      {attrs:{src:t._$s(
+                        "20-"+n,
+                        "a-src",
+                        e.userheadimgurl
+                      ),
+                      _i:"20-"+n}}
+                    ),
+                    i(
+                      "view",
+                      {staticClass:t._$s(
+                        "21-"+n,
+                        "sc",
+                        "header-name"
+                      ),
+                      attrs:{_i:"21-"+n}},
+                      [
+                        t._v(
+                          t._$s(
+                            "21-"+n,
+                            "t0-0",
+                            t._s(
+                              e.username
+                            )
+                          )
+                        )
+                      ]
+                    ),
+                    i(
+                      "view",
+                      {staticClass:t._$s(
+                        "22-"+n,
+                        "sc",
+                        "header-time"
+                      ),
+                      attrs:{_i:"22-"+n}},
+                      [
+                        t._v(
+                          t._$s(
+                            "22-"+n,
+                            "t0-0",
+                            t._s(
+                              e.time
+                            )
+                          )
+                        )
+                      ]
+                    )
+                  ]
+                ),
+                i(
+                  "view",
+                  {staticClass:t._$s(
+                    "23-"+n,
+                    "sc",
+                    "content"
+                  ),
+                  attrs:{_i:"23-"+n}},
+                  [
+                    t._v(
+                      t._$s(
+                        "23-"+n,
+                        "t0-0",
+                        t._s(
+                          e.content
+                        )
+                      )
+                    )
+                  ]
+                ),
+                i(
+                  "view",
+                  {staticClass:t._$s(
+                    "24-"+n,
+                    "sc",
+                    "imgArr"
+                  ),
+                  attrs:{_i:"24-"+n}},
+                  t._l(
+                    t._$s(
+                      "25-"+n,
+                      "f",
+                      {forItems:e.imagesurl}
+                    ),
+                    (
+                      function(
+                        s,
+                        a,
+                        r,
+                        o
+                      ){return i(
+                        "image",
+                        {key:t._$s(
+                          "25-"+n,
+                          "f",
+                          {forIndex:r,
+                          key:a}
+                        ),
+                        attrs:{src:t._$s(
+                          "25-"+n+"-"+o,
+                          "a-src",
+                          s
+                        ),
+                        _i:"25-"+n+"-"+o},
+                        on:{click:function(
+                          s
+                        ){return t.enlargeImg(
+                          e.imagesurl,
+                          a
+                        )}}}
+                      )}
+                    )
+                  ),
+                  0
+                ),
+                i(
+                  "view",
+                  {staticClass:t._$s(
+                    "26-"+n,
+                    "sc",
+                    "goods"
+                  ),
+                  attrs:{_i:"26-"+n},
+                  on:{click:function(
+                    s
+                  ){return t.toDetail(
+                    e.dumid
+                  )}}},
+                  [
+                    i(
+                      "image",
+                      {attrs:{src:t._$s(
+                        "27-"+n,
+                        "a-src",
+                        e.iconurl
+                      ),
+                      _i:"27-"+n}}
+                    ),
+                    i(
+                      "view",
+                      {staticClass:t._$s(
+                        "28-"+n,
+                        "sc",
+                        "goods-desc"
+                      ),
+                      attrs:{_i:"28-"+n}},
+                      [
+                        i(
+                          "view",
+                          {staticClass:t._$s(
+                            "29-"+n,
+                            "sc",
+                            "goods-name otw"
+                          ),
+                          attrs:{_i:"29-"+n}},
+                          [
+                            t._v(
+                              t._$s(
+                                "29-"+n,
+                                "t0-0",
+                                t._s(
+                                  e.delname
+                                )
+                              )
+                            )
+                          ]
+                        ),
+                        i(
+                          "view",
+                          {staticClass:t._$s(
+                            "30-"+n,
+                            "sc",
+                            "goods-issue"
+                          ),
+                          attrs:{_i:"30-"+n}},
+                          [
+                            t._v(
+                              t._$s(
+                                "30-"+n,
+                                "t0-0",
+                                t._s(
+                                  e.issue
+                                )
+                              )
+                            )
+                          ]
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]
+            )}
+          )
+        )
+      ],
+      2
+    )
+  ],
+  1
+)}
+```
+
+## Component options (data / methods)
+
+```js
+{"use strict";Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0;var i=r(s("4df3")),a=r(s("7142")),n=s("8522");s("2f62");function r(t){return t&&t.__esModule?t:{default:t}}var o={mixins:[i.default],components:{MescrollBody:a.default},onLoad:function(t){this.tabIndex=t.type||0},onShow:function(){var t=this;setTimeout((function(){t.mescroll.resetUpScroll()}))},computed:{},data:function(){return{mescroll:null,downOption:{use:!0,auto:!0},upOption:{use:!0,auto:!0,page:{num:0,size:20}},dataList:[],barList:[{title:this.$t("winner.wtorder")},{title:this.$t("winner.shared")}],listCount:0,tabIndex:0,cardList:[]}},methods:{enlargeImg:function(t,e){uni.previewImage({current:e,urls:t})},changeTab:function(t){this.tabIndex=t,this.mescroll.resetUpScroll()},toShare:function(t){uni.navigateTo({url:"../bask/index?id=".concat(t)})},toDetail:function(t){uni.navigateTo({url:"../goods/goods?id=".concat(t)})},upCallback:function(t){var e=this,s=(t.num-1)*t.size,i=t.size;0==this.tabIndex?(0,n.userOrder)({status:5,start:s,limit:i}).then((function(s){var i=s.list,a=i.length,n=+s.count;e.listCount=+s.count,1==t.num&&(e.cardList=[]),e.cardList=e.cardList.concat(i),e.mescroll.endBySize(a,n)})).catch((function(t){e.mescroll.endErr()})):(0,n.myWinner)({start:s,limit:i}).then((function(s){var i=s.list,a=i.length,n=+s.count;1==t.num&&(e.dataList=[]),e.dataList=e.dataList.concat(i),e.mescroll.endBySize(a,n)})).catch((function(t){e.mescroll.endErr()}))}}};e.default=o}
+```

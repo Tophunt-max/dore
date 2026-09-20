@@ -1,0 +1,518 @@
+# pages/goods/calculation
+
+- page module: `5cc0`
+- render module: `2db9`
+- options module: `734a`
+- css scope: `data-v-97a90e28`
+
+## Scoped CSS (25 rules)
+
+```css
+.calculation[data-v-97a90e28]{position:relative;min-height:100vh;padding:0 30rpx 30rpx 30rpx;background:#f9f9f9}
+.calculation .alg[data-v-97a90e28]{width:100%;margin-top:16rpx;padding:30rpx 28rpx;background:linear-gradient(283deg,#ee5016,rgba(238,80,22,.65));border-radius:16rpx}
+.calculation .alg .alg-title[data-v-97a90e28]{font-size:32rpx;font-family:Roboto,Roboto-Bold;font-weight:700;color:#fff}
+.calculation .alg .alg-text[data-v-97a90e28]{margin-top:10rpx;font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:700;color:#fff}
+.calculation .intro[data-v-97a90e28]{width:100%;margin-top:16rpx;padding:28rpx 28rpx;background:#fff;font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:700;text-align:LEFT;color:#17273a}
+.calculation .intro uni-text[data-v-97a90e28]{color:#ee5016}
+.calculation .intro uni-text[data-v-97a90e28]:before{content:" "}
+.calculation .list[data-v-97a90e28]{width:100%;padding:0 28rpx}
+.calculation .list .header[data-v-97a90e28]{display:flex;flex-direction:row;align-items:center;justify-content:space-between;width:100%;height:90rpx}
+.calculation .list .header .header-left[data-v-97a90e28]{font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:700;text-align:CENTER;color:#b9b9b9}
+.calculation .list .header .header-right[data-v-97a90e28]{font-size:28rpx;font-family:Roboto,Roboto-Bold;font-weight:700;text-align:CENTER;color:#b9b9b9}
+.calculation .list .main[data-v-97a90e28]{width:100%;height:400rpx;overflow-y:auto}
+.calculation .list .main .item[data-v-97a90e28]{display:flex;flex-direction:row;align-items:center;justify-content:space-between;width:100%;height:92rpx;border-top:1rpx solid #ececec}
+.calculation .list .main .item .item-left[data-v-97a90e28]{font-size:26rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9}
+.calculation .list .main .item .item-right[data-v-97a90e28]{font-size:26rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9}
+.calculation .list .main uni-text[data-v-97a90e28]{color:#ee5016}
+.calculation .result[data-v-97a90e28]{width:100%;margin-top:16rpx;padding:20rpx 22rpx;background:#fff}
+.calculation .result .result-title[data-v-97a90e28]{width:100%;font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:700;text-align:left;color:#17273a}
+.calculation .result .result-main[data-v-97a90e28]{width:100%;margin:24rpx 0;font-size:36rpx;font-family:Roboto,Roboto-Medium;font-weight:700;text-align:center;color:#17273a}
+.calculation .result .result-main uni-text[data-v-97a90e28]{color:#ee5016}
+.calculation .discount[data-v-97a90e28]{width:100%;background:#fff;margin-top:16rpx;font-size:28rpx;font-family:Roboto,Roboto-Medium;color:#17273a;padding:20rpx 0 20rpx 20rpx}
+.calculation .discount .discount_rank[data-v-97a90e28]{margin-top:20rpx;padding-right:20rpx}
+.calculation .discount .discount_rank .discount_rank_item[data-v-97a90e28]{display:flex;font-size:32rpx;margin-bottom:20rpx;min-height:64rpx;line-height:64rpx}
+.calculation .discount .discount_rank .discount_rank_item .discount_rank_item_title[data-v-97a90e28]{white-space:nowrap;text-align:right;width:200rpx}
+.calculation .discount .discount_rank .discount_rank_item .discount_rank_item_num[data-v-97a90e28]{color:#ee5016;margin-left:10rpx}
+```
+
+## Compiled template (literal classes/text)
+
+```js
+function(
+){var t=this,
+e=t.$createElement,
+s=t._self._c||e;return s(
+  "view",
+  {staticClass:t._$s(
+    0,
+    "sc",
+    "calculation"
+  ),
+  attrs:{_i:0}},
+  [
+    s(
+      "navbar",
+      {attrs:{title:t.$t(
+        "goods.ctitle"
+      ),
+      background:"#ffffff",
+      _i:1}}
+    ),
+    s(
+      "view",
+      {staticClass:t._$s(
+        2,
+        "sc",
+        "alg"
+      ),
+      attrs:{_i:2}},
+      [
+        s(
+          "view",
+          {staticClass:t._$s(
+            3,
+            "sc",
+            "alg-title"
+          ),
+          attrs:{_i:3}},
+          [
+            t._v(
+              t._$s(
+                3,
+                "t0-0",
+                t._s(
+                  t.$t(
+                    "goods.mula"
+                  )
+                )
+              )
+            )
+          ]
+        ),
+        s(
+          "view",
+          {staticClass:t._$s(
+            4,
+            "sc",
+            "alg-text"
+          ),
+          attrs:{_i:4}},
+          [
+            t._v(
+              t._$s(
+                4,
+                "t0-0",
+                t._s(
+                  t.$t(
+                    "goods.rem"
+                  )
+                )
+              )
+            )
+          ]
+        )
+      ]
+    ),
+    s(
+      "view",
+      {staticClass:t._$s(
+        5,
+        "sc",
+        "intro"
+      ),
+      attrs:{_i:5}},
+      [
+        s(
+          "view"
+        ),
+        s(
+          "view",
+          [
+            t._v(
+              t._$s(
+                7,
+                "t0-0",
+                t._s(
+                  t.$t(
+                    "goods.rec"
+                  )
+                )
+              )
+            )
+          ]
+        ),
+        s(
+          "view",
+          [
+            s(
+              "text",
+              [
+                t._v(
+                  t._$s(
+                    9,
+                    "t0-0",
+                    t._s(
+                      t.numA
+                    )
+                  )
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    ),
+    s(
+      "view",
+      {staticClass:t._$s(
+        10,
+        "sc",
+        "list"
+      ),
+      attrs:{_i:10}},
+      [
+        s(
+          "view",
+          {staticClass:t._$s(
+            11,
+            "sc",
+            "header"
+          ),
+          attrs:{_i:11}},
+          [
+            s(
+              "view",
+              {staticClass:t._$s(
+                12,
+                "sc",
+                "header-left"
+              ),
+              attrs:{_i:12}},
+              [
+                t._v(
+                  t._$s(
+                    12,
+                    "t0-0",
+                    t._s(
+                      t.$t(
+                        "goods.ordertimes"
+                      )
+                    )
+                  )
+                )
+              ]
+            ),
+            s(
+              "view",
+              {staticClass:t._$s(
+                13,
+                "sc",
+                "header-right"
+              ),
+              attrs:{_i:13}},
+              [
+                t._v(
+                  t._$s(
+                    13,
+                    "t0-0",
+                    t._s(
+                      t.$t(
+                        "goods.user"
+                      )
+                    )
+                  )
+                )
+              ]
+            )
+          ]
+        ),
+        s(
+          "view",
+          {staticClass:t._$s(
+            14,
+            "sc",
+            "main"
+          ),
+          attrs:{_i:14}},
+          t._l(
+            t._$s(
+              15,
+              "f",
+              {forItems:t.dataList}
+            ),
+            (
+              function(
+                e,
+                i,
+                a,
+                n
+              ){return s(
+                "view",
+                {key:t._$s(
+                  15,
+                  "f",
+                  {forIndex:a,
+                  key:i}
+                ),
+                staticClass:t._$s(
+                  "15-"+n,
+                  "sc",
+                  "item"
+                ),
+                attrs:{_i:"15-"+n}},
+                [
+                  s(
+                    "view",
+                    {staticClass:t._$s(
+                      "16-"+n,
+                      "sc",
+                      "item-left"
+                    ),
+                    attrs:{_i:"16-"+n}},
+                    [
+                      t._v(
+                        t._$s(
+                          "16-"+n,
+                          "t0-0",
+                          t._s(
+                            e.time
+                          )
+                        )+t._$s(
+                          "16-"+n,
+                          "t0-1",
+                          t._s(
+                            e.a_create_time.substring(
+                              e.a_create_time.length-3
+                            )
+                          )
+                        )
+                      ),
+                      s(
+                        "text",
+                        [
+                          t._v(
+                            t._$s(
+                              "17-"+n,
+                              "t0-0",
+                              t._s(
+                                e.a_create_time
+                              )
+                            )
+                          )
+                        ]
+                      )
+                    ]
+                  ),
+                  s(
+                    "view",
+                    {staticClass:t._$s(
+                      "18-"+n,
+                      "sc",
+                      "item-right"
+                    ),
+                    attrs:{_i:"18-"+n}},
+                    [
+                      t._v(
+                        t._$s(
+                          "18-"+n,
+                          "t0-0",
+                          t._s(
+                            e.nickname
+                          )
+                        )
+                      )
+                    ]
+                  )
+                ]
+              )}
+            )
+          ),
+          0
+        )
+      ]
+    ),
+    s(
+      "view",
+      {staticClass:t._$s(
+        19,
+        "sc",
+        "result"
+      ),
+      attrs:{_i:19}},
+      [
+        s(
+          "view",
+          {staticClass:t._$s(
+            20,
+            "sc",
+            "result-title"
+          ),
+          attrs:{_i:20}},
+          [
+            t._v(
+              t._$s(
+                20,
+                "t0-0",
+                t._s(
+                  t.$t(
+                    "goods.cal"
+                  )
+                )
+              )
+            )
+          ]
+        ),
+        s(
+          "view",
+          {staticClass:t._$s(
+            21,
+            "sc",
+            "result-main"
+          ),
+          attrs:{_i:21}},
+          [
+            t._v(
+              t._$s(
+                21,
+                "t0-0",
+                t._s(
+                  t.$t(
+                    "goods.code"
+                  )
+                )
+              )
+            ),
+            s(
+              "text",
+              [
+                t._v(
+                  t._$s(
+                    22,
+                    "t0-0",
+                    t._s(
+                      t.winner
+                    )
+                  )
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    ),
+    t._$s(
+      23,
+      "i",
+      2==t.dumnormal
+    )?s(
+      "view",
+      {staticClass:t._$s(
+        23,
+        "sc",
+        "discount"
+      ),
+      attrs:{_i:23}},
+      t._l(
+        t._$s(
+          24,
+          "f",
+          {forItems:t.codeList}
+        ),
+        (
+          function(
+            e,
+            i,
+            a,
+            n
+          ){return s(
+            "view",
+            {key:t._$s(
+              24,
+              "f",
+              {forIndex:a,
+              key:i}
+            ),
+            staticClass:t._$s(
+              "24-"+n,
+              "sc",
+              "discount_rank"
+            ),
+            attrs:{_i:"24-"+n}},
+            [
+              t._$s(
+                "25-"+n,
+                "i",
+                i>0
+              )?s(
+                "view",
+                {staticClass:t._$s(
+                  "25-"+n,
+                  "sc",
+                  "discount_rank_item"
+                ),
+                attrs:{_i:"25-"+n}},
+                [
+                  s(
+                    "view",
+                    {staticClass:t._$s(
+                      "26-"+n,
+                      "sc",
+                      "discount_rank_item_title"
+                    ),
+                    attrs:{_i:"26-"+n}},
+                    [
+                      t._v(
+                        t._$s(
+                          "26-"+n,
+                          "t0-0",
+                          t._s(
+                            t.rankName(
+                              i
+                            )
+                          )
+                        )
+                      )
+                    ]
+                  ),
+                  s(
+                    "view",
+                    {staticClass:t._$s(
+                      "27-"+n,
+                      "sc",
+                      "discount_rank_item_num"
+                    ),
+                    attrs:{_i:"27-"+n}},
+                    [
+                      t._v(
+                        t._$s(
+                          "27-"+n,
+                          "t0-0",
+                          t._s(
+                            e.join(
+                              ", "
+                            )
+                          )
+                        )
+                      )
+                    ]
+                  )
+                ]
+              ):t._e(
+              )
+            ]
+          )}
+        )
+      ),
+      0
+    ):t._e(
+    )
+  ],
+  1
+)}
+```
+
+## Component options (data / methods)
+
+```js
+{"use strict";Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0;var i=s("2f62"),a=s("f78c");function n(t,e){var s=Object.keys(t);if(Object.getOwnPropertySymbols){var i=Object.getOwnPropertySymbols(t);e&&(i=i.filter((function(e){return Object.getOwnPropertyDescriptor(t,e).enumerable}))),s.push.apply(s,i)}return s}function r(t){for(var e=1;e<arguments.length;e++){var s=null!=arguments[e]?arguments[e]:{};e%2?n(Object(s),!0).forEach((function(e){o(t,e,s[e])})):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(s)):n(Object(s)).forEach((function(e){Object.defineProperty(t,e,Object.getOwnPropertyDescriptor(s,e))}))}return t}function o(t,e,s){return e in t?Object.defineProperty(t,e,{value:s,enumerable:!0,configurable:!0,writable:!0}):t[e]=s,t}var c={onLoad:function(t){this.goodsId=t.id,this.numA=t.a,this.winner=t.winner,this.getData()},computed:r({},(0,i.mapGetters)(["userInfo"])),watch:{},data:function(){return{numA:"",winner:"",goodsId:"",dataList:[],dumnormal:1,rankList:[],codeList:[]}},methods:{getData:function(){var t=this;(0,a.GetLottery)({id:this.goodsId}).then((function(e){t.dataList=e.list,t.rankList=e.win,t.dumnormal=e.dumnormal,t.codeList=e.code}))},rankName:function(t){var e="";switch(+t){case 0:e=this.$t("goods.onenumber");break;case 1:e=this.$t("goods.twonumber");break;case 2:e=this.$t("goods.threenumber");break;case 3:e=this.$t("goods.fournumber");break;case 4:e=this.$t("goods.fivenumber");break}return e}}};e.default=c}
+```
