@@ -364,12 +364,14 @@ const styles = StyleSheet.create({
     color: C.grey,
     fontFamily: theme.typography.family.regular,
   },
-  // Share graphic (/static/image/goods/icon_Share.png — 126x134rpx, -14rpx top).
+  // Share graphic (/static/image/goods/icon_Share.png). The source PNG has
+  // transparent padding around the glyph, so render it larger than the ORich
+  // 126x134rpx box to keep the share mark clearly visible.
   shareBtn: {
     marginLeft: rpx(16),
-    marginTop: rpx(-14),
+    marginTop: rpx(-8),
   },
-  shareIcon: { width: rpx(126), height: rpx(134), resizeMode: 'contain' },
+  shareIcon: { width: rpx(180), height: rpx(190), resizeMode: 'contain' },
   // .people-view — participant count on the left, overlapping avatars right.
   peopleView: {
     flexDirection: 'row',
