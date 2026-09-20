@@ -14,6 +14,10 @@ export type OperationsPageName =
   | 'categories'
   | 'memberships-discounts'
   | 'finance-offers'
+  | 'finance-orders'
+  | 'after-sales'
+  | 'winners'
+  | 'system-settings'
   | 'game-config'
   | 'reports';
 
@@ -54,7 +58,146 @@ const adminOnly: AdminRole[] = ['admin'];
 const finance: AdminRole[] = ['finance', 'admin'];
 const support: AdminRole[] = ['support', 'admin'];
 
-const sections: Record<Exclude<OperationsPageName, 'reports'>, Section[]> = {
+const sections: Record<
+  Exclude<OperationsPageName, 'reports' | 'system-settings'>,
+  Section[]
+> = {
+  'after-sales': [
+    {
+      title: 'After-sales',
+      description: 'Handle returns, exchanges, and complaints on orders.',
+      endpoint: 'after-sales',
+      statuses: ['open', 'in_review', 'resolved', 'rejected'],
+      columns: [
+        { key: 'phoneMasked', label: 'User' },
+        { key: 'orderTitle', label: 'Order' },
+        { key: 'type', label: 'Type' },
+        { key: 'reason', label: 'Reason' },
+        { key: 'status', label: 'Status' },
+        { key: 'createdAt', label: 'Created' },
+      ],
+      actions: [
+        {
+          label: 'Review',
+          roles: support,
+          visible: (r) => String(r.status) === 'open',
+          path: (r) => `after-sales/${r.id}/status`,
+          method: 'POST',
+          confirm: () => 'Move this request to in-review?',
+          body: () => ({ status: 'in_review' }),
+        },
+        {
+          label: 'Resolve',
+          className: 'approve',
+          roles: support,
+          visible: (r) => String(r.status) !== 'resolved',
+          path: (r) => `after-sales/${r.id}/status`,
+          method: 'POST',
+          confirm: () => 'Mark this request resolved?',
+          body: () => ({
+            status: 'resolved',
+            adminNote: window.prompt('Resolution note (optional)') ?? '',
+          }),
+        },
+        {
+          label: 'Reject',
+          className: 'reject',
+          roles: support,
+          visible: (r) => String(r.status) !== 'rejected',
+          path: (r) => `after-sales/${r.id}/status`,
+          method: 'POST',
+          confirm: () => 'Reject this request?',
+          body: () => ({
+            status: 'rejected',
+            adminNote: window.prompt('Rejection reason') ?? '',
+          }),
+        },
+      ],
+    },
+  ],
+  'finance-orders': [
+    {
+      title: 'Finance orders',
+      description:
+        'Review finance purchases and settle them manually. Settlement credits principal + return to the user wallet (regulated — no auto interest).',
+      endpoint: 'finance-orders',
+      statuses: ['active', 'matured', 'settled', 'cancelled'],
+      columns: [
+        { key: 'phoneMasked', label: 'User' },
+        { key: 'offerTitle', label: 'Offer' },
+        { key: 'principalMinor', label: 'Principal (minor)' },
+        { key: 'status', label: 'Status' },
+        { key: 'createdAt', label: 'Created' },
+      ],
+      actions: [
+        {
+          label: 'Settle',
+          className: 'approve',
+          roles: finance,
+          visible: (r) => String(r.status) === 'active',
+          path: (r) => `finance-orders/${r.id}/settle`,
+          method: 'POST',
+          confirm: (r) =>
+            `Settle order ${r.id}? This credits principal + return to the user wallet.`,
+          body: () => {
+            const value = window.prompt(
+              'Return/interest in minor units (e.g. 500 = ₹5.00). Principal is added automatically.',
+              '0',
+            );
+            if (value === null) return null;
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount < 0) {
+              window.alert('Enter a valid non-negative amount.');
+              return null;
+            }
+            return {
+              returnMinor: Math.round(amount),
+              note: window.prompt('Settlement note (optional)') ?? '',
+            };
+          },
+        },
+      ],
+    },
+  ],
+  winners: [
+    {
+      title: 'Winners',
+      description:
+        'Announced winners. For cash-award campaigns, pay the cash prize into the winner wallet (manual, audited).',
+      endpoint: 'winners',
+      columns: [
+        { key: 'phoneMasked', label: 'User' },
+        { key: 'productTitle', label: 'Product' },
+        { key: 'entryNumber', label: 'Lucky code' },
+        { key: 'announcedAt', label: 'Announced' },
+      ],
+      actions: [
+        {
+          label: 'Cash payout',
+          className: 'approve',
+          roles: finance,
+          path: (r) => `winners/${r.id}/payout`,
+          method: 'POST',
+          confirm: (r) => `Pay a cash prize to ${r.phoneMasked}?`,
+          body: () => {
+            const value = window.prompt(
+              'Payout amount in minor units (e.g. 100000 = ₹1000.00)',
+            );
+            if (value === null) return null;
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount <= 0) {
+              window.alert('Enter a valid positive amount.');
+              return null;
+            }
+            return {
+              amountMinor: Math.round(amount),
+              note: window.prompt('Payout note (optional)') ?? '',
+            };
+          },
+        },
+      ],
+    },
+  ],
   draws: [
     {
       title: 'Draw execution',
@@ -1071,6 +1214,7 @@ export function OperationsPage({
   role: AdminRole;
 }) {
   if (page === 'reports') return <Reports role={role} />;
+  if (page === 'system-settings') return <SystemSettings />;
   return (
     <>
       {sections[page].map((section) => (
@@ -1081,5 +1225,79 @@ export function OperationsPage({
         />
       ))}
     </>
+  );
+}
+
+function SystemSettings() {
+  const client = useQueryClient();
+  const query = useQuery({
+    queryKey: ['admin-operation', 'settings'],
+    queryFn: () => adminApi.operations('settings'),
+  });
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [dirty, setDirty] = useState(false);
+  const items = (query.data?.items ?? []) as Array<{
+    key: string;
+    value: string;
+    updatedAt?: string;
+  }>;
+  const current: Record<string, string> = {};
+  for (const item of items) current[item.key] = item.value;
+  const view = dirty ? values : current;
+  const save = useMutation({
+    mutationFn: () =>
+      adminApi.operationAction('settings', 'PUT', { settings: view }),
+    onSuccess: () => {
+      setDirty(false);
+      void client.invalidateQueries({
+        queryKey: ['admin-operation', 'settings'],
+      });
+    },
+  });
+  return (
+    <section className="panel">
+      <div className="panel-heading">
+        <div>
+          <h2>System settings</h2>
+          <p className="muted">
+            Global configuration surfaced to the apps (withdrawal limits, fees,
+            support contacts, home notice).
+          </p>
+        </div>
+        <button
+          className="primary small"
+          disabled={!dirty || save.isPending}
+          onClick={() => save.mutate()}
+        >
+          {save.isPending ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
+      {query.isPending ? <div className="state">Loading settings…</div> : null}
+      {query.isError ? (
+        <div className="state error">{errorMessage(query.error)}</div>
+      ) : null}
+      {save.isError ? (
+        <div className="state error">{errorMessage(save.error)}</div>
+      ) : null}
+      {!query.isPending && !query.isError ? (
+        <div className="form-grid">
+          {items.map((item) => (
+            <label key={item.key}>
+              {item.key}
+              <input
+                value={view[item.key] ?? ''}
+                onChange={(event) => {
+                  setValues({ ...view, [item.key]: event.target.value });
+                  setDirty(true);
+                }}
+              />
+            </label>
+          ))}
+          {!items.length ? (
+            <div className="empty">No settings configured.</div>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
   );
 }

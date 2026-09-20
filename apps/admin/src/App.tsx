@@ -34,6 +34,7 @@ const navigation: NavItem[] = [
   { page: 'payments', roles: finance, group: 'Money' },
   { page: 'payment-methods', roles: finance, group: 'Money' },
   { page: 'withdrawals', roles: finance, group: 'Money' },
+  { page: 'finance-orders', roles: finance, group: 'Money' },
   { page: 'payment-operations', roles: finance, group: 'Money' },
   { page: 'beneficiaries', roles: finance, group: 'Money' },
   { page: 'finance-offers', roles: adminOnly, group: 'Platform' },
@@ -51,9 +52,12 @@ const navigation: NavItem[] = [
   { page: 'users', roles: support, group: 'People' },
   { page: 'referrals-rewards', roles: adminOnly, group: 'People' },
   { page: 'support-tickets', roles: support, group: 'People' },
+  { page: 'after-sales', roles: support, group: 'People' },
+  { page: 'winners', roles: finance, group: 'Platform' },
   { page: 'notifications', roles: adminOnly, group: 'Communication' },
   { page: 'audit-logs', roles: finance, group: 'Governance' },
   { page: 'reports', roles: finance, group: 'Governance' },
+  { page: 'system-settings', roles: adminOnly, group: 'Governance' },
 ];
 
 const label = (value: string) =>

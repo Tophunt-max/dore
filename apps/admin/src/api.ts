@@ -322,7 +322,7 @@ export const adminApi = {
   ) => request<ListResult<T>>(`${adminPath(path)}${queryString(params)}`),
   operationAction: <T = unknown>(
     path: string,
-    method: 'POST' | 'PATCH' | 'DELETE',
+    method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     body?: unknown,
   ) => request<T>(adminPath(path), json(method, body)),
   downloadReport: async (params: Record<string, string | undefined>) => {

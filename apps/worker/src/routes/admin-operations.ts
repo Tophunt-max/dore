@@ -913,3 +913,197 @@ adminOperationsRoutes.put('/settings', async (c) => {
   await c.env.DB.batch(statements);
   return ok(c, { updated: entries.length });
 });
+
+
+// ── Phase C: administrator-controlled money settlement ──────────────────────
+// These credit user wallets and are intentionally MANUAL (a finance
+// administrator decides each amount). Nothing here is automated, matching the
+// repo's regulated-money release gates in docs/SETUP.md.
+
+async function creditWallet(
+  env: AppEnv['Bindings'],
+  userId: string,
+  amountMinor: number,
+  referenceType: string,
+  referenceId: string,
+  entryType: string,
+  description: string,
+): Promise<{ ok: boolean; message?: string }> {
+  const stub = env.WALLET_COORDINATOR.get(
+    env.WALLET_COORDINATOR.idFromName(userId),
+  );
+  const res = await stub.fetch('https://wallet/credit', {
+    method: 'POST',
+    body: JSON.stringify({
+      operation: 'credit',
+      userId,
+      amountMinor,
+      referenceType,
+      referenceId,
+      entryType,
+      description,
+    }),
+  });
+  if (res.ok) return { ok: true };
+  const body = (await res.json().catch(() => ({}))) as { message?: string };
+  return { ok: false, message: body.message };
+}
+
+adminOperationsRoutes.get('/finance-orders', async (c) => {
+  const status = c.req.query('status');
+  const base = `SELECT o.id,o.user_id,o.principal_minor,o.currency,o.status,o.note,o.created_at,o.updated_at,
+    u.phone_e164, f.title offer_title, f.provider_name
+    FROM finance_orders o JOIN users u ON u.id=o.user_id JOIN finance_offers f ON f.id=o.offer_id`;
+  const result = status
+    ? await c.env.DB.prepare(
+        `${base} WHERE o.status=? ORDER BY o.created_at DESC LIMIT 200`,
+      )
+        .bind(status)
+        .all<Record<string, unknown>>()
+    : await c.env.DB.prepare(
+        `${base} ORDER BY o.created_at DESC LIMIT 200`,
+      ).all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      id: String(row.id),
+      userId: String(row.user_id),
+      phoneMasked: maskPhone(String(row.phone_e164)),
+      offerTitle: String(row.offer_title),
+      providerName: String(row.provider_name),
+      principalMinor: Number(row.principal_minor),
+      currency: String(row.currency),
+      status: String(row.status),
+      note: String(row.note),
+      createdAt: new Date(Number(row.created_at) * 1000).toISOString(),
+      updatedAt: new Date(Number(row.updated_at) * 1000).toISOString(),
+    })),
+  });
+});
+
+// Settle a finance order: credit principal + the administrator-entered return
+// to the user's wallet, then mark the order settled.
+adminOperationsRoutes.post('/finance-orders/:id/settle', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    returnMinor?: number;
+    note?: string;
+  };
+  const returnMinor = Number(body.returnMinor ?? 0);
+  if (!Number.isSafeInteger(returnMinor) || returnMinor < 0)
+    return fail(c, 400, 'VALIDATION_ERROR', 'returnMinor must be >= 0');
+  const order = await c.env.DB.prepare(
+    "SELECT id,user_id,principal_minor FROM finance_orders WHERE id=? AND status='active'",
+  )
+    .bind(c.req.param('id'))
+    .first<{ id: string; user_id: string; principal_minor: number }>();
+  if (!order)
+    return fail(c, 409, 'FINANCE_ORDER_NOT_SETTLEABLE', 'Order is not active');
+  const total = Number(order.principal_minor) + returnMinor;
+  const credited = await creditWallet(
+    c.env,
+    order.user_id,
+    total,
+    'finance_order',
+    order.id,
+    'finance_settlement',
+    'Finance settlement (principal + return)',
+  );
+  if (!credited.ok)
+    return fail(
+      c,
+      409,
+      'SETTLEMENT_FAILED',
+      credited.message ?? 'Wallet credit failed',
+    );
+  const now = nowSeconds();
+  await c.env.DB.batch([
+    c.env.DB.prepare(
+      "UPDATE finance_orders SET status='settled',note=?,updated_at=? WHERE id=?",
+    ).bind((body.note ?? '').trim(), now, order.id),
+    c.env.DB.prepare(
+      `INSERT INTO audit_logs (id,actor_user_id,action,entity_type,entity_id,request_id,metadata_json,created_at)
+       VALUES(?,?,?,?,?,?,?,?)`,
+    ).bind(
+      crypto.randomUUID(),
+      c.get('userId'),
+      'finance_order.settled',
+      'finance_order',
+      order.id,
+      c.get('requestId'),
+      JSON.stringify({ principalMinor: order.principal_minor, returnMinor }),
+      now,
+    ),
+  ]);
+  return ok(c, { id: order.id, status: 'settled', creditedMinor: total });
+});
+
+adminOperationsRoutes.get('/winners', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT w.id,w.campaign_id,w.user_id,w.entry_number,w.announced_at,
+      u.phone_e164, p.title product_title
+     FROM winners w JOIN users u ON u.id=w.user_id
+     JOIN campaigns c ON c.id=w.campaign_id JOIN products p ON p.id=c.product_id
+     ORDER BY w.announced_at DESC LIMIT 200`,
+  ).all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      id: String(row.id),
+      campaignId: String(row.campaign_id),
+      userId: String(row.user_id),
+      phoneMasked: maskPhone(String(row.phone_e164)),
+      productTitle: String(row.product_title),
+      entryNumber: Number(row.entry_number),
+      announcedAt: new Date(Number(row.announced_at) * 1000).toISOString(),
+    })),
+  });
+});
+
+// Cash prize payout: credit an administrator-entered amount to a winner's
+// wallet (for cash-award campaigns). Idempotent by winner id.
+adminOperationsRoutes.post('/winners/:id/payout', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    amountMinor?: number;
+    note?: string;
+  };
+  const amountMinor = Number(body.amountMinor);
+  if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0)
+    return fail(c, 400, 'VALIDATION_ERROR', 'amountMinor must be > 0');
+  const winner = await c.env.DB.prepare(
+    'SELECT id,user_id FROM winners WHERE id=?',
+  )
+    .bind(c.req.param('id'))
+    .first<{ id: string; user_id: string }>();
+  if (!winner) return fail(c, 404, 'WINNER_NOT_FOUND', 'Winner not found');
+  const credited = await creditWallet(
+    c.env,
+    winner.user_id,
+    amountMinor,
+    'winner',
+    winner.id,
+    'prize_payout',
+    'Cash prize payout',
+  );
+  if (!credited.ok)
+    return fail(
+      c,
+      409,
+      'PAYOUT_FAILED',
+      credited.message ?? 'Wallet credit failed',
+    );
+  const now = nowSeconds();
+  await c.env.DB.prepare(
+    `INSERT INTO audit_logs (id,actor_user_id,action,entity_type,entity_id,request_id,metadata_json,created_at)
+     VALUES(?,?,?,?,?,?,?,?)`,
+  )
+    .bind(
+      crypto.randomUUID(),
+      c.get('userId'),
+      'winner.cash_payout',
+      'winner',
+      winner.id,
+      c.get('requestId'),
+      JSON.stringify({ amountMinor }),
+      now,
+    )
+    .run();
+  return ok(c, { id: winner.id, paidMinor: amountMinor });
+});
