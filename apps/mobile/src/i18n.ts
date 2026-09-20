@@ -436,6 +436,8 @@ export const catalog = {
     hi: 'पूरा होने पर ड्रॉ',
     zh: '满员后开奖',
   },
+  // ORich prints the literal label "End" before the H:MM:SS timer.
+  'home.end': { en: 'End', hi: 'समाप्ति', zh: '结束' },
   'home.quick.draws': { en: 'All Draws', hi: 'सभी ड्रॉ', zh: '全部活动' },
   'home.quick.recharge': { en: 'Recharge', hi: 'रिचार्ज', zh: '充值' },
   'home.quick.invite': { en: 'Invite', hi: 'आमंत्रित करें', zh: '邀请' },
