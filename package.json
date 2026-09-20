@@ -1,0 +1,34 @@
+{
+  "name": "oriva-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Oriva mobile, Cloudflare Worker API, and administration platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:mobile": "npm run start -w @oriva/mobile",
+    "dev:worker": "npm run dev -w @oriva/worker",
+    "dev:admin": "npm run dev -w @oriva/admin",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-gesture-handler": "2.32.0",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-screens": "4.26.2",
+    "typescript": "^7.0.2"
+  }
+}

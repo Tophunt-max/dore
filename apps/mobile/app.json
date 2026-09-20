@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "Oriva",
+    "slug": "oriva",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "oriva",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "icon": "../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/logo.png",
+    "splash": {
+      "backgroundColor": "#F8F8F8"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.oriva.app"
+    },
+    "android": {
+      "package": "com.oriva.app",
+      "adaptiveIcon": {
+        "foregroundImage": "../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/logo.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "permissions": ["POST_NOTIFICATIONS", "CAMERA", "READ_MEDIA_IMAGES"],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#EE5016",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Oriva to choose images for your profile and prize sharing.",
+          "cameraPermission": "Allow Oriva to take a profile or prize-sharing photo."
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+// Authorized legacy ORich assets are reused for the Oriva visual system.
+// Metro watches the workspace root, so these exact source files are bundled.
+const root =
+  '../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static';
+void root;
+
+export const assets = {
+  logo: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/logo.png'),
+  loginBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/login/bg.png'),
+  loginPhone: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/login/icon_iphone.png'),
+  loginInvite: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/login/icon_invitation.png'),
+  homeBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/bg_homepage.png'),
+  hotPicks: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_HotPicks.png'),
+  upcoming: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_Upcoming.png'),
+  quickOrders: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_MyOrders.png'),
+  quickRecharge: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_Recharge.png'),
+  quickWinner: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_Winner.png'),
+  quickSupport: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_Support.png'),
+  groupBuy: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_1GroupBuy.png'),
+  winnerDrawn: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_WinnerDrawn.png'),
+  freeShipping: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/icon_FreeShipping.png'),
+  latestStrip: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/latest.png'),
+  highStrip: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/home/high.png'),
+  goodsOne: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/goods/goods1.png'),
+  goodsTwo: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/goods/goods2.jpg'),
+  noData: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/nodata.png'),
+  walletBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/account/bg_Wallet.png'),
+  accountBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/account/bg_my.png'),
+  financeBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/finance/bg_list.png'),
+  inviteBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/invite/invite_bg.png'),
+  faqBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/faq/bg_FAQ.png'),
+  taskBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/task/task_bj.png'),
+  memberBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/member/bg_vip.png'),
+  gameBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/game/bg_game.png'),
+  prizeBackground: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/prize/bg_partition.png'),
+  success: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/bask/img_Successful.png'),
+  paymentFailed: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/bask/img_Paymentfail.png'),
+  paytm: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/pay/paytm.png'),
+  xpay: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/pay/xpay.png'),
+  tabs: {
+    home: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_home_Nav_nor.png'),
+    homeActive: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_home_Nav_sel.png'),
+    winner: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_Winner_Nav_nor.png'),
+    winnerActive: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_Winner_Nav_sel.png'),
+    member: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_vip_Nav_nor.png'),
+    memberActive: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_vip_Nav_sel.png'),
+    task: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_task_nor.png'),
+    taskActive: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_task_sel.png'),
+    account: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_Account_Nav_nor.png'),
+    accountActive: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/image/tab/icon_Account_Nav_sel.png'),
+  },
+  fonts: {
+    regular: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/font/Roboto-Regular-14.ttf'),
+    medium: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/font/Roboto-Medium-12.ttf'),
+    bold: require('../../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/font/Roboto-Bold-3.ttf'),
+  },
+} as const;

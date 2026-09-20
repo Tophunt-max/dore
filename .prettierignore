@@ -1,0 +1,6 @@
+node_modules
+ORich_2.1.4_APKPure.xapk_Decompiler.com
+package-lock.json
+apps/mobile/assets
+apps/mobile/dist-mobile
+apps/worker/dist-worker

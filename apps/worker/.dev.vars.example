@@ -1,0 +1,7 @@
+JWT_SECRET=replace-with-at-least-32-random-bytes
+OTP_PEPPER=replace-with-at-least-32-random-bytes
+OTP_PROVIDER_API_KEY=replace-with-provider-key
+EXPO_ACCESS_TOKEN=replace-with-expo-access-token
+ADMIN_BOOTSTRAP_TOKEN=replace-with-one-time-bootstrap-token
+
+BENEFICIARY_ENCRYPTION_KEY=replace-with-at-least-32-random-bytes
