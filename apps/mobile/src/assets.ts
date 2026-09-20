@@ -19,6 +19,8 @@ export const assets = {
   freeShipping: require('../assets/orich/image/home/icon_FreeShipping.png'),
   latestStrip: require('../assets/orich/image/home/latest.png'),
   highStrip: require('../assets/orich/image/home/high.png'),
+  bannerLottery: require('../assets/orich/image/home/img_lottery.png'),
+  bannerWinning: require('../assets/orich/image/home/img_Winning.png'),
   goodsOne: require('../assets/orich/image/goods/goods1.png'),
   goodsTwo: require('../assets/orich/image/goods/goods2.jpg'),
   noData: require('../assets/orich/image/nodata.png'),

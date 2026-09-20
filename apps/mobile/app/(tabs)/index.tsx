@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { api } from '@/api/endpoints';
 import { assets } from '@/assets';
+import { BannerCarousel } from '@/components/BannerCarousel';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
 import { useI18n } from '@/i18n';
@@ -32,15 +33,16 @@ export default function HomeScreen() {
   const [category, setCategory] = useState('all');
   const campaigns = useQuery({ queryKey: ['campaigns'], queryFn: api.campaigns });
   const winners = useQuery({ queryKey: ['winners'], queryFn: api.winners });
+  const banners = useQuery({ queryKey: ['banners'], queryFn: api.banners });
   const active = (campaigns.data?.items ?? []).filter(
     (item) => item.status === 'active',
   );
-  const pool = active.reduce(
-    (sum, campaign) => sum + campaign.entryPriceMinor * campaign.totalEntries,
-    0,
-  );
   const refresh = () =>
-    Promise.all([campaigns.refetch(), winners.refetch()]).then(() => undefined);
+    Promise.all([
+      campaigns.refetch(),
+      winners.refetch(),
+      banners.refetch(),
+    ]).then(() => undefined);
 
   return (
     <Screen
@@ -64,16 +66,7 @@ export default function HomeScreen() {
             <Text style={styles.bellText}>♪</Text>
           </Pressable>
         </View>
-        <Pressable
-          onPress={() => router.push('/prize-pool')}
-          style={styles.pool}
-        >
-          <Text style={styles.poolLabel}>Active prize pool</Text>
-          <Text style={styles.poolValue}>{formatMoney(pool)}</Text>
-          <Text style={styles.poolCopy}>
-            Informational total from active campaign entries
-          </Text>
-        </Pressable>
+        <BannerCarousel banners={banners.data?.items} />
       </ImageBackground>
 
       {/* Category tabs */}
@@ -210,7 +203,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   root: { backgroundColor: theme.colors.background, paddingBottom: rpx(40) },
-  hero: { height: rpx(480), paddingTop: rpx(20) },
+  hero: { height: rpx(470), paddingTop: rpx(20), paddingBottom: rpx(10) },
   heroImage: { resizeMode: 'cover' },
   navbar: {
     height: rpx(88),
@@ -233,27 +226,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,.2)',
   },
   bellText: { color: '#fff', fontSize: rpx(28) },
-  pool: {
-    marginTop: rpx(30),
-    marginHorizontal: rpx(32),
-    padding: rpx(32),
-    borderRadius: rpx(20),
-    backgroundColor: 'rgba(255,255,255,.94)',
-  },
-  poolLabel: {
-    fontSize: rpx(28),
-    fontFamily: theme.typography.family.bold,
-    color: theme.colors.primary,
-  },
-  poolValue: {
-    marginTop: rpx(8),
-    fontSize: rpx(56),
-    fontFamily: theme.typography.family.bold,
-    color: theme.colors.ink,
-  },
-  poolCopy: { marginTop: rpx(6), fontSize: rpx(22), color: theme.colors.textMuted },
   tabs: {
-    marginTop: rpx(-70),
+    marginTop: rpx(16),
     marginHorizontal: rpx(24),
     paddingVertical: rpx(28),
     borderRadius: rpx(20),
