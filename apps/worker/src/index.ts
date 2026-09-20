@@ -14,6 +14,7 @@ import { adminRoutes } from './routes/admin';
 import { featureRoutes } from './routes/features';
 import { payoutRoutes } from './routes/payouts';
 import { platformRoutes } from './routes/platform';
+import { publicRoutes } from './routes/public';
 import { adminOperationsRoutes } from './routes/admin-operations';
 import { adminCatalogRoutes } from './routes/admin-catalog';
 import { requestContext } from './middleware/request-context';
@@ -60,6 +61,7 @@ app.get('/health', (c) =>
 app.route('/api/v1/auth', authRoutes);
 app.route('/api/v1/campaigns', campaignRoutes);
 app.route('/api/v1/winners', winnerRoutes);
+app.route('/api/v1', publicRoutes);
 app.use('/api/v1/*', requireAuth);
 app.route('/api/v1/users', userRoutes);
 app.route('/api/v1/orders', orderRoutes);

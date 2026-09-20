@@ -7,7 +7,7 @@
   "vars": {
     "APP_ENV": "production",
     "API_ORIGIN": "https://oriva-admin.pages.dev,https://oriva-user.pages.dev",
-    "PUBLIC_ASSET_BASE": "https://assets.example.com",
+    "PUBLIC_ASSET_BASE": "https://pub-e100abaaa8e7466fb358241e29afbd38.r2.dev",
     "OTP_PROVIDER_URL": "https://otp-provider.example.com/messages",
     "OTP_DEV_MODE": "false",
   },
