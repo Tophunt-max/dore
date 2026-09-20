@@ -330,17 +330,16 @@ function GoodsRow({
           {campaign.product.title}
         </Text>
 
-        {/* "End in H:MM:SS" — ORich accumulates days into the hour field */}
-        <Text style={styles.lgoodsEnd}>
-          {counting ? (
-            <>
-              {t('campaign.endIn', { time: '' }).trim()}{' '}
-              <Text style={styles.drawColor}>{remaining}</Text>
-            </>
-          ) : (
-            t('home.fulltime')
-          )}
-        </Text>
+        {/* ORich `.lgoods-end`: while counting the WHOLE line is `.draw-color`
+            (orange) and the label is just "End" + the H:MM:SS timer (days
+            folded into hours); otherwise a grey "Draw when full". */}
+        {counting ? (
+          <Text style={[styles.lgoodsEnd, styles.drawColor]}>
+            {t('home.end')} {remaining}
+          </Text>
+        ) : (
+          <Text style={styles.lgoodsEnd}>{t('home.fulltime')}</Text>
+        )}
 
         {/* .lgoods-precent — bar + sold/total (ORich prints counts, not a %) */}
         <View style={styles.lgoodsPrecent}>
