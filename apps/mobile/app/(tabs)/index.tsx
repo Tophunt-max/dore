@@ -156,7 +156,7 @@ export default function HomeScreen() {
           style={styles.headerRight}
         >
           <Text style={styles.headerRightText}>{t('home.all')}</Text>
-          <Image source={assets.arrowGrey} style={styles.headerRightArrow} />
+          <Image source={assets.arrowRight} style={styles.headerRightArrow} />
         </Pressable>
       </View>
 
