@@ -186,7 +186,7 @@ export default function HomeScreen() {
                   <Image
                     source={{ uri: campaign.product.imageUrl }}
                     style={styles.litemImg}
-                    resizeMode="cover"
+                    resizeMode="contain"
                   />
                 ) : (
                   <View style={[styles.litemImg, styles.litemImgPlaceholder]}>
@@ -197,12 +197,19 @@ export default function HomeScreen() {
                     />
                   </View>
                 )}
+                {campaign.category?.name ? (
+                  <View style={styles.itemPrize}>
+                    <Text style={styles.itemPrizeText} numberOfLines={1}>
+                      {campaign.category.name}
+                    </Text>
+                  </View>
+                ) : null}
                 {sold > 0 ? (
                   <View style={styles.avatarRow}>
                     {[0, 1, 2].map((i) => (
                       <Image
                         key={i}
-                        source={assets.defaultAvatar}
+                        source={assets.avatars[(index + i) % assets.avatars.length]}
                         style={[styles.avatar, i === 0 && styles.avatarFirst]}
                       />
                     ))}
@@ -271,8 +278,16 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   root: { backgroundColor: C.bg, paddingBottom: rpx(40) },
-  // .home-background (330rpx) + .nav-logo (88rpx) + .banner (278rpx)
-  headerBg: { paddingTop: rpx(20), paddingBottom: rpx(24) },
+  // .home-background (orange header art) + .nav-logo (88rpx) + .banner (278rpx).
+  // An explicit height + overflow:hidden is required: on web the background
+  // image layer is sized to the PNG's intrinsic height (473px) and would bleed
+  // past the header, tinting the sections below it orange.
+  headerBg: {
+    height: rpx(418),
+    overflow: 'hidden',
+    paddingTop: rpx(20),
+    paddingBottom: rpx(24),
+  },
   headerBgImg: { resizeMode: 'cover' },
   navLogo: {
     height: rpx(88),
@@ -382,14 +397,32 @@ const styles = StyleSheet.create({
   },
   litemLast: { borderBottomWidth: 0 },
   litemLeft: { width: rpx(184), marginRight: rpx(42) },
+  // .litem-img — max 184x184rpx, contained on white (ORich shows the product
+  // photo fitted, not cropped).
   litemImg: {
     width: rpx(184),
     height: rpx(184),
     borderRadius: rpx(8),
-    backgroundColor: '#FFF3E9',
+    backgroundColor: '#fff',
   },
   litemImgPlaceholder: { alignItems: 'center', justifyContent: 'center' },
   placeholderIcon: { width: rpx(96), height: rpx(96), opacity: 0.85 },
+  // .item-prize — blue label pinned to the bottom of the product image.
+  itemPrize: {
+    width: rpx(184),
+    height: rpx(42),
+    marginTop: rpx(-42),
+    justifyContent: 'center',
+    backgroundColor: '#90b9ff',
+    borderTopLeftRadius: rpx(20),
+    borderTopRightRadius: rpx(20),
+  },
+  itemPrizeText: {
+    fontSize: rpx(24),
+    textAlign: 'center',
+    color: '#fff',
+    fontFamily: theme.typography.family.medium,
+  },
   avatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
