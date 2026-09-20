@@ -15,9 +15,13 @@ import {
 } from 'react-native';
 import { assets } from '@/assets';
 import { contentWidth, rpx } from '@/rpx';
-import { theme } from '@/theme';
 
-type ImageSlide = { kind: 'image'; key: string; source: ImageSourcePropType; actionUrl?: string | null };
+type ImageSlide = {
+  kind: 'image';
+  key: string;
+  source: ImageSourcePropType;
+  actionUrl?: string | null;
+};
 type PromoSlide = {
   kind: 'promo';
   key: string;
@@ -29,12 +33,13 @@ type PromoSlide = {
 type Slide = ImageSlide | PromoSlide;
 
 // Branded ORich promo slides shown before an administrator publishes banners.
+// (ORich banners are server/admin-fed; the APK bundles no banner images.)
 const fallbackSlides: PromoSlide[] = [
   {
     kind: 'promo',
     key: 'lottery',
     title: 'Join from ₹1',
-    subtitle: 'Enter a lucky draw for a chance to win big prizes',
+    subtitle: 'Enter a lucky draw and win big prizes',
     graphic: assets.bannerLottery,
     colors: ['#FF7A3D', '#EE5016'],
   },
@@ -42,15 +47,16 @@ const fallbackSlides: PromoSlide[] = [
     kind: 'promo',
     key: 'winning',
     title: 'Winners every day',
-    subtitle: 'See the latest winners and grab your lucky code',
+    subtitle: 'Grab your lucky code and win',
     graphic: assets.bannerWinning,
     colors: ['#FEA326', '#EE5016'],
   },
 ];
 
+// ORich `.banner`: width 100%, height 278rpx, sitting inside `.toTop`
+// (14rpx side padding). Full-bleed image swiper with bottom indicator dots.
 export function BannerCarousel({ banners }: { banners?: Banner[] }) {
-  const width = contentWidth();
-  const pageWidth = width - rpx(48); // horizontal margins (rpx(24) each side)
+  const pageWidth = contentWidth() - rpx(28); // toTop padding: 14rpx each side
   const scrollRef = useRef<ScrollView>(null);
   const [index, setIndex] = useState(0);
 
@@ -90,7 +96,7 @@ export function BannerCarousel({ banners }: { banners?: Banner[] }) {
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.banner, { width: pageWidth }]}>
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -146,15 +152,15 @@ export function BannerCarousel({ banners }: { banners?: Banner[] }) {
   );
 }
 
+const RADIUS = rpx(16);
 const styles = StyleSheet.create({
-  wrap: { marginTop: rpx(8) },
-  slide: {
-    height: rpx(280),
-    borderRadius: rpx(20),
+  banner: {
+    height: rpx(278),
+    borderRadius: RADIUS,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,.18)',
   },
-  image: { width: '100%', height: '100%', borderRadius: rpx(20) },
+  slide: { height: rpx(278) },
+  image: { width: '100%', height: '100%' },
   promo: {
     flex: 1,
     flexDirection: 'row',
@@ -164,8 +170,8 @@ const styles = StyleSheet.create({
   },
   promoCopy: { flex: 1, paddingRight: rpx(12) },
   promoTitle: {
-    fontSize: rpx(48),
-    fontFamily: theme.typography.family.bold,
+    fontSize: rpx(46),
+    fontWeight: '700',
     color: '#fff',
   },
   promoSubtitle: {
@@ -174,9 +180,13 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,.92)',
     lineHeight: rpx(34),
   },
-  promoGraphic: { width: rpx(180), height: rpx(240) },
+  promoGraphic: { width: rpx(170), height: rpx(220) },
+  // Indicator dots overlaid at the bottom-centre of the swiper (u-swiper style).
   dots: {
-    marginTop: rpx(16),
+    position: 'absolute',
+    bottom: rpx(16),
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
   },
@@ -185,7 +195,7 @@ const styles = StyleSheet.create({
     height: rpx(12),
     borderRadius: rpx(6),
     marginHorizontal: rpx(6),
-    backgroundColor: 'rgba(255,255,255,.5)',
+    backgroundColor: 'rgba(255,255,255,.55)',
   },
   dotActive: { backgroundColor: '#fff', width: rpx(28) },
 });

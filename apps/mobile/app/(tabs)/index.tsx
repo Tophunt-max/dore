@@ -66,7 +66,9 @@ export default function HomeScreen() {
             <Text style={styles.bellText}>♪</Text>
           </Pressable>
         </View>
-        <BannerCarousel banners={banners.data?.items} />
+        <View style={styles.bannerWrap}>
+          <BannerCarousel banners={banners.data?.items} />
+        </View>
       </ImageBackground>
 
       {/* Category tabs */}
@@ -203,7 +205,8 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   root: { backgroundColor: theme.colors.background, paddingBottom: rpx(40) },
-  hero: { height: rpx(470), paddingTop: rpx(20), paddingBottom: rpx(10) },
+  hero: { height: rpx(410), paddingTop: rpx(20) },
+  bannerWrap: { marginTop: rpx(8), alignItems: 'center' },
   heroImage: { resizeMode: 'cover' },
   navbar: {
     height: rpx(88),
@@ -227,21 +230,19 @@ const styles = StyleSheet.create({
   },
   bellText: { color: '#fff', fontSize: rpx(28) },
   tabs: {
-    marginTop: rpx(16),
-    marginHorizontal: rpx(24),
-    paddingVertical: rpx(28),
-    borderRadius: rpx(20),
+    paddingVertical: rpx(26),
+    paddingHorizontal: rpx(30),
     backgroundColor: '#fff',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    ...theme.shadows.card,
   },
   tabItem: { flex: 1, alignItems: 'center' },
   tabIcon: { width: ICON, height: ICON },
   tabText: {
-    marginTop: rpx(10),
-    fontSize: rpx(22),
-    color: theme.colors.ink,
+    marginTop: rpx(6),
+    fontSize: rpx(26),
+    fontFamily: theme.typography.family.bold,
+    color: '#4f4f4f',
   },
   tabTextActive: {
     color: theme.colors.primary,
