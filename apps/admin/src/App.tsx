@@ -722,6 +722,9 @@ interface ResourceConfig {
   fields: Field[];
   canCreate?: boolean;
   canDelete?: boolean;
+  // Label for the row delete button. Defaults to 'Archive' (soft-disable). Set
+  // to 'Delete' for resources whose DELETE endpoint permanently removes the row.
+  deleteLabel?: string;
   writeRoles: AdminRole[];
 }
 const configs: Record<ResourcePage, ResourceConfig> = {
@@ -731,6 +734,7 @@ const configs: Record<ResourcePage, ResourceConfig> = {
     description: 'Configure bank and UPI accounts shown to users.',
     canCreate: true,
     canDelete: true,
+    deleteLabel: 'Delete',
     writeRoles: finance,
     columns: [
       { key: 'display_name', label: 'Name' },
@@ -1240,15 +1244,19 @@ function ResourceManager({
                           className="reject"
                           disabled={remove.isPending}
                           onClick={() => {
-                            if (
-                              window.confirm(
-                                `Archive or disable ${String(row.id)}?`,
-                              )
-                            )
+                            const label = config.deleteLabel ?? 'Archive';
+                            const name = String(
+                              row.display_name ?? row.title ?? row.id,
+                            );
+                            const message =
+                              label === 'Delete'
+                                ? `Permanently delete "${name}"? This cannot be undone — you will need to create it again to use it.`
+                                : `Archive or disable "${name}"?`;
+                            if (window.confirm(message))
                               remove.mutate(String(row.id));
                           }}
                         >
-                          Archive
+                          {config.deleteLabel ?? 'Archive'}
                         </button>
                       ) : null}
                     </td>

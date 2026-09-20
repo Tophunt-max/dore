@@ -242,6 +242,11 @@ export const catalog = {
     hi: 'भुगतान विधियाँ लोड नहीं हो सकीं। कृपया अपना कनेक्शन जांचें और पुनः प्रयास करें।',
     zh: '无法加载支付方式，请检查网络后重试。',
   },
+  'payment.loginRequired': {
+    en: 'Please log in to recharge your wallet and view payment methods.',
+    hi: 'वॉलेट रिचार्ज करने और भुगतान विधियाँ देखने के लिए कृपया लॉग इन करें।',
+    zh: '请登录以充值钱包并查看支付方式。',
+  },
   'payment.recharge': {
     en: 'Wallet recharge',
     hi: 'वॉलेट रिचार्ज',

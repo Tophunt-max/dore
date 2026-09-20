@@ -19,6 +19,7 @@ import { api } from '@/api/endpoints';
 import { chooseAndUploadPaymentProof } from '@/uploads';
 import { GradientButton } from './GradientButton';
 import { useI18n } from '@/i18n';
+import { useAuthStore } from '@/stores/auth';
 import { theme } from '@/theme';
 
 interface ManualPaymentFormProps {
@@ -31,9 +32,11 @@ export function ManualPaymentForm({
   orderId,
 }: ManualPaymentFormProps) {
   const { t } = useI18n();
+  const user = useAuthStore((state) => state.user);
   const methods = useQuery({
     queryKey: ['payment-methods'],
     queryFn: api.paymentMethods,
+    enabled: Boolean(user),
   });
   const [selected, setSelected] = useState<PaymentMethod | null>(null);
   const [payment, setPayment] = useState<ManualPayment | null>(null);
@@ -118,7 +121,18 @@ export function ManualPaymentForm({
       <View style={styles.section}>
         <Text style={styles.title}>{t('payment.chooseMethod')}</Text>
         <Text style={styles.copy}>{t('payment.transferInstructions')}</Text>
-        {methods.isLoading ? (
+        {!user ? (
+          <View>
+            <Text style={styles.error}>{t('payment.loginRequired')}</Text>
+            <Pressable
+              onPress={() => router.push('/login')}
+              style={styles.retry}
+            >
+              <Text style={styles.retryText}>{t('auth.login')}</Text>
+            </Pressable>
+          </View>
+        ) : null}
+        {user && methods.isLoading ? (
           <Text style={styles.copy}>{t('payment.loadingMethods')}</Text>
         ) : null}
         {methods.isError ? (
@@ -163,13 +177,15 @@ export function ManualPaymentForm({
           <Text style={styles.error}>{t('payment.noMethodsCopy')}</Text>
         ) : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <GradientButton
-          disabled={!selected}
-          loading={busy}
-          onPress={createIntent}
-        >
-          {t('payment.showDetails')}
-        </GradientButton>
+        {user ? (
+          <GradientButton
+            disabled={!selected}
+            loading={busy}
+            onPress={createIntent}
+          >
+            {t('payment.showDetails')}
+          </GradientButton>
+        ) : null}
       </View>
     );
   }

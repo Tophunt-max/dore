@@ -198,13 +198,45 @@ adminRoutes.patch('/payment-methods/:id', async (c) => {
 adminRoutes.delete('/payment-methods/:id', async (c) => {
   if (!financeAllowed(c))
     return fail(c, 403, 'FORBIDDEN', 'Finance role is required');
+  const id = c.req.param('id');
+  const method = await c.env.DB.prepare(
+    'SELECT id FROM payment_methods WHERE id = ?',
+  )
+    .bind(id)
+    .first<{ id: string }>();
+  if (!method)
+    return fail(c, 404, 'PAYMENT_METHOD_NOT_FOUND', 'Payment method not found');
+  // Financial integrity: a method referenced by payment history cannot be hard
+  // deleted (it would orphan/break transaction records). Disable it instead and
+  // tell the admin why.
+  const usage = await c.env.DB.prepare(
+    'SELECT COUNT(*) AS count FROM payment_transactions WHERE payment_method_id = ?',
+  )
+    .bind(id)
+    .first<{ count: number }>();
+  if (usage && Number(usage.count) > 0) {
+    await c.env.DB.batch([
+      c.env.DB.prepare(
+        'UPDATE payment_methods SET enabled = 0, updated_at = ? WHERE id = ?',
+      ).bind(nowSeconds(), id),
+      audit(c, 'payment_method.disabled', 'payment_method', id, {
+        reason: 'has_transaction_history',
+        transactions: Number(usage.count),
+      }),
+    ]);
+    return fail(
+      c,
+      409,
+      'PAYMENT_METHOD_IN_USE',
+      'This payment method has payment history and cannot be permanently deleted. It has been disabled instead so existing records stay intact.',
+    );
+  }
+  // Unused method: permanently remove it. Admin must re-create it to use again.
   await c.env.DB.batch([
-    c.env.DB.prepare(
-      'UPDATE payment_methods SET enabled = 0, updated_at = ? WHERE id = ?',
-    ).bind(nowSeconds(), c.req.param('id')),
-    audit(c, 'payment_method.disabled', 'payment_method', c.req.param('id')),
+    c.env.DB.prepare('DELETE FROM payment_methods WHERE id = ?').bind(id),
+    audit(c, 'payment_method.deleted', 'payment_method', id),
   ]);
-  return ok(c, { disabled: true });
+  return ok(c, { deleted: true });
 });
 
 // Manual payment review
