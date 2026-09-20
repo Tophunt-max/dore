@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -15,9 +16,23 @@ import { BannerCarousel } from '@/components/BannerCarousel';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
 import { useI18n } from '@/i18n';
-import { rpx, ICON, ARROW } from '@/rpx';
-import { useAuthStore } from '@/stores/auth';
+import { rpx } from '@/rpx';
 import { theme } from '@/theme';
+
+// ORich home palette (decompiled view.css, scope 7f2b1428).
+const C = {
+  bg: '#f6f6f6',
+  card: '#ffffff',
+  orange: '#ee5016',
+  red: '#ff5c5c',
+  grey: '#b9b9b9',
+  ink: '#17273a',
+  dash: '#e6e6e6',
+  track: '#f1e4dc',
+  gold1: '#ffe44b',
+  gold2: '#fea326',
+  goldText: '#ad6701',
+};
 
 const categories = [
   { key: 'all', label: 'All', icon: assets.categoryAll },
@@ -27,9 +42,26 @@ const categories = [
   { key: 'soon', label: 'Upcoming', icon: assets.upcoming },
 ] as const;
 
+const categorySlug: Record<string, string> = {
+  gifts: 'gifts',
+  cash: 'cash-award',
+  high: 'high-winning',
+};
+
+function endLabel(endsAt: string): string {
+  const ms = new Date(endsAt).getTime() - Date.now();
+  if (ms <= 0) return '00:00:00';
+  const d = Math.floor(ms / 86_400_000);
+  const h = Math.floor((ms % 86_400_000) / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  const s = Math.floor((ms % 60_000) / 1000);
+  const pad = (v: number) => String(v).padStart(2, '0');
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
 export default function HomeScreen() {
   const { t, formatMoney } = useI18n();
-  const user = useAuthStore((state) => state.user);
   const [category, setCategory] = useState('all');
   const campaigns = useQuery({
     queryKey: ['campaigns'],
@@ -37,11 +69,7 @@ export default function HomeScreen() {
   });
   const winners = useQuery({ queryKey: ['winners'], queryFn: api.winners });
   const banners = useQuery({ queryKey: ['banners'], queryFn: api.banners });
-  const categorySlug: Record<string, string> = {
-    gifts: 'gifts',
-    cash: 'cash-award',
-    high: 'high-winning',
-  };
+
   const active = (campaigns.data?.items ?? [])
     .filter((item) => item.status === 'active')
     .filter((item) => {
@@ -50,6 +78,7 @@ export default function HomeScreen() {
         return new Date(item.startsAt).getTime() > Date.now();
       return item.category?.slug === categorySlug[category];
     });
+
   const refresh = () =>
     Promise.all([
       campaigns.refetch(),
@@ -57,35 +86,32 @@ export default function HomeScreen() {
       banners.refetch(),
     ]).then(() => undefined);
 
+  const topWinner = winners.data?.items[0];
+
   return (
     <Screen
       contentStyle={styles.root}
       refreshing={campaigns.isRefetching || winners.isRefetching}
       onRefresh={() => void refresh()}
     >
-      {/* Hero */}
+      {/* Orange header background + centered logo */}
       <ImageBackground
         source={assets.homeBackground}
         resizeMode="cover"
-        style={styles.hero}
-        imageStyle={styles.heroImage}
+        style={styles.headerBg}
+        imageStyle={styles.headerBgImg}
       >
-        <View style={styles.navbar}>
-          <Text style={styles.brand}>ORich</Text>
-          <Pressable
-            onPress={() => router.push('/notifications')}
-            style={styles.bell}
-          >
-            <Text style={styles.bellText}>♪</Text>
-          </Pressable>
+        <View style={styles.navLogo}>
+          <Text style={styles.brand}>ORICH</Text>
         </View>
-        <View style={styles.bannerWrap}>
+        {/* Banner carousel (278rpx) */}
+        <View style={styles.banner}>
           <BannerCarousel banners={banners.data?.items} />
         </View>
       </ImageBackground>
 
-      {/* Category tabs */}
-      <View style={styles.tabs}>
+      {/* Category tabs — round icons on white */}
+      <View style={styles.tab}>
         {categories.map((cat) => (
           <Pressable
             key={cat.key}
@@ -105,29 +131,32 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* Latest winners strip */}
-      {winners.data?.items.length ? (
+      {/* Winner announcement toast */}
+      {topWinner ? (
         <View style={styles.toast}>
-          <Image source={assets.winnerDrawn} style={styles.toastIcon} />
+          <Image source={assets.defaultAvatar} style={styles.toastAvatar} />
           <Text style={styles.toastText} numberOfLines={1}>
-            {winners.data.items[0].displayName} won{' '}
-            {winners.data.items[0].productTitle}
+            <Text style={styles.toastName}>{topWinner.displayName} </Text>
+            won {topWinner.productTitle}
           </Text>
           <Pressable onPress={() => router.push('/winners')}>
-            <Text style={styles.toastMore}>More</Text>
+            <Text style={styles.toastMore}>{t('home.more')}</Text>
           </Pressable>
         </View>
       ) : null}
 
-      {/* Section heading */}
-      <View style={styles.heading}>
-        <Text style={styles.headingTitle}>Hot Picks</Text>
+      {/* Section header */}
+      <View style={styles.listHeader}>
+        <View style={styles.listHeaderTitle}>
+          <View style={styles.headerBar} />
+          <Text style={styles.listHeaderText}>{t('home.hotPicks')}</Text>
+        </View>
         <Pressable
           onPress={() => router.push('/products')}
-          style={styles.headingMore}
+          style={styles.headerRight}
         >
-          <Text style={styles.headingMoreText}>All</Text>
-          <Image source={assets.arrowGrey} style={styles.headingMoreArrow} />
+          <Text style={styles.headerRightText}>{t('home.all')}</Text>
+          <Image source={assets.arrowGrey} style={styles.headerRightArrow} />
         </Pressable>
       </View>
 
@@ -137,272 +166,331 @@ export default function HomeScreen() {
         onRetry={() => void campaigns.refetch()}
       />
 
-      {/* Campaign (nshop) cards */}
-      <View style={styles.list}>
-        {active.map((campaign) => {
-          const remaining = Math.max(
-            0,
-            campaign.totalEntries - campaign.soldEntries,
-          );
+      {/* Product list — ORich .home-list .litem rows */}
+      <View style={styles.homeList}>
+        {active.map((campaign, index) => {
+          const sold = campaign.soldEntries;
+          const total = campaign.totalEntries;
           const percent =
-            campaign.totalEntries > 0
-              ? Math.min(
-                  100,
-                  Math.round(
-                    (campaign.soldEntries / campaign.totalEntries) * 100,
-                  ),
-                )
-              : 0;
+            total > 0 ? Math.min(100, Math.round((sold / total) * 100)) : 0;
+          const last = index === active.length - 1;
           return (
             <Pressable
               key={campaign.id}
               onPress={() => router.push(`/products/${campaign.id}`)}
-              style={styles.card}
+              style={[styles.litem, last && styles.litemLast]}
             >
-              {campaign.product.imageUrl ? (
-                <Image
-                  source={{ uri: campaign.product.imageUrl }}
-                  style={styles.cardImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
+              {/* Left: image + participant avatars */}
+              <View style={styles.litemLeft}>
+                {campaign.product.imageUrl ? (
                   <Image
-                    source={assets.groupBuy}
-                    style={styles.placeholderIcon}
-                    resizeMode="contain"
+                    source={{ uri: campaign.product.imageUrl }}
+                    style={styles.litemImg}
+                    resizeMode="cover"
                   />
-                </View>
-              )}
-              <View style={styles.cardDetail}>
-                <Text style={styles.cardTitle} numberOfLines={2}>
+                ) : (
+                  <View style={[styles.litemImg, styles.litemImgPlaceholder]}>
+                    <Image
+                      source={assets.groupBuy}
+                      style={styles.placeholderIcon}
+                      resizeMode="contain"
+                    />
+                  </View>
+                )}
+                {sold > 0 ? (
+                  <View style={styles.avatarRow}>
+                    {[0, 1, 2].map((i) => (
+                      <Image
+                        key={i}
+                        source={assets.defaultAvatar}
+                        style={[styles.avatar, i === 0 && styles.avatarFirst]}
+                      />
+                    ))}
+                  </View>
+                ) : null}
+              </View>
+
+              {/* Right: details */}
+              <View style={styles.litemRight}>
+                <Text style={styles.lgoodsTitle} numberOfLines={2}>
                   {campaign.product.title}
                 </Text>
-                <View style={styles.progressRow}>
-                  <View style={styles.progressTrack}>
-                    <View
-                      style={[styles.progressFill, { width: `${percent}%` }]}
-                    />
+                <Text style={styles.lgoodsEnd}>
+                  {t('campaign.endIn', { time: '' }).trim()}{' '}
+                  <Text style={styles.drawColor}>
+                    {endLabel(campaign.endsAt)}
+                  </Text>
+                </Text>
+                <View style={styles.lgoodsPrecent}>
+                  <View style={styles.track}>
+                    <View style={[styles.fill, { width: `${percent}%` }]} />
                   </View>
                   <Text style={styles.progressText}>{percent}%</Text>
                 </View>
-                <Text style={styles.remaining}>Needed: {remaining}</Text>
-                <View style={styles.priceRow}>
-                  <View>
-                    {campaign.product.retailPriceMinor ? (
-                      <Text style={styles.priceOld}>
-                        M.R.P{' '}
-                        {formatMoney(
-                          campaign.product.retailPriceMinor,
-                          campaign.product.currency,
-                        )}
-                      </Text>
-                    ) : null}
-                    <Text style={styles.priceNew}>
+                <View style={styles.lgoodsPrice}>
+                  {campaign.product.retailPriceMinor ? (
+                    <Text style={styles.priceOld}>
                       {formatMoney(
-                        campaign.entryPriceMinor,
+                        campaign.product.retailPriceMinor,
                         campaign.product.currency,
                       )}
-                      <Text style={styles.priceUnit}> / entry</Text>
                     </Text>
-                  </View>
-                  <View style={styles.joinBtn}>
-                    <Text style={styles.joinText}>Join</Text>
-                  </View>
+                  ) : null}
+                  <Text style={styles.priceNew}>
+                    {formatMoney(
+                      campaign.entryPriceMinor,
+                      campaign.product.currency,
+                    )}
+                  </Text>
                 </View>
+                <Text style={styles.people}>
+                  {t('campaign.peopleParticipating', { count: sold })}
+                </Text>
               </View>
+
+              {/* Gold "Go" button */}
+              <LinearGradient
+                colors={[C.gold1, C.gold2]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.goBtn}
+              >
+                <Text style={styles.goText}>{t('home.go')}</Text>
+                <Image source={assets.arrowRight} style={styles.goArrow} />
+              </LinearGradient>
             </Pressable>
           );
         })}
+        {!campaigns.isLoading && !campaigns.error && !active.length ? (
+          <Text style={styles.empty}>{t('home.noCampaigns')}</Text>
+        ) : null}
       </View>
-      {!campaigns.isLoading && !campaigns.error && !active.length ? (
-        <Text style={styles.empty}>{t('home.noCampaigns')}</Text>
-      ) : null}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: theme.colors.background, paddingBottom: rpx(40) },
-  hero: { height: rpx(410), paddingTop: rpx(20) },
-  bannerWrap: { marginTop: rpx(8), alignItems: 'center' },
-  heroImage: { resizeMode: 'cover' },
-  navbar: {
+  root: { backgroundColor: C.bg, paddingBottom: rpx(40) },
+  // .home-background (330rpx) + .nav-logo (88rpx) + .banner (278rpx)
+  headerBg: { paddingTop: rpx(20), paddingBottom: rpx(24) },
+  headerBgImg: { resizeMode: 'cover' },
+  navLogo: {
     height: rpx(88),
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: rpx(32),
+    justifyContent: 'center',
   },
   brand: {
-    fontSize: rpx(40),
-    fontFamily: theme.typography.family.bold,
+    fontSize: rpx(44),
+    letterSpacing: 2,
     color: '#fff',
+    fontFamily: theme.typography.family.bold,
   },
-  bell: {
-    width: rpx(56),
-    height: rpx(56),
-    borderRadius: rpx(28),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,.2)',
-  },
-  bellText: { color: '#fff', fontSize: rpx(28) },
-  tabs: {
-    paddingVertical: rpx(24),
-    paddingHorizontal: rpx(12),
-    backgroundColor: '#fff',
+  banner: { height: rpx(278), marginTop: rpx(8) },
+  // .tab — white bar, round 96rpx icons
+  tab: {
     flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: rpx(26),
+    paddingHorizontal: rpx(30),
+    backgroundColor: C.card,
   },
-  tabItem: { flex: 1, alignItems: 'center', paddingHorizontal: rpx(6) },
-  tabIcon: { width: rpx(52), height: rpx(52) },
+  tabItem: { flex: 1, alignItems: 'center' },
+  tabIcon: { width: rpx(96), height: rpx(96), borderRadius: rpx(48) },
   tabText: {
-    marginTop: rpx(8),
-    fontSize: rpx(18),
-    lineHeight: rpx(23),
+    marginTop: rpx(6),
+    fontSize: rpx(24),
     textAlign: 'center',
-    fontFamily: theme.typography.family.medium,
     color: '#4f4f4f',
+    fontFamily: theme.typography.family.medium,
   },
   tabTextActive: {
-    color: theme.colors.primary,
+    color: C.orange,
     fontFamily: theme.typography.family.bold,
   },
+  // .toast — winner announcement
   toast: {
-    marginTop: rpx(24),
-    marginHorizontal: rpx(24),
-    height: rpx(72),
-    borderRadius: rpx(36),
-    backgroundColor: '#FFF3E9',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: rpx(24),
+    borderTopWidth: rpx(2),
+    borderTopColor: C.bg,
+    paddingVertical: rpx(16),
+    paddingHorizontal: rpx(28),
+    backgroundColor: C.card,
   },
-  toastIcon: { width: ICON, height: ICON },
+  toastAvatar: {
+    width: rpx(60),
+    height: rpx(60),
+    borderRadius: rpx(30),
+    backgroundColor: '#eee',
+  },
   toastText: {
     flex: 1,
-    marginLeft: rpx(16),
-    fontSize: rpx(24),
-    color: theme.colors.ink,
+    marginLeft: rpx(24),
+    fontSize: rpx(26),
+    color: C.grey,
+    fontFamily: theme.typography.family.regular,
   },
+  toastName: { color: C.orange, fontFamily: theme.typography.family.bold },
   toastMore: {
-    fontSize: rpx(24),
-    color: theme.colors.primary,
+    fontSize: rpx(26),
+    color: C.orange,
     fontFamily: theme.typography.family.bold,
   },
-  heading: {
-    marginTop: rpx(36),
-    marginHorizontal: rpx(24),
+  // .glist .header
+  listHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    height: rpx(90),
+    paddingHorizontal: rpx(28),
+    marginTop: rpx(10),
   },
-  headingTitle: {
-    fontSize: rpx(34),
+  listHeaderTitle: { flexDirection: 'row', alignItems: 'center' },
+  headerBar: {
+    width: rpx(10),
+    height: rpx(30),
+    borderRadius: rpx(4),
+    marginRight: rpx(16),
+    backgroundColor: C.orange,
+  },
+  listHeaderText: {
+    fontSize: rpx(36),
+    color: C.ink,
     fontFamily: theme.typography.family.bold,
-    color: theme.colors.ink,
   },
-  headingMore: { flexDirection: 'row', alignItems: 'center' },
-  headingMoreText: { fontSize: rpx(24), color: theme.colors.textMuted },
-  headingMoreArrow: {
-    width: ARROW,
-    height: ARROW,
-    marginLeft: rpx(4),
-    tintColor: theme.colors.textMuted,
+  headerRight: { flexDirection: 'row', alignItems: 'center' },
+  headerRightText: { fontSize: rpx(26), color: C.grey },
+  headerRightArrow: {
+    width: rpx(28),
+    height: rpx(28),
+    marginLeft: rpx(6),
+    tintColor: C.grey,
   },
-  list: { marginTop: rpx(20), marginHorizontal: rpx(24) },
-  card: {
+  // .home-list
+  homeList: { backgroundColor: C.card },
+  // .litem — product row
+  litem: {
+    position: 'relative',
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: rpx(20),
-    padding: rpx(20),
-    marginBottom: rpx(20),
-    ...theme.shadows.card,
+    alignItems: 'flex-start',
+    paddingVertical: rpx(24),
+    paddingHorizontal: rpx(26),
+    borderBottomWidth: rpx(1),
+    borderBottomColor: C.dash,
+    borderStyle: 'dashed',
+    backgroundColor: C.card,
   },
-  cardImage: {
-    width: rpx(220),
-    height: rpx(220),
-    borderRadius: rpx(16),
-    backgroundColor: '#f4f4f4',
-  },
-  cardImagePlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  litemLast: { borderBottomWidth: 0 },
+  litemLeft: { width: rpx(184), marginRight: rpx(42) },
+  litemImg: {
+    width: rpx(184),
+    height: rpx(184),
+    borderRadius: rpx(8),
     backgroundColor: '#FFF3E9',
   },
-  placeholderIcon: { width: rpx(96), height: rpx(96) },
-  cardDetail: { flex: 1, marginLeft: rpx(20), justifyContent: 'space-between' },
-  cardTitle: {
-    fontSize: rpx(28),
-    fontFamily: theme.typography.family.medium,
-    color: theme.colors.ink,
-    lineHeight: rpx(38),
-  },
-  progressRow: {
-    marginTop: rpx(12),
+  litemImgPlaceholder: { alignItems: 'center', justifyContent: 'center' },
+  placeholderIcon: { width: rpx(96), height: rpx(96), opacity: 0.85 },
+  avatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingTop: rpx(10),
+    marginLeft: rpx(14),
   },
-  progressTrack: {
+  avatar: {
+    width: rpx(44),
+    height: rpx(44),
+    borderRadius: rpx(22),
+    borderWidth: rpx(2),
+    borderColor: '#fff',
+    marginLeft: rpx(-14),
+    backgroundColor: '#eee',
+  },
+  avatarFirst: { marginLeft: 0 },
+  litemRight: { flex: 1 },
+  lgoodsTitle: {
+    fontSize: rpx(32),
+    lineHeight: rpx(42),
+    color: '#000',
+    fontFamily: theme.typography.family.bold,
+  },
+  lgoodsEnd: {
+    marginTop: rpx(14),
+    fontSize: rpx(26),
+    color: C.grey,
+    fontFamily: theme.typography.family.regular,
+  },
+  drawColor: { color: C.orange, fontFamily: theme.typography.family.bold },
+  lgoodsPrecent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: rpx(8),
+    marginBottom: rpx(3),
+    paddingRight: rpx(24),
+  },
+  track: {
     flex: 1,
     height: rpx(14),
     borderRadius: rpx(7),
-    backgroundColor: '#F1E4DC',
     overflow: 'hidden',
+    backgroundColor: C.track,
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: rpx(7),
-    backgroundColor: theme.colors.primary,
-  },
+  fill: { height: '100%', borderRadius: rpx(7), backgroundColor: C.orange },
   progressText: {
     marginLeft: rpx(12),
-    fontSize: rpx(22),
-    color: theme.colors.primary,
+    fontSize: rpx(28),
+    color: C.grey,
     fontFamily: theme.typography.family.bold,
   },
-  remaining: {
-    marginTop: rpx(8),
-    fontSize: rpx(22),
-    color: theme.colors.textMuted,
-  },
-  priceRow: {
-    marginTop: rpx(12),
+  lgoodsPrice: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: rpx(6),
   },
   priceOld: {
-    fontSize: rpx(20),
-    color: theme.colors.textMuted,
+    marginRight: rpx(20),
+    fontSize: rpx(28),
+    color: C.grey,
     textDecorationLine: 'line-through',
+    fontFamily: theme.typography.family.bold,
   },
   priceNew: {
     fontSize: rpx(32),
+    color: C.orange,
     fontFamily: theme.typography.family.bold,
-    color: theme.colors.primary,
   },
-  priceUnit: {
-    fontSize: rpx(20),
-    color: theme.colors.textMuted,
-    fontFamily: theme.typography.family.regular,
+  people: {
+    marginTop: rpx(18),
+    fontSize: rpx(24),
+    color: C.grey,
+    fontFamily: theme.typography.family.bold,
   },
-  joinBtn: {
-    paddingHorizontal: rpx(36),
-    height: rpx(64),
-    borderRadius: rpx(32),
+  // .lgoods-btn — gold "Go" pill, bottom-right
+  goBtn: {
+    position: 'absolute',
+    right: rpx(32),
+    bottom: rpx(18),
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.accentEnd,
+    width: rpx(150),
+    height: rpx(60),
+    borderRadius: rpx(8),
   },
-  joinText: {
-    fontSize: rpx(26),
+  goText: {
+    fontSize: rpx(28),
+    color: C.goldText,
     fontFamily: theme.typography.family.bold,
-    color: '#7a3d00',
+  },
+  goArrow: {
+    width: rpx(28),
+    height: rpx(28),
+    marginLeft: rpx(6),
+    tintColor: C.goldText,
   },
   empty: {
-    padding: rpx(48),
+    padding: rpx(60),
     textAlign: 'center',
-    color: theme.colors.textMuted,
+    color: C.grey,
+    fontFamily: theme.typography.family.regular,
   },
 });

@@ -420,6 +420,10 @@ export const catalog = {
     hi: 'अभी कोई सक्रिय अभियान नहीं है।',
     zh: '目前没有进行中的活动。',
   },
+  'home.hotPicks': { en: 'Hot Picks', hi: 'लोकप्रिय', zh: '热门' },
+  'home.all': { en: 'All', hi: 'सभी', zh: '全部' },
+  'home.more': { en: 'More', hi: 'और', zh: '更多' },
+  'home.go': { en: 'Go', hi: 'जाएं', zh: '去' },
   'home.noWinners': {
     en: 'No winner announcements yet.',
     hi: 'अभी कोई विजेता घोषणा नहीं है।',
