@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -40,10 +40,16 @@ export default function ProductDetailScreen() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const { t, formatMoney } = useI18n();
   const user = useAuthStore((s) => s.user);
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ['campaign', productId],
     queryFn: () => api.campaign(productId),
     enabled: Boolean(productId),
+  });
+  const wallet = useQuery({
+    queryKey: ['wallet'],
+    queryFn: api.wallet,
+    enabled: Boolean(user),
   });
   const participants = useQuery({
     queryKey: ['participants', productId],
@@ -82,15 +88,30 @@ export default function ProductDetailScreen() {
       return;
     }
     if (!campaign || campaign.status !== 'active') return;
+    const amount = quantity * campaign.entryPriceMinor;
+    const balance = wallet.data?.availableMinor ?? 0;
+    // Option A: entries are always bought from the wallet. If the balance is
+    // short, send the user to recharge instead of a manual checkout.
+    if (balance < amount) {
+      setError(t('campaign.insufficient'));
+      router.push('/wallet/recharge');
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
+      // Reserve the entries, then pay for them straight from the wallet.
       const order = await api.createOrder({
         campaignId: campaign.id,
         quantity,
         idempotencyKey: Crypto.randomUUID(),
       });
-      router.push(`/checkout/${order.id}`);
+      await api.payOrderWallet(order.id);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['wallet'] }),
+        queryClient.invalidateQueries({ queryKey: ['campaign', productId] }),
+      ]);
+      router.replace(`/orders/${order.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('common.error'));
     } finally {
