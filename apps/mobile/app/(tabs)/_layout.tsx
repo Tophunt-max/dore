@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Image, StyleSheet } from 'react-native';
 import { assets } from '@/assets';
 import { useI18n } from '@/i18n';
+import { rpx } from '@/rpx';
 import { theme } from '@/theme';
 
 const icons = {
@@ -32,8 +33,10 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.ink,
+        // ORich tabbar: color #17273a, selectedColor #de6436 (matches the
+        // app-config tabBar block too).
+        tabBarActiveTintColor: '#de6436',
+        tabBarInactiveTintColor: '#17273a',
         tabBarLabelStyle: styles.label,
         tabBarStyle: styles.bar,
         tabBarItemStyle: styles.item,
@@ -89,13 +92,17 @@ export default function TabLayout() {
 }
 const styles = StyleSheet.create({
   bar: {
-    height: 70,
+    height: rpx(98),
     paddingTop: 4,
     paddingBottom: 7,
     backgroundColor: theme.colors.surface,
     borderTopColor: theme.colors.border,
   },
   item: { paddingVertical: 2 },
-  icon: { width: 38, height: 38 },
-  label: { fontFamily: theme.typography.family.medium, fontSize: 10 },
+  icon: { width: rpx(46), height: rpx(46) },
+  label: {
+    fontFamily: theme.typography.family.bold,
+    fontSize: rpx(20),
+    marginTop: rpx(2),
+  },
 });

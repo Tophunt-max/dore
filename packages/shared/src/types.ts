@@ -56,6 +56,8 @@ export interface Product {
 export interface Campaign {
   id: string;
   product: Product;
+  /** Present when the campaign's product has been assigned to a category. */
+  category?: Category | null;
   entryPriceMinor: number;
   totalEntries: number;
   soldEntries: number;

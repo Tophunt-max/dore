@@ -69,6 +69,9 @@ export const assets = {
   arrowRight: require('../assets/orich/image/home/icon_Arrow_right.png'),
   arrowGrey: require('../assets/orich/image/home/icon_Arrow.png'),
   categoryAll: require('../assets/orich/image/home/icon_Category.png'),
+  // ORich `.ltab-item-active` underline (34x12rpx) and the `.lgoods-btn` chevron.
+  select: require('../assets/orich/image/icon_Select.png'),
+  rightArrow: require('../assets/orich/image/home/icon_RightArrow.png'),
   tabs: {
     home: require('../assets/orich/image/tab/icon_home_Nav_nor.png'),
     homeActive: require('../assets/orich/image/tab/icon_home_Nav_sel.png'),
