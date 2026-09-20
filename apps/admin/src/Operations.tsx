@@ -492,7 +492,7 @@ const sections: Record<
       columns: [
         { key: 'name', label: 'Name' },
         { key: 'slug', label: 'Slug' },
-        { key: 'sort_order', label: 'Order' },
+        { key: 'sortOrder', label: 'Order' },
         { key: 'status', label: 'Status' },
       ],
       createLabel: 'New category',
