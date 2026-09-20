@@ -151,7 +151,7 @@ export default function ProductDetailScreen() {
           <View style={styles.banner}>
             {campaign.product.imageUrl ? (
               <Image
-                resizeMode="cover"
+                resizeMode="contain"
                 source={{ uri: campaign.product.imageUrl }}
                 style={styles.bannerImage}
               />
@@ -228,7 +228,7 @@ export default function ProductDetailScreen() {
                   {avatars.map((p, index) => (
                     <Image
                       key={p.userId}
-                      source={assets.defaultAvatar}
+                      source={assets.avatars[index % assets.avatars.length]}
                       style={[styles.avatar, index === 0 && styles.avatarFirst]}
                     />
                   ))}
@@ -321,7 +321,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#fff',
   },
-  bannerImage: { width: '100%', height: rpx(620), backgroundColor: '#FFF7F2' },
+  // ORich shows the product photo fitted on white (not cropped).
+  bannerImage: { width: '100%', height: rpx(620), backgroundColor: '#fff' },
   bannerPlaceholder: { alignItems: 'center', justifyContent: 'center' },
   placeholderIcon: { width: rpx(200), height: rpx(200), opacity: 0.85 },
   // Floating back chevron over the banner (no title bar, like ORich).

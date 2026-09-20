@@ -42,7 +42,15 @@ export const assets = {
   financeBackground2: require('../assets/orich/image/account/bg_finance.png'),
   rewardBackground: require('../assets/orich/image/account/bg_reward.png'),
   teamBackground: require('../assets/orich/image/account/bg_myteam.png'),
-  defaultAvatar: require('../assets/orich/image/account/login3.png'),
+  // Neutral, non-identifiable avatar placeholders. (The ORich bundle ships
+  // photos of real, identifiable people; those are deliberately not reused.)
+  defaultAvatar: require('../assets/orich/image/avatar/avatar1.png'),
+  avatars: [
+    require('../assets/orich/image/avatar/avatar1.png'),
+    require('../assets/orich/image/avatar/avatar2.png'),
+    require('../assets/orich/image/avatar/avatar3.png'),
+    require('../assets/orich/image/avatar/avatar4.png'),
+  ],
   statusWaiting: require('../assets/orich/image/account/icon_Waiting.png'),
   statusToConfirm: require('../assets/orich/image/account/icon_ToConfirm.png'),
   statusInDelivery: require('../assets/orich/image/account/icon_InDelivery.png'),
