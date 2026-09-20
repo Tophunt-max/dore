@@ -426,6 +426,34 @@ export interface ReferralRebate {
   createdAt: string;
 }
 
+export interface FinanceOrder {
+  id: string;
+  offerId: string;
+  offerTitle: string;
+  providerName: string;
+  principalMinor: number;
+  currency: string;
+  status: 'active' | 'matured' | 'settled' | 'cancelled';
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AfterSalesRequest {
+  id: string;
+  orderId: string;
+  orderTitle: string;
+  type: 'return' | 'exchange' | 'complaint' | 'other';
+  reason: string;
+  status: 'open' | 'in_review' | 'resolved' | 'rejected';
+  adminNote: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SystemConfig {
+  settings: Record<string, string>;
+}
+
 export interface FinanceOffer {
   id: string;
   providerName: string;

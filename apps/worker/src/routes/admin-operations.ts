@@ -10,6 +10,7 @@ import { fail, ok } from '../lib/http';
 import { mapBeneficiary, mapDraw } from '../lib/mappers';
 import { notificationStatements } from '../lib/notifications';
 import { nowSeconds } from '../lib/time';
+import { maskPhone } from '../lib/user';
 import type { AppEnv } from '../types';
 
 export const adminOperationsRoutes = new Hono<AppEnv>();
@@ -796,4 +797,119 @@ adminOperationsRoutes.get('/reports/export.csv', async (c) => {
       'Cache-Control': 'private, no-store',
     },
   });
+});
+
+
+// After-sales administration (ORich `editAfStatus`).
+adminOperationsRoutes.get('/after-sales', async (c) => {
+  const status = c.req.query('status');
+  const base = `SELECT a.id,a.user_id,a.order_id,a.type,a.reason,a.status,a.admin_note,a.created_at,a.updated_at,
+    u.phone_e164, o.title order_title
+    FROM after_sales a JOIN users u ON u.id=a.user_id JOIN orders o ON o.id=a.order_id`;
+  const result = status
+    ? await c.env.DB.prepare(
+        `${base} WHERE a.status=? ORDER BY a.created_at DESC LIMIT 200`,
+      )
+        .bind(status)
+        .all<Record<string, unknown>>()
+    : await c.env.DB.prepare(
+        `${base} ORDER BY a.created_at DESC LIMIT 200`,
+      ).all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      id: String(row.id),
+      userId: String(row.user_id),
+      phoneMasked: maskPhone(String(row.phone_e164)),
+      orderId: String(row.order_id),
+      orderTitle: String(row.order_title),
+      type: String(row.type),
+      reason: String(row.reason),
+      status: String(row.status),
+      adminNote: String(row.admin_note),
+      createdAt: new Date(Number(row.created_at) * 1000).toISOString(),
+      updatedAt: new Date(Number(row.updated_at) * 1000).toISOString(),
+    })),
+  });
+});
+adminOperationsRoutes.post('/after-sales/:id/status', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    status?: string;
+    adminNote?: string;
+  };
+  const allowed = ['open', 'in_review', 'resolved', 'rejected'];
+  if (!body.status || !allowed.includes(body.status))
+    return fail(c, 400, 'VALIDATION_ERROR', 'A valid status is required');
+  const now = nowSeconds();
+  const existing = await c.env.DB.prepare(
+    'SELECT id FROM after_sales WHERE id=?',
+  )
+    .bind(c.req.param('id'))
+    .first<{ id: string }>();
+  if (!existing)
+    return fail(c, 404, 'AFTER_SALES_NOT_FOUND', 'After-sales request not found');
+  await c.env.DB.batch([
+    c.env.DB.prepare(
+      'UPDATE after_sales SET status=?,admin_note=?,updated_at=? WHERE id=?',
+    ).bind(body.status, (body.adminNote ?? '').trim(), now, c.req.param('id')),
+    c.env.DB.prepare(
+      `INSERT INTO audit_logs (id,actor_user_id,action,entity_type,entity_id,request_id,metadata_json,created_at)
+       VALUES(?,?,?,?,?,?,?,?)`,
+    ).bind(
+      crypto.randomUUID(),
+      c.get('userId'),
+      'after_sales.status_changed',
+      'after_sales',
+      c.req.param('id'),
+      c.get('requestId'),
+      JSON.stringify({ status: body.status }),
+      now,
+    ),
+  ]);
+  return ok(c, { id: c.req.param('id'), status: body.status });
+});
+
+// System settings administration (backs the public `getsystem` config).
+adminOperationsRoutes.get('/settings', async (c) => {
+  const result = await c.env.DB.prepare(
+    'SELECT key,value,updated_at FROM system_settings ORDER BY key',
+  ).all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      key: String(row.key),
+      value: String(row.value),
+      updatedAt: new Date(Number(row.updated_at) * 1000).toISOString(),
+    })),
+  });
+});
+adminOperationsRoutes.put('/settings', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    settings?: Record<string, string>;
+  };
+  const entries = Object.entries(body.settings ?? {});
+  if (!entries.length)
+    return fail(c, 400, 'VALIDATION_ERROR', 'settings object is required');
+  const now = nowSeconds();
+  const statements = entries.map(([key, value]) =>
+    c.env.DB.prepare(
+      `INSERT INTO system_settings (key,value,updated_at) VALUES(?,?,?)
+       ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at`,
+    ).bind(String(key), String(value), now),
+  );
+  statements.push(
+    c.env.DB.prepare(
+      `INSERT INTO audit_logs (id,actor_user_id,action,entity_type,entity_id,request_id,metadata_json,created_at)
+       VALUES(?,?,?,?,?,?,?,?)`,
+    ).bind(
+      crypto.randomUUID(),
+      c.get('userId'),
+      'system_settings.updated',
+      'system_settings',
+      'system_settings',
+      c.get('requestId'),
+      JSON.stringify({ keys: entries.map(([k]) => k) }),
+      now,
+    ),
+  );
+  await c.env.DB.batch(statements);
+  return ok(c, { updated: entries.length });
 });

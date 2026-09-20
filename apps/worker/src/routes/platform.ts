@@ -335,6 +335,107 @@ platformRoutes.post('/games/:id/play', async (c) => {
     201,
   );
 });
+// VIP membership purchase (ORich `vipBuy`): buy an active plan from the wallet
+// balance. Serialized + audited by the WalletCoordinator durable object.
+platformRoutes.post('/memberships/purchase', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    planId?: string;
+    idempotencyKey?: string;
+  };
+  if (!body.planId)
+    return fail(c, 400, 'VALIDATION_ERROR', 'planId is required');
+  const userId = c.get('userId');
+  const stub = c.env.WALLET_COORDINATOR.get(
+    c.env.WALLET_COORDINATOR.idFromName(userId),
+  );
+  const res = await stub.fetch('https://wallet/membership.purchase', {
+    method: 'POST',
+    body: JSON.stringify({
+      operation: 'membership.purchase',
+      userId,
+      planId: body.planId,
+      idempotencyKey: body.idempotencyKey ?? crypto.randomUUID(),
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok)
+    return fail(
+      c,
+      res.status === 404 ? 404 : 409,
+      'MEMBERSHIP_PURCHASE_REJECTED',
+      (data as { message?: string }).message ?? 'Purchase rejected',
+    );
+  return ok(c, data, 201);
+});
+
+// Finance product purchase (ORich `financeBuy`). Debits the wallet and records
+// an order. NOTE: interest/returns are NOT auto-credited here — settlement is an
+// administrator/regulated process (see docs/SETUP.md release gates).
+platformRoutes.post('/finance/offers/:id/purchase', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    principalMinor?: number;
+    idempotencyKey?: string;
+  };
+  const principalMinor = Number(body.principalMinor);
+  if (!Number.isSafeInteger(principalMinor) || principalMinor <= 0)
+    return fail(
+      c,
+      400,
+      'VALIDATION_ERROR',
+      'principalMinor must be a positive integer in minor units',
+    );
+  const userId = c.get('userId');
+  const stub = c.env.WALLET_COORDINATOR.get(
+    c.env.WALLET_COORDINATOR.idFromName(userId),
+  );
+  const res = await stub.fetch('https://wallet/finance.purchase', {
+    method: 'POST',
+    body: JSON.stringify({
+      operation: 'finance.purchase',
+      userId,
+      offerId: c.req.param('id'),
+      principalMinor,
+      idempotencyKey: body.idempotencyKey ?? crypto.randomUUID(),
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok)
+    return fail(
+      c,
+      res.status === 404 ? 404 : 409,
+      'FINANCE_PURCHASE_REJECTED',
+      (data as { message?: string }).message ?? 'Purchase rejected',
+    );
+  return ok(c, data, 201);
+});
+
+// My finance orders (ORich `myFinanceList`).
+platformRoutes.get('/finance/orders', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT o.id,o.offer_id,f.title offer_title,f.provider_name,o.principal_minor,o.currency,o.status,o.created_at,o.updated_at
+     FROM finance_orders o JOIN finance_offers f ON f.id=o.offer_id
+     WHERE o.user_id=? ORDER BY o.created_at DESC LIMIT 100`,
+  )
+    .bind(c.get('userId'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    informationalReturns: true,
+    items: result.results.map(mapFinanceOrder),
+  });
+});
+
+// Recent finance orders (ORich `financeOrderRecent`).
+platformRoutes.get('/finance/orders/recent', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT o.id,o.offer_id,f.title offer_title,f.provider_name,o.principal_minor,o.currency,o.status,o.created_at,o.updated_at
+     FROM finance_orders o JOIN finance_offers f ON f.id=o.offer_id
+     WHERE o.user_id=? ORDER BY o.created_at DESC LIMIT 5`,
+  )
+    .bind(c.get('userId'))
+    .all<Record<string, unknown>>();
+  return ok(c, { items: result.results.map(mapFinanceOrder) });
+});
+
 platformRoutes.get('/memberships/plans', async (c) => {
   const result = await c.env.DB.prepare(
     `SELECT id,name,description,benefits_json,price_minor,currency,duration_days
@@ -457,6 +558,19 @@ const mapMessage = (row: MessageRow) => ({
 });
 const toIso = (value: unknown) =>
   value == null ? null : new Date(Number(value) * 1000).toISOString();
+function mapFinanceOrder(row: Record<string, unknown>) {
+  return {
+    id: String(row.id),
+    offerId: String(row.offer_id),
+    offerTitle: String(row.offer_title),
+    providerName: String(row.provider_name),
+    principalMinor: Number(row.principal_minor),
+    currency: String(row.currency),
+    status: String(row.status),
+    createdAt: toIso(row.created_at),
+    updatedAt: toIso(row.updated_at),
+  };
+}
 function safeStringArray(value: unknown): string[] {
   try {
     const parsed: unknown = JSON.parse(String(value));

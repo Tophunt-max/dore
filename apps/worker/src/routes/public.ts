@@ -10,6 +10,17 @@ export const publicRoutes = new Hono<AppEnv>();
 const toIso = (value: unknown) =>
   value == null ? null : new Date(Number(value) * 1000).toISOString();
 
+// Global app config (ORich `getsystem`): key/value settings surfaced to all
+// clients (min withdrawal, fees, support contacts, notices, etc.).
+publicRoutes.get('/system', async (c) => {
+  const result = await c.env.DB.prepare(
+    'SELECT key,value FROM system_settings',
+  ).all<{ key: string; value: string }>();
+  const settings: Record<string, string> = {};
+  for (const row of result.results) settings[String(row.key)] = String(row.value);
+  return ok(c, { settings });
+});
+
 publicRoutes.get('/categories', async (c) => {
   const result = await c.env.DB.prepare(
     `SELECT id,name,slug,image_key,sort_order FROM categories

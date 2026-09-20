@@ -16,12 +16,15 @@ import type {
   CreateSupportTicketInput,
   CreateUploadInput,
   DiscountOffer,
+  AfterSalesRequest,
   FinanceOffer,
+  FinanceOrder,
   GameDefinition,
   LedgerEntry,
   ManualPayment,
   Membership,
   MembershipPlan,
+  SystemConfig,
   NotificationInboxItem,
   Order,
   PayoutBeneficiary,
@@ -247,6 +250,29 @@ export const api = {
     apiRequest<{ informationalOnly: true; items: FinanceOffer[] }>(
       '/api/v1/finance/offers',
     ),
+  financeBuy: (offerId: string, principalMinor: number) =>
+    apiRequest<{ status: string; orderId: string }>(
+      `/api/v1/finance/offers/${offerId}/purchase`,
+      { method: 'POST', body: { principalMinor } },
+    ),
+  financeOrders: () =>
+    apiRequest<{ informationalReturns: true; items: FinanceOrder[] }>(
+      '/api/v1/finance/orders',
+    ),
+  financeOrdersRecent: () =>
+    apiRequest<{ items: FinanceOrder[] }>('/api/v1/finance/orders/recent'),
+  systemConfig: () => apiRequest<SystemConfig>('/api/v1/system'),
+  afterSales: () =>
+    apiRequest<{ items: AfterSalesRequest[] }>('/api/v1/after-sales'),
+  createAfterSales: (input: {
+    orderId: string;
+    type: string;
+    reason: string;
+  }) =>
+    apiRequest<{ id: string; status: string }>('/api/v1/after-sales', {
+      method: 'POST',
+      body: input,
+    }),
   games: () =>
     apiRequest<{ nonMonetary: true; items: GameDefinition[] }>('/api/v1/games'),
   playGame: (id: string) =>
@@ -257,6 +283,11 @@ export const api = {
   membershipPlans: () =>
     apiRequest<{ items: MembershipPlan[] }>('/api/v1/memberships/plans'),
   memberships: () => apiRequest<{ items: Membership[] }>('/api/v1/memberships'),
+  buyMembership: (planId: string) =>
+    apiRequest<{ status: string; membershipId: string }>(
+      '/api/v1/memberships/purchase',
+      { method: 'POST', body: { planId } },
+    ),
   discounts: () => apiRequest<{ items: DiscountOffer[] }>('/api/v1/discounts'),
 
   createUpload: (input: CreateUploadInput) =>

@@ -329,6 +329,65 @@ featureRoutes.get('/team/rebates', async (c) => {
   });
 });
 
+// After-sales requests (ORich `getUserAfs`): raise a return/exchange/complaint
+// against one of the user's own orders, and list existing requests.
+const afterSalesTypes = ['return', 'exchange', 'complaint', 'other'] as const;
+featureRoutes.post('/after-sales', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    orderId?: string;
+    type?: string;
+    reason?: string;
+  };
+  const type = afterSalesTypes.includes(body.type as never)
+    ? (body.type as string)
+    : null;
+  const reason = (body.reason ?? '').trim();
+  if (!body.orderId || !type || reason.length < 3)
+    return fail(
+      c,
+      400,
+      'VALIDATION_ERROR',
+      'orderId, a valid type, and a reason (min 3 chars) are required',
+    );
+  const order = await c.env.DB.prepare(
+    'SELECT id FROM orders WHERE id=? AND user_id=?',
+  )
+    .bind(body.orderId, c.get('userId'))
+    .first<{ id: string }>();
+  if (!order) return fail(c, 404, 'ORDER_NOT_FOUND', 'Order not found');
+  const id = crypto.randomUUID();
+  const n = now();
+  await c.env.DB.prepare(
+    `INSERT INTO after_sales (id,user_id,order_id,type,reason,status,admin_note,created_at,updated_at)
+     VALUES(?,?,?,?,?,'open','',?,?)`,
+  )
+    .bind(id, c.get('userId'), body.orderId, type, reason, n, n)
+    .run();
+  return ok(c, { id, status: 'open' }, 201);
+});
+featureRoutes.get('/after-sales', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT a.id,a.order_id,a.type,a.reason,a.status,a.admin_note,a.created_at,a.updated_at,o.title order_title
+     FROM after_sales a JOIN orders o ON o.id=a.order_id
+     WHERE a.user_id=? ORDER BY a.created_at DESC LIMIT 100`,
+  )
+    .bind(c.get('userId'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      id: String(row.id),
+      orderId: String(row.order_id),
+      orderTitle: String(row.order_title),
+      type: String(row.type),
+      reason: String(row.reason),
+      status: String(row.status),
+      adminNote: String(row.admin_note),
+      createdAt: new Date(Number(row.created_at) * 1000).toISOString(),
+      updatedAt: new Date(Number(row.updated_at) * 1000).toISOString(),
+    })),
+  });
+});
+
 featureRoutes.get('/withdrawals', async (c) => {
   const result = await c.env.DB.prepare(
     `SELECT id,amount_minor,currency,status,beneficiary_id,destination_snapshot_json,
