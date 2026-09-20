@@ -6,6 +6,7 @@ import {
 } from '@oriva/shared';
 import { fail, ok } from '../lib/http';
 import { nowSeconds } from '../lib/time';
+import { maskPhone } from '../lib/user';
 import type { AppEnv } from '../types';
 
 export const platformRoutes = new Hono<AppEnv>();
@@ -434,6 +435,139 @@ platformRoutes.get('/finance/orders/recent', async (c) => {
     .bind(c.get('userId'))
     .all<Record<string, unknown>>();
   return ok(c, { items: result.results.map(mapFinanceOrder) });
+});
+
+// Prize activity detail + my participation (ORich `activitydetail`).
+platformRoutes.get('/prize-activities/:id', async (c) => {
+  const row = await c.env.DB.prepare(
+    `SELECT id,title,description,rules,prize_pool_minor,currency,winners_count,
+       required_invites,image_key,status,starts_at,ends_at,drawn_at
+     FROM prize_activities WHERE id=?`,
+  )
+    .bind(c.req.param('id'))
+    .first<Record<string, unknown>>();
+  if (!row) return fail(c, 404, 'ACTIVITY_NOT_FOUND', 'Activity not found');
+  const countRow = await c.env.DB.prepare(
+    'SELECT COUNT(*) n FROM prize_activity_participants WHERE activity_id=?',
+  )
+    .bind(c.req.param('id'))
+    .first<{ n: number }>();
+  const mine = await c.env.DB.prepare(
+    'SELECT status,prize_minor FROM prize_activity_participants WHERE activity_id=? AND user_id=?',
+  )
+    .bind(c.req.param('id'), c.get('userId'))
+    .first<{ status: string; prize_minor: number }>();
+  const participants = await c.env.DB.prepare(
+    `SELECT p.user_id,p.status,p.prize_minor,p.created_at,u.display_name,u.phone_e164
+     FROM prize_activity_participants p JOIN users u ON u.id=p.user_id
+     WHERE p.activity_id=? ORDER BY p.created_at DESC LIMIT 100`,
+  )
+    .bind(c.req.param('id'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    id: String(row.id),
+    title: String(row.title),
+    description: String(row.description),
+    rules: String(row.rules),
+    prizePoolMinor: Number(row.prize_pool_minor),
+    currency: String(row.currency),
+    winnersCount: Number(row.winners_count),
+    requiredInvites: Number(row.required_invites),
+    imageUrl: row.image_key
+      ? `${c.env.PUBLIC_ASSET_BASE}/${String(row.image_key)}`
+      : null,
+    status: String(row.status),
+    startsAt: toIso(row.starts_at),
+    endsAt: toIso(row.ends_at),
+    drawnAt: toIso(row.drawn_at),
+    participantCount: Number(countRow?.n ?? 0),
+    joined: Boolean(mine),
+    myStatus: mine ? mine.status : null,
+    myPrizeMinor: mine ? Number(mine.prize_minor) : 0,
+    participants: participants.results.map((p) => ({
+      userId: String(p.user_id),
+      displayName: p.display_name == null ? null : String(p.display_name),
+      phoneMasked: maskPhone(String(p.phone_e164)),
+      status: String(p.status),
+      prizeMinor: Number(p.prize_minor),
+      createdAt: new Date(Number(p.created_at) * 1000).toISOString(),
+    })),
+  });
+});
+
+// Join a prize activity (ORich `joinactivity`).
+platformRoutes.post('/prize-activities/:id/join', async (c) => {
+  const now = nowSeconds();
+  const activity = await c.env.DB.prepare(
+    'SELECT id,status,ends_at FROM prize_activities WHERE id=?',
+  )
+    .bind(c.req.param('id'))
+    .first<{ id: string; status: string; ends_at: number | null }>();
+  if (!activity) return fail(c, 404, 'ACTIVITY_NOT_FOUND', 'Activity not found');
+  if (activity.status !== 'active' || (activity.ends_at && activity.ends_at < now))
+    return fail(c, 409, 'ACTIVITY_CLOSED', 'This activity is not open to join');
+  const existing = await c.env.DB.prepare(
+    'SELECT id FROM prize_activity_participants WHERE activity_id=? AND user_id=?',
+  )
+    .bind(activity.id, c.get('userId'))
+    .first<{ id: string }>();
+  if (existing) return ok(c, { joined: true, alreadyJoined: true });
+  await c.env.DB.prepare(
+    `INSERT INTO prize_activity_participants (id,activity_id,user_id,status,prize_minor,created_at)
+     VALUES(?,?,?,'joined',0,?)`,
+  )
+    .bind(crypto.randomUUID(), activity.id, c.get('userId'), now)
+    .run();
+  return ok(c, { joined: true }, 201);
+});
+
+// Finance offer detail (ORich `financeDetail`).
+platformRoutes.get('/finance/offers/:id', async (c) => {
+  const row = await c.env.DB.prepare(
+    `SELECT id,provider_name,title,description,category,disclaimer,external_url,sort_order
+     FROM finance_offers WHERE id=? AND status='active'`,
+  )
+    .bind(c.req.param('id'))
+    .first<Record<string, unknown>>();
+  if (!row) return fail(c, 404, 'OFFER_NOT_FOUND', 'Finance offer not found');
+  const stats = await c.env.DB.prepare(
+    `SELECT COUNT(*) participants, COALESCE(SUM(principal_minor),0) total_principal
+     FROM finance_orders WHERE offer_id=?`,
+  )
+    .bind(c.req.param('id'))
+    .first<{ participants: number; total_principal: number }>();
+  return ok(c, {
+    informationalOnly: true,
+    id: String(row.id),
+    providerName: String(row.provider_name),
+    title: String(row.title),
+    description: String(row.description),
+    category: String(row.category),
+    disclaimer: String(row.disclaimer),
+    externalUrl: row.external_url == null ? null : String(row.external_url),
+    participants: Number(stats?.participants ?? 0),
+    totalPrincipalMinor: Number(stats?.total_principal ?? 0),
+  });
+});
+
+// Finance offer participation history (ORich `financeDetailHistory`).
+platformRoutes.get('/finance/offers/:id/history', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT o.principal_minor,o.currency,o.status,o.created_at,u.phone_e164
+     FROM finance_orders o JOIN users u ON u.id=o.user_id
+     WHERE o.offer_id=? ORDER BY o.created_at DESC LIMIT 50`,
+  )
+    .bind(c.req.param('id'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      phoneMasked: maskPhone(String(row.phone_e164)),
+      principalMinor: Number(row.principal_minor),
+      currency: String(row.currency),
+      status: String(row.status),
+      createdAt: new Date(Number(row.created_at) * 1000).toISOString(),
+    })),
+  });
 });
 
 platformRoutes.get('/memberships/plans', async (c) => {

@@ -24,6 +24,7 @@ import type {
   ManualPayment,
   Membership,
   MembershipPlan,
+  PrizeActivity,
   SystemConfig,
   NotificationInboxItem,
   Order,
@@ -261,6 +262,22 @@ export const api = {
     ),
   financeOrdersRecent: () =>
     apiRequest<{ items: FinanceOrder[] }>('/api/v1/finance/orders/recent'),
+  financeOffer: (id: string) =>
+    apiRequest<FinanceOffer & { participants: number; totalPrincipalMinor: number }>(
+      `/api/v1/finance/offers/${id}`,
+    ),
+  financeOfferHistory: (id: string) =>
+    apiRequest<{ items: unknown[] }>(`/api/v1/finance/offers/${id}/history`),
+  prizeActivities: () =>
+    apiRequest<{ items: PrizeActivity[] }>('/api/v1/prize-activities'),
+  prizeActivity: (id: string) =>
+    apiRequest<PrizeActivity & { participants: unknown[] }>(
+      `/api/v1/prize-activities/${id}`,
+    ),
+  joinPrizeActivity: (id: string) =>
+    apiRequest<{ joined: boolean }>(`/api/v1/prize-activities/${id}/join`, {
+      method: 'POST',
+    }),
   systemConfig: () => apiRequest<SystemConfig>('/api/v1/system'),
   afterSales: () =>
     apiRequest<{ items: AfterSalesRequest[] }>('/api/v1/after-sales'),

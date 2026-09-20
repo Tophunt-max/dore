@@ -12,6 +12,7 @@ export type OperationsPageName =
   | 'notifications'
   | 'banners'
   | 'categories'
+  | 'prize-activities'
   | 'memberships-discounts'
   | 'finance-offers'
   | 'finance-orders'
@@ -512,6 +513,71 @@ const sections: Record<
           label: 'Sort order',
           type: 'number',
           defaultValue: '0',
+        },
+      ],
+    },
+  ],
+  'prize-activities': [
+    {
+      title: 'Prize activities',
+      description:
+        'Cash prize-pool events. Create, then run the draw to split the pool among qualified participants (manual, audited).',
+      endpoint: 'prize-activities',
+      statuses: ['draft', 'active', 'drawing', 'completed', 'cancelled'],
+      columns: [
+        { key: 'title', label: 'Title' },
+        { key: 'prizePoolMinor', label: 'Pool (minor)' },
+        { key: 'winnersCount', label: 'Winners' },
+        { key: 'requiredInvites', label: 'Req. invites' },
+        { key: 'participantCount', label: 'Participants' },
+        { key: 'status', label: 'Status' },
+      ],
+      createLabel: 'New activity',
+      createRoles: adminOnly,
+      createFields: [
+        { name: 'title', label: 'Title', required: true },
+        { name: 'description', label: 'Description', type: 'textarea' },
+        { name: 'rules', label: 'Rules', type: 'textarea' },
+        {
+          name: 'prizePoolMinor',
+          label: 'Prize pool (minor units, e.g. 500000 = ₹5000)',
+          type: 'number',
+          defaultValue: '0',
+        },
+        {
+          name: 'winnersCount',
+          label: 'Number of winners',
+          type: 'number',
+          defaultValue: '1',
+        },
+        {
+          name: 'requiredInvites',
+          label: 'Required qualified invites',
+          type: 'number',
+          defaultValue: '0',
+        },
+        { name: 'imageKey', label: 'Banner image', type: 'image' },
+        {
+          name: 'status',
+          label: 'Status',
+          type: 'select',
+          options: ['draft', 'active', 'drawing', 'completed', 'cancelled'],
+          defaultValue: 'draft',
+        },
+        { name: 'startsAt', label: 'Starts epoch', type: 'number' },
+        { name: 'endsAt', label: 'Ends epoch (deadline)', type: 'number' },
+      ],
+      actions: [
+        {
+          label: 'Run draw',
+          className: 'approve',
+          roles: finance,
+          visible: (r) => ['active', 'drawing'].includes(String(r.status)),
+          path: (r) => `prize-activities/${r.id}/draw`,
+          method: 'POST',
+          confirm: (r) =>
+            `Run the draw for "${r.title}"? This splits the pool among qualified winners and credits their wallets. This cannot be undone.`,
+          body: () => ({}),
         },
       ],
     },

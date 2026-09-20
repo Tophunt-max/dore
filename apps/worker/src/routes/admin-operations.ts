@@ -1107,3 +1107,151 @@ adminOperationsRoutes.post('/winners/:id/payout', async (c) => {
     .run();
   return ok(c, { id: winner.id, paidMinor: amountMinor });
 });
+
+
+// Prize-pool activity administration + draw (ORich prize splitting).
+adminOperationsRoutes.get('/prize-activities', async (c) => {
+  const status = c.req.query('status');
+  const base = `SELECT a.id,a.title,a.prize_pool_minor,a.currency,a.winners_count,a.required_invites,
+    a.status,a.starts_at,a.ends_at,a.drawn_at,a.created_at,
+    (SELECT COUNT(*) FROM prize_activity_participants p WHERE p.activity_id=a.id) participant_count
+    FROM prize_activities a`;
+  const result = status
+    ? await c.env.DB.prepare(
+        `${base} WHERE a.status=? ORDER BY a.created_at DESC LIMIT 200`,
+      )
+        .bind(status)
+        .all<Record<string, unknown>>()
+    : await c.env.DB.prepare(
+        `${base} ORDER BY a.created_at DESC LIMIT 200`,
+      ).all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      id: String(row.id),
+      title: String(row.title),
+      prizePoolMinor: Number(row.prize_pool_minor),
+      currency: String(row.currency),
+      winnersCount: Number(row.winners_count),
+      requiredInvites: Number(row.required_invites),
+      status: String(row.status),
+      participantCount: Number(row.participant_count),
+      createdAt: new Date(Number(row.created_at) * 1000).toISOString(),
+    })),
+  });
+});
+
+// Run the draw: pick qualified winners, split the pool, credit wallets, close.
+adminOperationsRoutes.post('/prize-activities/:id/draw', async (c) => {
+  const id = c.req.param('id');
+  const activity = await c.env.DB.prepare(
+    `SELECT id,prize_pool_minor,winners_count,required_invites,status
+     FROM prize_activities WHERE id=?`,
+  )
+    .bind(id)
+    .first<{
+      id: string;
+      prize_pool_minor: number;
+      winners_count: number;
+      required_invites: number;
+      status: string;
+    }>();
+  if (!activity)
+    return fail(c, 404, 'ACTIVITY_NOT_FOUND', 'Activity not found');
+  if (activity.status === 'completed')
+    return fail(c, 409, 'ALREADY_DRAWN', 'This activity was already drawn');
+  if (!['active', 'drawing'].includes(activity.status))
+    return fail(c, 409, 'NOT_DRAWABLE', 'Activity is not in a drawable state');
+
+  // Qualified = joined participants whose qualified referral count meets the
+  // required invites threshold.
+  const rows = await c.env.DB.prepare(
+    `SELECT p.id, p.user_id,
+       (SELECT COUNT(*) FROM referrals r WHERE r.referrer_user_id=p.user_id
+        AND r.status IN ('qualified','rewarded')) qcount
+     FROM prize_activity_participants p WHERE p.activity_id=?`,
+  )
+    .bind(id)
+    .all<{ id: string; user_id: string; qcount: number }>();
+  const qualified = rows.results.filter(
+    (r) => Number(r.qcount) >= activity.required_invites,
+  );
+  if (!qualified.length)
+    return fail(
+      c,
+      409,
+      'NO_QUALIFIED_PARTICIPANTS',
+      'No participants meet the invite requirement',
+    );
+
+  // Shuffle and select winners.
+  const shuffled = [...qualified];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+  }
+  const winnerCount = Math.min(activity.winners_count, shuffled.length);
+  const winners = shuffled.slice(0, winnerCount);
+  const prizeEach =
+    winnerCount > 0 ? Math.floor(activity.prize_pool_minor / winnerCount) : 0;
+
+  const now = nowSeconds();
+  const winnerIds = new Set(winners.map((w) => w.id));
+  // Credit each winner (idempotent per participant reference).
+  for (const winner of winners) {
+    if (prizeEach > 0) {
+      const credited = await creditWallet(
+        c.env,
+        winner.user_id,
+        prizeEach,
+        'prize_activity',
+        winner.id,
+        'prize_activity_payout',
+        'Prize pool winnings',
+      );
+      if (!credited.ok)
+        return fail(
+          c,
+          409,
+          'PAYOUT_FAILED',
+          credited.message ?? 'Wallet credit failed',
+        );
+    }
+  }
+  const statements: D1PreparedStatement[] = [
+    c.env.DB.prepare(
+      "UPDATE prize_activities SET status='completed',drawn_at=?,updated_at=? WHERE id=?",
+    ).bind(now, now, id),
+    c.env.DB.prepare(
+      `INSERT INTO audit_logs (id,actor_user_id,action,entity_type,entity_id,request_id,metadata_json,created_at)
+       VALUES(?,?,?,?,?,?,?,?)`,
+    ).bind(
+      crypto.randomUUID(),
+      c.get('userId'),
+      'prize_activity.drawn',
+      'prize_activity',
+      id,
+      c.get('requestId'),
+      JSON.stringify({
+        winners: winners.length,
+        prizeEach,
+        qualified: qualified.length,
+      }),
+      now,
+    ),
+  ];
+  for (const row of rows.results) {
+    const won = winnerIds.has(row.id);
+    statements.push(
+      c.env.DB.prepare(
+        'UPDATE prize_activity_participants SET status=?,prize_minor=? WHERE id=?',
+      ).bind(won ? 'won' : 'not_won', won ? prizeEach : 0, row.id),
+    );
+  }
+  await c.env.DB.batch(statements);
+  return ok(c, {
+    id,
+    status: 'completed',
+    winners: winners.length,
+    prizeEachMinor: prizeEach,
+  });
+});

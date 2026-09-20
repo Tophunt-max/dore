@@ -278,6 +278,18 @@ export const bannerInputSchema = z.object({
   endsAt: z.number().int().positive().nullable().optional(),
   sortOrder: z.number().int().min(0).max(1000).default(0),
 });
+export const prizeActivityInputSchema = z.object({
+  title: z.string().trim().min(2).max(160),
+  description: z.string().trim().max(2000).default(''),
+  rules: z.string().trim().max(5000).default(''),
+  prizePoolMinor: z.number().int().min(0).default(0),
+  winnersCount: z.number().int().min(1).max(1000).default(1),
+  requiredInvites: z.number().int().min(0).max(100).default(0),
+  imageKey: z.string().trim().max(500).nullable().optional(),
+  status: z.enum(['draft', 'active', 'drawing', 'completed', 'cancelled']).default('draft'),
+  startsAt: z.number().int().positive().nullable().optional(),
+  endsAt: z.number().int().positive().nullable().optional(),
+});
 export const categoryInputSchema = z.object({
   name: z.string().trim().min(1).max(80),
   slug: z

@@ -454,6 +454,43 @@ export interface SystemConfig {
   settings: Record<string, string>;
 }
 
+export interface PrizeActivity {
+  id: string;
+  title: string;
+  description: string;
+  rules: string;
+  prizePoolMinor: number;
+  currency: string;
+  winnersCount: number;
+  requiredInvites: number;
+  imageUrl: string | null;
+  status: 'draft' | 'active' | 'drawing' | 'completed' | 'cancelled';
+  startsAt: string | null;
+  endsAt: string | null;
+  drawnAt: string | null;
+  participantCount: number;
+  joined?: boolean;
+  myStatus?: 'joined' | 'qualified' | 'won' | 'not_won' | null;
+  myPrizeMinor?: number;
+}
+
+export interface PrizeActivityParticipant {
+  userId: string;
+  displayName: string | null;
+  phoneMasked: string;
+  status: 'joined' | 'qualified' | 'won' | 'not_won';
+  prizeMinor: number;
+  createdAt: string;
+}
+
+export interface FinanceOfferHistoryItem {
+  phoneMasked: string;
+  principalMinor: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+}
+
 export interface FinanceOffer {
   id: string;
   providerName: string;
