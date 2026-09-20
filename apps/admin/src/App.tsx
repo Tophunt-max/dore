@@ -1,5 +1,45 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import {
+  Component,
+  useEffect,
+  useMemo,
+  useState,
+  type ErrorInfo,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+// Contains a page render error so a single broken page never blanks the whole
+// console. Shows the error (and a reset) while the sidebar stays usable.
+class PageErrorBoundary extends Component<
+  { pageKey: string; children: ReactNode },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Admin page error:', error, info);
+  }
+  componentDidUpdate(prev: { pageKey: string }) {
+    if (prev.pageKey !== this.props.pageKey && this.state.error)
+      this.setState({ error: null });
+  }
+  render() {
+    if (this.state.error)
+      return (
+        <section className="panel state error">
+          <h2>This page hit an error</h2>
+          <p className="muted">{this.state.error.message}</p>
+          <button className="primary small" onClick={() => this.setState({ error: null })}>
+            Retry
+          </button>
+        </section>
+      );
+    return this.props.children;
+  }
+}
 import { formatMoney } from '@oriva/shared';
 import {
   AdminApiError,
@@ -130,7 +170,9 @@ export function App() {
             <span className="admin-badge">{label(user.role)}</span>
           </div>
         </header>
-        <PageView page={page} user={user} />
+        <PageErrorBoundary pageKey={page}>
+          <PageView page={page} user={user} />
+        </PageErrorBoundary>
       </main>
     </div>
   );
