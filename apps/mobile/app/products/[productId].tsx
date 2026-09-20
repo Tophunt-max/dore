@@ -15,7 +15,6 @@ import { api } from '@/api/endpoints';
 import { assets } from '@/assets';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
-import { TopBar } from '@/components/TopBar';
 import { useI18n } from '@/i18n';
 import { rpx } from '@/rpx';
 import { useAuthStore } from '@/stores/auth';
@@ -116,13 +115,6 @@ export default function ProductDetailScreen() {
   return (
     <Screen
       contentStyle={styles.root}
-      header={
-        <TopBar
-          actionLabel={t('common.share')}
-          onAction={() => void share()}
-          title={t('campaign.title')}
-        />
-      }
       refreshing={query.isRefetching}
       onRefresh={() => void query.refetch()}
     >
@@ -133,7 +125,8 @@ export default function ProductDetailScreen() {
       />
       {campaign ? (
         <>
-          {/* Banner image with countdown badge */}
+          {/* Banner image with floating back button + countdown badge
+              (ORich goods page has no title bar; the image runs to the top). */}
           <View style={styles.banner}>
             {campaign.product.imageUrl ? (
               <Image
@@ -150,6 +143,12 @@ export default function ProductDetailScreen() {
                 />
               </View>
             )}
+            <Pressable
+              onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+              style={styles.backBtn}
+            >
+              <Text style={styles.backText}>‹</Text>
+            </Pressable>
             {remaining > 0 ? (
               <LinearGradient
                 colors={['#ee5016', 'rgba(238,80,22,0.17)']}
@@ -301,9 +300,28 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#fff',
   },
-  bannerImage: { width: '100%', height: rpx(520), backgroundColor: '#FFF7F2' },
+  bannerImage: { width: '100%', height: rpx(620), backgroundColor: '#FFF7F2' },
   bannerPlaceholder: { alignItems: 'center', justifyContent: 'center' },
-  placeholderIcon: { width: rpx(180), height: rpx(180), opacity: 0.85 },
+  placeholderIcon: { width: rpx(200), height: rpx(200), opacity: 0.85 },
+  // Floating back chevron over the banner (no title bar, like ORich).
+  backBtn: {
+    position: 'absolute',
+    top: rpx(20),
+    left: rpx(20),
+    zIndex: 980,
+    width: rpx(64),
+    height: rpx(64),
+    borderRadius: rpx(32),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.65)',
+  },
+  backText: {
+    fontSize: rpx(48),
+    lineHeight: rpx(52),
+    color: C.ink,
+    fontFamily: theme.typography.family.bold,
+  },
   // .banner .banner-countdown — pill over the image, square bottom-left corner.
   countdown: {
     zIndex: 970,
@@ -364,7 +382,8 @@ const styles = StyleSheet.create({
     color: C.grey,
     fontFamily: theme.typography.family.regular,
   },
-  // Share graphic (/static/image/goods/icon_Share.png — 126x134rpx, -14rpx top).
+  // Share graphic (/static/image/goods/icon_Share.png) — ORich .intro uni-image
+  // is exactly 126x134rpx with a -14rpx top offset. Match it precisely.
   shareBtn: {
     marginLeft: rpx(16),
     marginTop: rpx(-14),
