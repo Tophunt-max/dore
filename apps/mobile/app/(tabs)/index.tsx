@@ -146,15 +146,21 @@ export default function HomeScreen() {
               onPress={() => router.push(`/products/${campaign.id}`)}
               style={styles.card}
             >
-              <Image
-                source={
-                  campaign.product.imageUrl
-                    ? { uri: campaign.product.imageUrl }
-                    : assets.goodsOne
-                }
-                style={styles.cardImage}
-                resizeMode="cover"
-              />
+              {campaign.product.imageUrl ? (
+                <Image
+                  source={{ uri: campaign.product.imageUrl }}
+                  style={styles.cardImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
+                  <Image
+                    source={assets.groupBuy}
+                    style={styles.placeholderIcon}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
               <View style={styles.cardDetail}>
                 <Text style={styles.cardTitle} numberOfLines={2}>
                   {campaign.product.title}
@@ -230,18 +236,19 @@ const styles = StyleSheet.create({
   },
   bellText: { color: '#fff', fontSize: rpx(28) },
   tabs: {
-    paddingVertical: rpx(26),
-    paddingHorizontal: rpx(30),
+    paddingVertical: rpx(24),
+    paddingHorizontal: rpx(12),
     backgroundColor: '#fff',
     flexDirection: 'row',
-    justifyContent: 'space-between',
   },
-  tabItem: { flex: 1, alignItems: 'center' },
-  tabIcon: { width: ICON, height: ICON },
+  tabItem: { flex: 1, alignItems: 'center', paddingHorizontal: rpx(6) },
+  tabIcon: { width: rpx(52), height: rpx(52) },
   tabText: {
-    marginTop: rpx(6),
-    fontSize: rpx(26),
-    fontFamily: theme.typography.family.bold,
+    marginTop: rpx(8),
+    fontSize: rpx(18),
+    lineHeight: rpx(23),
+    textAlign: 'center',
+    fontFamily: theme.typography.family.medium,
     color: '#4f4f4f',
   },
   tabTextActive: {
@@ -305,6 +312,12 @@ const styles = StyleSheet.create({
     borderRadius: rpx(16),
     backgroundColor: '#f4f4f4',
   },
+  cardImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF3E9',
+  },
+  placeholderIcon: { width: rpx(96), height: rpx(96) },
   cardDetail: { flex: 1, marginLeft: rpx(20), justifyContent: 'space-between' },
   cardTitle: {
     fontSize: rpx(28),
