@@ -81,7 +81,7 @@ export function BannerCarousel({ banners }: { banners?: Banner[] }) {
         scrollRef.current?.scrollTo({ x: next * pageWidth, animated: true });
         return next;
       });
-    }, 4000);
+    }, 3000); // u-swiper default interval
     return () => clearInterval(timer);
   }, [slides.length, pageWidth]);
 
@@ -152,7 +152,8 @@ export function BannerCarousel({ banners }: { banners?: Banner[] }) {
   );
 }
 
-const RADIUS = rpx(16);
+// u-swiper default `borderRadius` is 8rpx (ORich passes only height + list).
+const RADIUS = rpx(8);
 const styles = StyleSheet.create({
   banner: {
     height: rpx(278),
@@ -191,11 +192,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dot: {
-    width: rpx(12),
-    height: rpx(12),
+    width: rpx(14),
+    height: rpx(14),
     borderRadius: rpx(6),
     marginHorizontal: rpx(6),
-    backgroundColor: 'rgba(255,255,255,.55)',
+    backgroundColor: 'rgba(0,0,0,.3)',
   },
-  dotActive: { backgroundColor: '#fff', width: rpx(28) },
+  dotActive: { width: rpx(34), backgroundColor: 'rgba(255,255,255,.8)' },
 });

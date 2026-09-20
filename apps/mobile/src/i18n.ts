@@ -424,6 +424,23 @@ export const catalog = {
   'home.all': { en: 'All', hi: 'सभी', zh: '全部' },
   'home.more': { en: 'More', hi: 'और', zh: '更多' },
   'home.go': { en: 'Go', hi: 'जाएं', zh: '去' },
+  // Remaining ORich home strings (i18n `home` block of the decompiled bundle).
+  'home.snatch': { en: 'Join', hi: 'शामिल हों', zh: '参与' },
+  'home.won': { en: 'won', hi: 'ने जीता', zh: '赢得了' },
+  'home.lnew': { en: 'Gifts', hi: 'उपहार', zh: '礼品' },
+  'home.lhot': { en: 'Cash award', hi: 'नकद पुरस्कार', zh: '现金奖励' },
+  'home.lsoon': { en: 'High Winning', hi: 'उच्च जीत', zh: '高中奖率' },
+  'home.upcoming': { en: 'Upcoming', hi: 'आने वाले', zh: '即将开始' },
+  'home.fulltime': {
+    en: 'Draw when full',
+    hi: 'पूरा होने पर ड्रॉ',
+    zh: '满员后开奖',
+  },
+  'home.quick.draws': { en: 'All Draws', hi: 'सभी ड्रॉ', zh: '全部活动' },
+  'home.quick.orders': { en: 'My Orders', hi: 'मेरे ऑर्डर', zh: '我的订单' },
+  'home.quick.recharge': { en: 'Recharge', hi: 'रिचार्ज', zh: '充值' },
+  'home.quick.winners': { en: 'Winners', hi: 'विजेता', zh: '获奖者' },
+  'home.quick.support': { en: 'Support', hi: 'सहायता', zh: '客服' },
   'home.noWinners': {
     en: 'No winner announcements yet.',
     hi: 'अभी कोई विजेता घोषणा नहीं है।',
