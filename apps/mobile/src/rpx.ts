@@ -30,3 +30,9 @@ export function rpx(value: number): number {
 export function contentWidth(): number {
   return baseWidth();
 }
+
+// Uniform icon sizing used across the app so every icon shares the same
+// square width/height. `ICON` is the standard content icon; `ARROW` is the
+// small chevron used in list rows.
+export const ICON = rpx(52);
+export const ARROW = rpx(28);

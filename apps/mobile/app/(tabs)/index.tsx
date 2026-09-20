@@ -14,7 +14,7 @@ import { assets } from '@/assets';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
 import { useI18n } from '@/i18n';
-import { rpx } from '@/rpx';
+import { rpx, ICON, ARROW } from '@/rpx';
 import { useAuthStore } from '@/stores/auth';
 import { theme } from '@/theme';
 
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     ...theme.shadows.card,
   },
   tabItem: { flex: 1, alignItems: 'center' },
-  tabIcon: { width: rpx(64), height: rpx(64) },
+  tabIcon: { width: ICON, height: ICON },
   tabText: {
     marginTop: rpx(10),
     fontSize: rpx(22),
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: rpx(24),
   },
-  toastIcon: { width: rpx(40), height: rpx(40) },
+  toastIcon: { width: ICON, height: ICON },
   toastText: {
     flex: 1,
     marginLeft: rpx(16),
@@ -310,8 +310,8 @@ const styles = StyleSheet.create({
   headingMore: { flexDirection: 'row', alignItems: 'center' },
   headingMoreText: { fontSize: rpx(24), color: theme.colors.textMuted },
   headingMoreArrow: {
-    width: rpx(24),
-    height: rpx(24),
+    width: ARROW,
+    height: ARROW,
     marginLeft: rpx(4),
     tintColor: theme.colors.textMuted,
   },

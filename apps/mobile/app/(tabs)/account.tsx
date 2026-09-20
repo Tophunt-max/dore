@@ -12,7 +12,7 @@ import { api } from '@/api/endpoints';
 import { Screen } from '@/components/Screen';
 import { useI18n } from '@/i18n';
 import { assets } from '@/assets';
-import { rpx } from '@/rpx';
+import { rpx, ICON, ARROW } from '@/rpx';
 import { useAuthStore } from '@/stores/auth';
 import { theme } from '@/theme';
 
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     top: rpx(28),
     right: rpx(24),
   },
-  settingIcon: { width: rpx(40), height: rpx(40) },
+  settingIcon: { width: ICON, height: ICON },
   userMain: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: rpx(28),
   },
-  vipCoin: { width: rpx(48), height: rpx(48) },
+  vipCoin: { width: ICON, height: ICON },
   vipText: {
     flex: 1,
     marginLeft: rpx(18),
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.family.medium,
     color: theme.colors.primary,
   },
-  vipArrow: { width: rpx(28), height: rpx(28) },
+  vipArrow: { width: ARROW, height: ARROW },
   orderCard: {
     marginTop: rpx(-120),
     marginLeft: rpx(16),
@@ -265,8 +265,8 @@ const styles = StyleSheet.create({
   orderMenuRight: { flexDirection: 'row', alignItems: 'center' },
   orderMenuRightText: { fontSize: rpx(26), color: '#b9b9b9' },
   orderMenuArrow: {
-    width: rpx(24),
-    height: rpx(24),
+    width: ARROW,
+    height: ARROW,
     marginLeft: rpx(4),
     tintColor: '#b9b9b9',
   },
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     paddingTop: rpx(40),
   },
   orderNavItem: { alignItems: 'center' },
-  orderNavIcon: { width: rpx(64), height: rpx(64) },
+  orderNavIcon: { width: ICON, height: ICON },
   orderNavTitle: {
     marginTop: rpx(10),
     fontSize: rpx(24),
@@ -355,11 +355,11 @@ const styles = StyleSheet.create({
     borderTopColor: '#f0f0f0',
   },
   menuItemLeft: { flexDirection: 'row', alignItems: 'center' },
-  menuIcon: { width: rpx(44), height: rpx(44), marginRight: rpx(22) },
+  menuIcon: { width: ICON, height: ICON, marginRight: rpx(22) },
   menuTitle: {
     fontSize: rpx(32),
     color: theme.colors.ink,
     fontFamily: theme.typography.family.regular,
   },
-  menuArrow: { width: rpx(24), height: rpx(24), tintColor: '#c9c9c9' },
+  menuArrow: { width: ARROW, height: ARROW, tintColor: '#c9c9c9' },
 });

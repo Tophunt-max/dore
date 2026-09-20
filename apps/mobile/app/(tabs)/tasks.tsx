@@ -14,7 +14,7 @@ import { assets } from '@/assets';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
 import { useI18n } from '@/i18n';
-import { rpx } from '@/rpx';
+import { rpx, ICON, ARROW } from '@/rpx';
 import { useAuthStore } from '@/stores/auth';
 import { theme } from '@/theme';
 
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#f0f0f0',
   },
-  welfareIcon: { width: rpx(64), height: rpx(64) },
+  welfareIcon: { width: ICON, height: ICON },
   welfareCopy: { flex: 1, marginLeft: rpx(22) },
   welfareTitle: {
     fontSize: rpx(28),
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     fontSize: rpx(22),
     color: theme.colors.primary,
   },
-  welfareArrow: { width: rpx(24), height: rpx(24), tintColor: '#c9c9c9' },
+  welfareArrow: { width: ARROW, height: ARROW, tintColor: '#c9c9c9' },
   sectionTitle: {
     marginTop: rpx(36),
     marginHorizontal: rpx(24),
