@@ -1,56 +1,40 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { api } from '@/api/endpoints';
+import { assets } from '@/assets';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
 import { useI18n } from '@/i18n';
+import { rpx } from '@/rpx';
 import { theme } from '@/theme';
+
 export default function WinnersScreen() {
-  const { width } = useWindowDimensions();
-  const { t, formatDate } = useI18n();
+  const { formatDate } = useI18n();
   const query = useQuery({ queryKey: ['winners'], queryFn: api.winners });
   return (
     <Screen
-      contentStyle={styles.page}
+      contentStyle={styles.root}
       refreshing={query.isRefetching}
       onRefresh={() => void query.refetch()}
     >
-      <View style={styles.heading}>
-        <View>
-          <Text style={styles.title}>{t('winners.title')}</Text>
-          <Text style={styles.subtitle}>{t('winners.subtitle')}</Text>
-        </View>
-        <Pressable
-          onPress={() => router.push('/prize-pool')}
-          style={styles.pool}
-        >
-          <Text style={styles.poolText}>{t('home.activePool')}</Text>
-        </Pressable>
+      <View style={styles.headerBar}>
+        <Text style={styles.headerTitle}>Latest winners</Text>
       </View>
-      <View
-        style={[
-          styles.hero,
-          { minHeight: Math.max(130, Math.min(200, width * 0.38)) },
-        ]}
-      >
-        <Text style={styles.heroStar}>★</Text>
-        <Text style={styles.heroTitle}>{t('winners.subtitle')}</Text>
+
+      <View style={styles.banner}>
+        <Image source={assets.winnerDrawn} style={styles.bannerIcon} />
+        <Text style={styles.bannerText}>Published campaign results</Text>
       </View>
+
       <QueryNotice
         loading={query.isLoading}
         error={query.error}
         onRetry={() => void query.refetch()}
       />
+
       <View style={styles.list}>
-        {query.data?.items.map((winner, index) => (
+        {query.data?.items.map((winner) => (
           <Pressable
             key={winner.id}
             onPress={() =>
@@ -59,114 +43,135 @@ export default function WinnersScreen() {
                 params: { campaignId: winner.campaignId },
               })
             }
-            style={styles.row}
+            style={styles.card}
           >
-            <View style={styles.rank}>
-              <Text style={styles.rankText}>{index + 1}</Text>
-            </View>
-            {winner.avatarUrl ? (
-              <Image source={{ uri: winner.avatarUrl }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {winner.displayName.slice(0, 1).toUpperCase()}
+            <View style={styles.cardHeader}>
+              {winner.avatarUrl ? (
+                <Image
+                  source={{ uri: winner.avatarUrl }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <Image source={assets.defaultAvatar} style={styles.avatar} />
+              )}
+              <View style={styles.cardHeaderInfo}>
+                <Text style={styles.name}>{winner.displayName}</Text>
+                <Text style={styles.time}>
+                  {formatDate(winner.announcedAt)}
                 </Text>
               </View>
-            )}
-            <View style={styles.copy}>
-              <Text style={styles.name}>{winner.displayName}</Text>
-              <Text style={styles.prize}>{winner.productTitle}</Text>
-              <Text style={styles.time}>
-                {t('winners.announced', {
-                  date: formatDate(winner.announcedAt),
-                })}
-              </Text>
+              <View style={styles.wonBadge}>
+                <Text style={styles.wonBadgeText}>Winner</Text>
+              </View>
             </View>
-            <Text style={styles.arrow}>›</Text>
+            <View style={styles.cardBody}>
+              <Image source={assets.goodsOne} style={styles.goodsImg} />
+              <View style={styles.goodsInfo}>
+                <Text style={styles.goodsName} numberOfLines={2}>
+                  {winner.productTitle}
+                </Text>
+                <Text style={styles.goodsIssue}>You won this prize</Text>
+              </View>
+            </View>
           </Pressable>
         ))}
       </View>
+
       {!query.isLoading && !query.error && !query.data?.items.length ? (
-        <Text style={styles.empty}>{t('home.noWinners')}</Text>
+        <Text style={styles.empty}>No winner announcements yet.</Text>
       ) : null}
     </Screen>
   );
 }
+
 const styles = StyleSheet.create({
-  page: { padding: theme.spacing.lg },
-  heading: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  root: { backgroundColor: theme.colors.background, paddingBottom: rpx(40) },
+  headerBar: {
+    paddingTop: rpx(24),
+    paddingHorizontal: rpx(32),
+    paddingBottom: rpx(16),
   },
-  title: {
+  headerTitle: {
+    fontSize: rpx(40),
+    fontFamily: theme.typography.family.bold,
     color: theme.colors.ink,
-    fontFamily: theme.typography.family.bold,
-    fontSize: theme.typography.size.title,
   },
-  subtitle: { marginTop: 4, color: theme.colors.textMuted },
-  pool: { padding: 10, borderRadius: 20, backgroundColor: '#E8F5EE' },
-  poolText: {
-    color: theme.colors.primary,
-    fontFamily: theme.typography.family.bold,
-    fontSize: 11,
-  },
-  hero: {
-    marginTop: theme.spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: theme.radii.xl,
+  banner: {
+    marginHorizontal: rpx(24),
+    height: rpx(200),
+    borderRadius: rpx(20),
     backgroundColor: theme.colors.primary,
-  },
-  heroStar: { fontSize: 38, color: theme.colors.accentStart },
-  heroTitle: {
-    marginTop: 8,
-    color: theme.colors.surface,
-    fontFamily: theme.typography.family.bold,
-  },
-  list: {
-    marginTop: theme.spacing.lg,
-    overflow: 'hidden',
-    borderRadius: theme.radii.xl,
-  },
-  row: {
-    minHeight: 86,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: theme.spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-  },
-  rank: {
-    width: 28,
-    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 14,
-    backgroundColor: '#FFF5DD',
   },
-  rankText: {
-    color: theme.colors.warning,
+  bannerIcon: { width: rpx(90), height: rpx(90) },
+  bannerText: {
+    marginTop: rpx(16),
+    fontSize: rpx(30),
     fontFamily: theme.typography.family.bold,
+    color: '#fff',
   },
+  list: { marginTop: rpx(24), marginHorizontal: rpx(24) },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: rpx(20),
+    padding: rpx(24),
+    marginBottom: rpx(20),
+    ...theme.shadows.card,
+  },
+  cardHeader: { flexDirection: 'row', alignItems: 'center' },
   avatar: {
-    width: 44,
-    height: 44,
-    marginLeft: 12,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: rpx(72),
+    height: rpx(72),
+    borderRadius: rpx(36),
     backgroundColor: '#FFF1EA',
   },
-  avatarText: {
+  cardHeaderInfo: { flex: 1, marginLeft: rpx(20) },
+  name: {
+    fontSize: rpx(30),
+    fontFamily: theme.typography.family.bold,
+    color: theme.colors.ink,
+  },
+  time: { marginTop: rpx(6), fontSize: rpx(22), color: theme.colors.textMuted },
+  wonBadge: {
+    paddingHorizontal: rpx(20),
+    paddingVertical: rpx(8),
+    borderRadius: rpx(24),
+    backgroundColor: '#FFF3E9',
+  },
+  wonBadgeText: {
+    fontSize: rpx(22),
     color: theme.colors.primary,
     fontFamily: theme.typography.family.bold,
   },
-  copy: { flex: 1, marginLeft: 12 },
-  name: { color: theme.colors.ink, fontFamily: theme.typography.family.bold },
-  prize: { marginTop: 3, color: theme.colors.primary },
-  time: { marginTop: 3, color: theme.colors.textMuted, fontSize: 10 },
-  arrow: { fontSize: 24, color: theme.colors.textMuted },
-  empty: { padding: 40, textAlign: 'center', color: theme.colors.textMuted },
+  cardBody: {
+    marginTop: rpx(20),
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: rpx(20),
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#f0f0f0',
+  },
+  goodsImg: {
+    width: rpx(120),
+    height: rpx(120),
+    borderRadius: rpx(12),
+    backgroundColor: '#f4f4f4',
+  },
+  goodsInfo: { flex: 1, marginLeft: rpx(20) },
+  goodsName: {
+    fontSize: rpx(28),
+    color: theme.colors.ink,
+    lineHeight: rpx(38),
+  },
+  goodsIssue: {
+    marginTop: rpx(8),
+    fontSize: rpx(24),
+    color: theme.colors.primary,
+  },
+  empty: {
+    padding: rpx(60),
+    textAlign: 'center',
+    color: theme.colors.textMuted,
+  },
 });
