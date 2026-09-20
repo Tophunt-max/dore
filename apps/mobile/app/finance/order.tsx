@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
+import { Redirect } from 'expo-router';
 import { Linking, StyleSheet, Text, View } from 'react-native';
+import { useAuthStore } from '@/stores/auth';
 import { api } from '@/api/endpoints';
 import { GradientButton } from '@/components/GradientButton';
 import { QueryNotice } from '@/components/QueryNotice';
@@ -10,6 +12,8 @@ import { useI18n } from '@/i18n';
 import { theme } from '@/theme';
 
 export default function FinanceOrderScreen() {
+  const authedUser = useAuthStore((state) => state.user);
+  if (!authedUser) return <Redirect href="/login" />;
   const { t } = useI18n();
   const query = useQuery({
     queryKey: ['finance-offers'],

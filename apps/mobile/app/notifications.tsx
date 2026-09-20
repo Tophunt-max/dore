@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Redirect } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useAuthStore } from '@/stores/auth';
 import { api } from '@/api/endpoints';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
@@ -8,6 +10,8 @@ import { useI18n } from '@/i18n';
 import { theme } from '@/theme';
 
 export default function NotificationsScreen() {
+  const authedUser = useAuthStore((state) => state.user);
+  if (!authedUser) return <Redirect href="/login" />;
   const { formatDate, t } = useI18n();
   const client = useQueryClient();
   const query = useQuery({

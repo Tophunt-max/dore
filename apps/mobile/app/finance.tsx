@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
+import { useAuthStore } from '@/stores/auth';
 import {
   ImageBackground,
   Linking,
@@ -18,6 +19,8 @@ import { useI18n } from '@/i18n';
 import { theme } from '@/theme';
 
 export default function FinanceScreen() {
+  const authedUser = useAuthStore((state) => state.user);
+  if (!authedUser) return <Redirect href="/login" />;
   const { t } = useI18n();
   const query = useQuery({
     queryKey: ['finance-offers'],

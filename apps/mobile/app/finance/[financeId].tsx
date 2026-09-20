@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Linking, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useAuthStore } from '@/stores/auth';
 import { api } from '@/api/endpoints';
 import { GradientButton } from '@/components/GradientButton';
 import { QueryNotice } from '@/components/QueryNotice';
@@ -11,6 +12,8 @@ import { useI18n } from '@/i18n';
 import { theme } from '@/theme';
 
 export default function FinanceDetailScreen() {
+  const authedUser = useAuthStore((state) => state.user);
+  if (!authedUser) return <Redirect href="/login" />;
   const { t } = useI18n();
   const { financeId } = useLocalSearchParams<{ financeId: string }>();
   const query = useQuery({

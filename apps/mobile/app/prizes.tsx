@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
+import { useAuthStore } from '@/stores/auth';
 import {
   Pressable,
   StyleSheet,
@@ -15,6 +16,8 @@ import { TopBar } from '@/components/TopBar';
 import { useI18n } from '@/i18n';
 import { theme } from '@/theme';
 export default function PrizesScreen() {
+  const authedUser = useAuthStore((state) => state.user);
+  if (!authedUser) return <Redirect href="/login" />;
   const { width } = useWindowDimensions();
   const { t, formatDate, labelFor } = useI18n();
   const query = useQuery({ queryKey: ['prizes'], queryFn: api.prizes });
