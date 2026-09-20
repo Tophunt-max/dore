@@ -3,6 +3,7 @@ import {
   campaignInputSchema,
   contentInputSchema,
   paymentMethodInputSchema,
+  paymentMethodUpdateSchema,
   productInputSchema,
   rejectPaymentSchema,
   taskInputSchema,
@@ -142,9 +143,9 @@ adminRoutes.post('/payment-methods', async (c) => {
 adminRoutes.patch('/payment-methods/:id', async (c) => {
   if (!financeAllowed(c))
     return fail(c, 403, 'FORBIDDEN', 'Finance role is required');
-  const parsed = paymentMethodInputSchema
-    .partial()
-    .safeParse(await c.req.json().catch(() => null));
+  const parsed = paymentMethodUpdateSchema.safeParse(
+    await c.req.json().catch(() => null),
+  );
   if (!parsed.success)
     return fail(
       c,

@@ -232,6 +232,16 @@ export const catalog = {
     hi: 'उपलब्ध होने पर बैंक या UPI ट्रांसफ़र विवरण दिखाई देंगे।',
     zh: '可用时将显示银行或 UPI 转账详情。',
   },
+  'payment.loadingMethods': {
+    en: 'Loading payment methods…',
+    hi: 'भुगतान विधियाँ लोड हो रही हैं…',
+    zh: '正在加载支付方式…',
+  },
+  'payment.methodsError': {
+    en: 'Could not load payment methods. Please check your connection and try again.',
+    hi: 'भुगतान विधियाँ लोड नहीं हो सकीं। कृपया अपना कनेक्शन जांचें और पुनः प्रयास करें।',
+    zh: '无法加载支付方式，请检查网络后重试。',
+  },
   'payment.recharge': {
     en: 'Wallet recharge',
     hi: 'वॉलेट रिचार्ज',

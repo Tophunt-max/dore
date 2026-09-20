@@ -118,6 +118,20 @@ export function ManualPaymentForm({
       <View style={styles.section}>
         <Text style={styles.title}>{t('payment.chooseMethod')}</Text>
         <Text style={styles.copy}>{t('payment.transferInstructions')}</Text>
+        {methods.isLoading ? (
+          <Text style={styles.copy}>{t('payment.loadingMethods')}</Text>
+        ) : null}
+        {methods.isError ? (
+          <View>
+            <Text style={styles.error}>{t('payment.methodsError')}</Text>
+            <Pressable
+              onPress={() => void methods.refetch()}
+              style={styles.retry}
+            >
+              <Text style={styles.retryText}>{t('common.retry')}</Text>
+            </Pressable>
+          </View>
+        ) : null}
         {methods.data?.items.map((method) => (
           <Pressable
             key={method.id}
@@ -145,7 +159,7 @@ export function ManualPaymentForm({
             </Text>
           </Pressable>
         ))}
-        {!methods.isLoading && !methods.data?.items.length ? (
+        {methods.isSuccess && !methods.data?.items.length ? (
           <Text style={styles.error}>{t('payment.noMethodsCopy')}</Text>
         ) : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -363,5 +377,19 @@ const styles = StyleSheet.create({
     color: theme.colors.danger,
     fontFamily: theme.typography.family.regular,
     textAlign: 'center',
+  },
+  retry: {
+    marginTop: theme.spacing.md,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    borderRadius: theme.radii.lg,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.xl,
+    backgroundColor: '#FFF7F2',
+  },
+  retryText: {
+    color: theme.colors.primary,
+    fontFamily: theme.typography.family.bold,
   },
 });
