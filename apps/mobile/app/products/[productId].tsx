@@ -164,7 +164,7 @@ export default function ProductDetailScreen() {
             ) : null}
           </View>
 
-          {/* Intro card: price + title + issue, share on the right */}
+          {/* Intro card: price + title + description, share on the right */}
           <View style={styles.card}>
             <View style={styles.introRow}>
               <View style={styles.introHeader}>
@@ -174,16 +174,15 @@ export default function ProductDetailScreen() {
                       campaign.entryPriceMinor,
                       campaign.product.currency,
                     )}
-                    {campaign.product.retailPriceMinor ? (
-                      <Text style={styles.priceOld}>
-                        {'  '}
-                        {formatMoney(
-                          campaign.product.retailPriceMinor,
-                          campaign.product.currency,
-                        )}
-                      </Text>
-                    ) : null}
                   </Text>
+                  {campaign.product.retailPriceMinor ? (
+                    <Text style={styles.priceOld} numberOfLines={1}>
+                      {formatMoney(
+                        campaign.product.retailPriceMinor,
+                        campaign.product.currency,
+                      )}
+                    </Text>
+                  ) : null}
                 </View>
                 <Text style={styles.introTitle}>{campaign.product.title}</Text>
                 {campaign.product.description ? (
@@ -200,19 +199,21 @@ export default function ProductDetailScreen() {
 
           {/* People / progress card */}
           <View style={styles.card}>
-            <Text style={styles.peopleText}>
-              {t('campaign.peopleParticipating', { count: people })}
-            </Text>
             <View style={styles.peopleView}>
-              <View style={styles.avatarRow}>
-                {avatars.map((p, index) => (
-                  <Image
-                    key={p.userId}
-                    source={assets.defaultAvatar}
-                    style={[styles.avatar, index === 0 && styles.avatarFirst]}
-                  />
-                ))}
-              </View>
+              <Text style={styles.peopleText}>
+                {t('campaign.peopleParticipating', { count: people })}
+              </Text>
+              {avatars.length ? (
+                <View style={styles.avatarRow}>
+                  {avatars.map((p, index) => (
+                    <Image
+                      key={p.userId}
+                      source={assets.defaultAvatar}
+                      style={[styles.avatar, index === 0 && styles.avatarFirst]}
+                    />
+                  ))}
+                </View>
+              ) : null}
             </View>
             <View style={styles.track}>
               <View style={[styles.fill, { width: `${progress}%` }]} />
@@ -292,11 +293,20 @@ export default function ProductDetailScreen() {
 
 const styles = StyleSheet.create({
   root: { backgroundColor: C.bg, paddingBottom: rpx(40) },
-  banner: { position: 'relative', backgroundColor: '#fff' },
+  // .banner { position:relative } — overflow:hidden keeps the absolute
+  // countdown pill clipped to the banner so it can never escape onto the
+  // cards below it on web.
+  banner: {
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
   bannerImage: { width: '100%', height: rpx(520), backgroundColor: '#FFF7F2' },
   bannerPlaceholder: { alignItems: 'center', justifyContent: 'center' },
   placeholderIcon: { width: rpx(180), height: rpx(180), opacity: 0.85 },
+  // .banner .banner-countdown — pill over the image, square bottom-left corner.
   countdown: {
+    zIndex: 970,
     position: 'absolute',
     bottom: rpx(18),
     left: rpx(10),
@@ -308,11 +318,12 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 0,
   },
   countdownText: {
-    fontSize: rpx(30),
+    fontSize: rpx(32),
     textAlign: 'center',
     color: '#fff',
     fontFamily: theme.typography.family.bold,
   },
+  // .card — white block, 30rpx padding, 16rpx gap between cards.
   card: {
     padding: rpx(30),
     marginBottom: rpx(16),
@@ -320,9 +331,10 @@ const styles = StyleSheet.create({
   },
   introRow: { flexDirection: 'row', alignItems: 'flex-start' },
   introHeader: { flex: 1 },
+  // .intro-price row: big red current price + strikethrough retail price.
   priceRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'baseline',
   },
   priceAll: {
     fontSize: rpx(48),
@@ -330,18 +342,21 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.family.bold,
   },
   priceOld: {
-    fontSize: rpx(30),
+    marginLeft: rpx(22),
+    fontSize: rpx(32),
     color: C.grey,
     fontFamily: theme.typography.family.regular,
     textDecorationLine: 'line-through',
   },
+  // .intro-title
   introTitle: {
-    marginTop: rpx(10),
+    marginTop: rpx(6),
     fontSize: rpx(32),
     lineHeight: rpx(44),
     color: C.ink,
     fontFamily: theme.typography.family.bold,
   },
+  // .intro-text
   introText: {
     marginTop: rpx(18),
     fontSize: rpx(28),
@@ -349,23 +364,22 @@ const styles = StyleSheet.create({
     color: C.grey,
     fontFamily: theme.typography.family.regular,
   },
+  // Share graphic (/static/image/goods/icon_Share.png — 126x134rpx, -14rpx top).
   shareBtn: {
     marginLeft: rpx(16),
-    width: rpx(72),
-    height: rpx(72),
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: rpx(-14),
   },
-  shareIcon: { width: rpx(44), height: rpx(44), resizeMode: 'contain' },
+  shareIcon: { width: rpx(126), height: rpx(134), resizeMode: 'contain' },
+  // .people-view — participant count on the left, overlapping avatars right.
+  peopleView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   peopleText: {
     fontSize: rpx(28),
     color: C.grey,
     fontFamily: theme.typography.family.regular,
-  },
-  peopleView: {
-    marginTop: rpx(16),
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   avatarRow: { flexDirection: 'row', alignItems: 'center' },
   avatar: {
@@ -378,16 +392,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
   },
   avatarFirst: { marginLeft: 0 },
+  // .people-progress → <lineprogress> (28rpx tall, rounded, orange fill).
   track: {
     marginTop: rpx(20),
-    height: rpx(14),
-    borderRadius: rpx(7),
+    marginBottom: rpx(4),
+    height: rpx(28),
+    borderRadius: rpx(14),
     overflow: 'hidden',
     backgroundColor: C.track,
   },
-  fill: { height: '100%', borderRadius: rpx(7), backgroundColor: C.orange },
+  fill: { height: '100%', borderRadius: rpx(14), backgroundColor: C.orange },
+  // .people-need — "Total: x" left, "Needed: y" right, both orange.
   needRow: {
-    marginTop: rpx(14),
+    marginTop: rpx(8),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -407,31 +424,39 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: rpx(8),
   },
+  // .btn — bottom action bar: price + quantity stepper + buy button.
   buyBar: {
     marginTop: rpx(4),
     flexDirection: 'row',
     alignItems: 'center',
-    height: rpx(120),
-    paddingHorizontal: rpx(24),
+    height: rpx(98),
+    paddingHorizontal: rpx(30),
     backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  buyPrice: { flex: 1, justifyContent: 'center' },
+  // .btn-price
+  buyPrice: { flex: 1, justifyContent: 'center', paddingLeft: rpx(30) },
   buyPriceNew: {
-    fontSize: rpx(34),
+    fontSize: rpx(32),
     color: C.orange,
     fontFamily: theme.typography.family.bold,
   },
   buyPriceOld: {
     marginTop: rpx(2),
-    fontSize: rpx(26),
+    fontSize: rpx(28),
     color: C.grey,
     textDecorationLine: 'line-through',
     fontFamily: theme.typography.family.regular,
   },
+  // .btn-num → <u-number-box> stepper
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: rpx(20),
+    marginHorizontal: rpx(28),
     backgroundColor: C.numberBg,
     borderRadius: rpx(10),
   },
@@ -449,10 +474,11 @@ const styles = StyleSheet.create({
     color: C.ink,
     fontFamily: theme.typography.family.bold,
   },
+  // .btn-btn → <overbtn> buy button (283x78rpx, yellow gradient).
   buyBtn: {
-    width: rpx(240),
-    height: rpx(84),
-    borderRadius: rpx(42),
+    width: rpx(283),
+    height: rpx(78),
+    borderRadius: rpx(39),
     alignItems: 'center',
     justifyContent: 'center',
   },
