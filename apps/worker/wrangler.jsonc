@@ -1,0 +1,73 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "oriva-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "APP_ENV": "production",
+    "API_ORIGIN": "http://localhost:8081",
+    "PUBLIC_ASSET_BASE": "https://assets.example.com",
+    "OTP_PROVIDER_URL": "https://otp-provider.example.com/messages",
+    "OTP_DEV_MODE": "false",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "oriva-db",
+      "database_id": "replace-with-d1-database-id",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "ASSETS_BUCKET",
+      "bucket_name": "oriva-assets",
+    },
+    {
+      "binding": "PAYMENT_PROOFS_BUCKET",
+      "bucket_name": "oriva-payment-proofs",
+    },
+  ],
+  "queues": {
+    "producers": [
+      { "binding": "PAYMENT_EVENTS", "queue": "oriva-payment-events" },
+      {
+        "binding": "NOTIFICATION_EVENTS",
+        "queue": "oriva-notification-events",
+      },
+    ],
+    "consumers": [
+      {
+        "queue": "oriva-payment-events",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+      },
+      {
+        "queue": "oriva-notification-events",
+        "max_batch_size": 50,
+        "max_batch_timeout": 5,
+      },
+    ],
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "WALLET_COORDINATOR", "class_name": "WalletCoordinator" },
+      { "name": "CAMPAIGN_COORDINATOR", "class_name": "CampaignCoordinator" },
+      { "name": "OTP_RATE_LIMITER", "class_name": "OtpRateLimiter" },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": [
+        "WalletCoordinator",
+        "CampaignCoordinator",
+        "OtpRateLimiter",
+      ],
+    },
+  ],
+  "triggers": {
+    "crons": ["*/10 * * * *", "15 2 * * *"],
+  },
+}
