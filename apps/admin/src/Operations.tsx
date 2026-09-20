@@ -971,7 +971,7 @@ function OperationalSection({
               {rows.map((row, index) => (
                 <tr key={String(row.id ?? `${section.endpoint}-${index}`)}>
                   {section.columns.map((column) => (
-                    <td key={column.key}>
+                    <td key={column.key} data-label={column.label}>
                       {column.key.includes('status') && row[column.key] ? (
                         <span className={`status ${String(row[column.key])}`}>
                           {display(row[column.key])}
@@ -984,7 +984,7 @@ function OperationalSection({
                   {section.actions?.some((item) =>
                     item.roles.includes(role),
                   ) ? (
-                    <td className="actions">
+                    <td className="actions" data-label="Actions">
                       {section.actions
                         .filter(
                           (item) =>

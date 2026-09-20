@@ -1213,7 +1213,7 @@ function ResourceManager({
               {pageRows.map((row) => (
                 <tr key={String(row.id)}>
                   {config.columns.map((column) => (
-                    <td key={column.key}>
+                    <td key={column.key} data-label={column.label}>
                       {column.key === 'status' ? (
                         <span className={`status ${String(row[column.key])}`}>
                           {display(row[column.key])}
@@ -1224,7 +1224,7 @@ function ResourceManager({
                     </td>
                   ))}
                   {canWrite ? (
-                    <td className="actions">
+                    <td className="actions" data-label="Actions">
                       <button
                         onClick={() => {
                           setSelected(row);
