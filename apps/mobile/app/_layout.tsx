@@ -74,5 +74,11 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    // Keep the mobile artboard proportions on wide (desktop web) viewports by
+    // centering the app in a phone-width column. No effect on real devices
+    // whose width is already below this cap.
+    width: '100%',
+    maxWidth: 540,
+    alignSelf: 'center',
   },
 });

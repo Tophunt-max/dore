@@ -48,13 +48,28 @@ interface WithdrawalTransitionRequest {
   reason?: string;
   payoutReference?: string;
 }
+interface MembershipPurchaseRequest {
+  operation: 'membership.purchase';
+  userId: string;
+  planId: string;
+  idempotencyKey: string;
+}
+interface FinancePurchaseRequest {
+  operation: 'finance.purchase';
+  userId: string;
+  offerId: string;
+  principalMinor: number;
+  idempotencyKey: string;
+}
 type WalletRequest =
   | CreditRequest
   | RewardRequest
   | ReferralRewardRequest
   | RefundRequest
   | WithdrawRequest
-  | WithdrawalTransitionRequest;
+  | WithdrawalTransitionRequest
+  | MembershipPurchaseRequest
+  | FinancePurchaseRequest;
 
 export class WalletCoordinator implements DurableObject {
   constructor(
@@ -84,6 +99,10 @@ export class WalletCoordinator implements DurableObject {
         return this.refund(input);
       case 'withdrawal.transition':
         return this.transitionWithdrawal(input);
+      case 'membership.purchase':
+        return this.membershipPurchase(input);
+      case 'finance.purchase':
+        return this.financePurchase(input);
       default:
         return this.withdraw(input);
     }
@@ -321,6 +340,174 @@ export class WalletCoordinator implements DurableObject {
       ),
     ]);
     return Response.json({ status: 'applied', transactionId });
+  }
+
+  private async membershipPurchase(
+    input: MembershipPurchaseRequest,
+  ): Promise<Response> {
+    if (!input.planId || !input.idempotencyKey)
+      return Response.json(
+        { message: 'Invalid purchase request' },
+        { status: 400 },
+      );
+    const existing = await this.env.DB.prepare(
+      'SELECT membership_id FROM membership_orders WHERE user_id=? AND idempotency_key=?',
+    )
+      .bind(input.userId, input.idempotencyKey)
+      .first<{ membership_id: string }>();
+    if (existing)
+      return Response.json({
+        status: 'ok',
+        membershipId: existing.membership_id,
+        idempotent: true,
+      });
+    const plan = await this.env.DB.prepare(
+      "SELECT id,price_minor,duration_days FROM membership_plans WHERE id=? AND status='active'",
+    )
+      .bind(input.planId)
+      .first<{ id: string; price_minor: number; duration_days: number }>();
+    if (!plan)
+      return Response.json({ message: 'Plan not available' }, { status: 404 });
+    const price = Number(plan.price_minor);
+    if (!Number.isSafeInteger(price) || price <= 0)
+      return Response.json(
+        { message: 'This plan is not purchasable' },
+        { status: 409 },
+      );
+    const wallet = await this.wallet(input.userId);
+    if (!wallet || wallet.available_minor < price)
+      return Response.json(
+        { message: 'Insufficient wallet balance' },
+        { status: 409 },
+      );
+    const now = nowSeconds();
+    const active = await this.env.DB.prepare(
+      "SELECT ends_at FROM memberships WHERE user_id=? AND status='active' AND ends_at>? ORDER BY ends_at DESC LIMIT 1",
+    )
+      .bind(input.userId, now)
+      .first<{ ends_at: number }>();
+    const startsAt = active ? Number(active.ends_at) : now;
+    const endsAt = startsAt + Number(plan.duration_days) * 86400;
+    const membershipId = crypto.randomUUID();
+    const orderId = crypto.randomUUID();
+    const transactionId = crypto.randomUUID();
+    await this.env.DB.batch([
+      this.env.DB.prepare(
+        `UPDATE wallet_accounts SET available_minor=available_minor-?,version=version+1,updated_at=?
+         WHERE user_id=? AND available_minor>=?`,
+      ).bind(price, now, input.userId, price),
+      this.env.DB.prepare(
+        `INSERT INTO memberships (id,user_id,plan_id,status,source,starts_at,ends_at,created_at,updated_at)
+         VALUES(?,?,?,'active','purchase',?,?,?,?)`,
+      ).bind(membershipId, input.userId, plan.id, startsAt, endsAt, now, now),
+      this.env.DB.prepare(
+        `INSERT INTO membership_orders (id,user_id,plan_id,membership_id,amount_minor,currency,idempotency_key,status,created_at)
+         VALUES(?,?,?,?,?,'INR',?,'paid',?)`,
+      ).bind(
+        orderId,
+        input.userId,
+        plan.id,
+        membershipId,
+        price,
+        input.idempotencyKey,
+        now,
+      ),
+      ledger(
+        this.env.DB,
+        transactionId,
+        input.userId,
+        'debit',
+        price,
+        'membership_purchase',
+        'VIP membership purchase',
+        'membership',
+        membershipId,
+        now,
+      ),
+    ]);
+    return Response.json({
+      status: 'ok',
+      membershipId,
+      orderId,
+      amountMinor: price,
+      endsAt: new Date(endsAt * 1000).toISOString(),
+    });
+  }
+
+  private async financePurchase(
+    input: FinancePurchaseRequest,
+  ): Promise<Response> {
+    if (
+      !input.offerId ||
+      !input.idempotencyKey ||
+      !validAmount(input.principalMinor)
+    )
+      return invalidAmount();
+    const existing = await this.env.DB.prepare(
+      'SELECT id FROM finance_orders WHERE user_id=? AND idempotency_key=?',
+    )
+      .bind(input.userId, input.idempotencyKey)
+      .first<{ id: string }>();
+    if (existing)
+      return Response.json({
+        status: 'ok',
+        orderId: existing.id,
+        idempotent: true,
+      });
+    const offer = await this.env.DB.prepare(
+      "SELECT id FROM finance_offers WHERE id=? AND status='active'",
+    )
+      .bind(input.offerId)
+      .first<{ id: string }>();
+    if (!offer)
+      return Response.json(
+        { message: 'Finance offer not available' },
+        { status: 404 },
+      );
+    const wallet = await this.wallet(input.userId);
+    if (!wallet || wallet.available_minor < input.principalMinor)
+      return Response.json(
+        { message: 'Insufficient wallet balance' },
+        { status: 409 },
+      );
+    const now = nowSeconds();
+    const orderId = crypto.randomUUID();
+    const transactionId = crypto.randomUUID();
+    await this.env.DB.batch([
+      this.env.DB.prepare(
+        `UPDATE wallet_accounts SET available_minor=available_minor-?,version=version+1,updated_at=?
+         WHERE user_id=? AND available_minor>=?`,
+      ).bind(input.principalMinor, now, input.userId, input.principalMinor),
+      this.env.DB.prepare(
+        `INSERT INTO finance_orders (id,user_id,offer_id,principal_minor,currency,idempotency_key,status,note,created_at,updated_at)
+         VALUES(?,?,?,?,'INR',?,'active','',?,?)`,
+      ).bind(
+        orderId,
+        input.userId,
+        offer.id,
+        input.principalMinor,
+        input.idempotencyKey,
+        now,
+        now,
+      ),
+      ledger(
+        this.env.DB,
+        transactionId,
+        input.userId,
+        'debit',
+        input.principalMinor,
+        'finance_purchase',
+        'Finance product purchase',
+        'finance_order',
+        orderId,
+        now,
+      ),
+    ]);
+    return Response.json({
+      status: 'ok',
+      orderId,
+      principalMinor: input.principalMinor,
+    });
   }
 
   private async withdraw(input: WithdrawRequest): Promise<Response> {

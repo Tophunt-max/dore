@@ -44,7 +44,7 @@ uploadRoutes.post('/', async (c) => {
       'File extension does not match its MIME type',
     );
   if (
-    ['product', 'campaign', 'prize'].includes(parsed.data.purpose) &&
+    ['product', 'campaign', 'prize', 'banner'].includes(parsed.data.purpose) &&
     c.get('userRole') !== 'admin'
   )
     return fail(

@@ -8,6 +8,7 @@ import {
   mapTeamMember,
   mapWithdrawal,
 } from '../lib/mappers';
+import { maskPhone } from '../lib/user';
 import type { AppEnv } from '../types';
 
 export const featureRoutes = new Hono<AppEnv>();
@@ -242,6 +243,151 @@ featureRoutes.get('/team', async (c) => {
     .all<Record<string, unknown>>();
   return ok(c, { items: result.results.map(mapTeamMember) });
 });
+
+// Referral summary (ORich `userinvitetop`): headline counts + total earned.
+featureRoutes.get('/team/summary', async (c) => {
+  const userId = c.get('userId');
+  const counts = await c.env.DB.prepare(
+    `SELECT
+       COUNT(*) total_invited,
+       SUM(CASE WHEN status IN ('qualified','rewarded') THEN 1 ELSE 0 END) qualified,
+       SUM(CASE WHEN status='rewarded' THEN 1 ELSE 0 END) rewarded
+     FROM referrals WHERE referrer_user_id=?`,
+  )
+    .bind(userId)
+    .first<Record<string, unknown>>();
+  const rewards = await c.env.DB.prepare(
+    `SELECT COALESCE(SUM(amount_minor),0) reward_minor, COALESCE(SUM(coin_amount),0) reward_coins
+     FROM referral_reward_issues WHERE beneficiary_user_id=? AND role='referrer'`,
+  )
+    .bind(userId)
+    .first<Record<string, unknown>>();
+  return ok(c, {
+    totalInvited: Number(counts?.total_invited ?? 0),
+    qualified: Number(counts?.qualified ?? 0),
+    rewarded: Number(counts?.rewarded ?? 0),
+    rewardMinor: Number(rewards?.reward_minor ?? 0),
+    rewardCoins: Number(rewards?.reward_coins ?? 0),
+    currency: 'INR',
+  });
+});
+
+// Consumption ranking (ORich `userconsume`): invited users ranked by their
+// paid/fulfilled order spend.
+featureRoutes.get('/team/consumption', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT u.id user_id, u.display_name, u.phone_e164,
+       COALESCE(SUM(CASE WHEN o.status IN ('paid','fulfilled') THEN o.amount_minor ELSE 0 END),0) consumption_minor
+     FROM referrals r
+     JOIN users u ON u.id = r.referred_user_id
+     LEFT JOIN orders o ON o.user_id = u.id
+     WHERE r.referrer_user_id = ?
+     GROUP BY u.id, u.display_name, u.phone_e164
+     ORDER BY consumption_minor DESC, u.created_at DESC LIMIT 100`,
+  )
+    .bind(c.get('userId'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      userId: String(row.user_id),
+      displayName: row.display_name == null ? null : String(row.display_name),
+      phoneMasked: maskPhone(String(row.phone_e164)),
+      consumptionMinor: Number(row.consumption_minor),
+      currency: 'INR',
+    })),
+  });
+});
+
+// Rebate/reward details (ORich `userrebatelist`): referral rewards credited to
+// the current user, with the counterparty for context.
+featureRoutes.get('/team/rebates', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT i.id, i.role, i.amount_minor, i.coin_amount, i.created_at,
+       CASE WHEN i.role='referrer' THEN ru.display_name ELSE rf.display_name END from_name,
+       CASE WHEN i.role='referrer' THEN ru.phone_e164 ELSE rf.phone_e164 END from_phone
+     FROM referral_reward_issues i
+     JOIN referrals r ON r.id = i.referral_id
+     LEFT JOIN users ru ON ru.id = r.referred_user_id
+     LEFT JOIN users rf ON rf.id = r.referrer_user_id
+     WHERE i.beneficiary_user_id = ?
+     ORDER BY i.created_at DESC LIMIT 100`,
+  )
+    .bind(c.get('userId'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      id: String(row.id),
+      role: row.role as 'referrer' | 'referred',
+      amountMinor: Number(row.amount_minor),
+      coinAmount: Number(row.coin_amount),
+      currency: 'INR',
+      fromDisplayName: row.from_name == null ? null : String(row.from_name),
+      fromPhoneMasked:
+        row.from_phone == null ? null : maskPhone(String(row.from_phone)),
+      createdAt: new Date(Number(row.created_at) * 1000).toISOString(),
+    })),
+  });
+});
+
+// After-sales requests (ORich `getUserAfs`): raise a return/exchange/complaint
+// against one of the user's own orders, and list existing requests.
+const afterSalesTypes = ['return', 'exchange', 'complaint', 'other'] as const;
+featureRoutes.post('/after-sales', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    orderId?: string;
+    type?: string;
+    reason?: string;
+  };
+  const type = afterSalesTypes.includes(body.type as never)
+    ? (body.type as string)
+    : null;
+  const reason = (body.reason ?? '').trim();
+  if (!body.orderId || !type || reason.length < 3)
+    return fail(
+      c,
+      400,
+      'VALIDATION_ERROR',
+      'orderId, a valid type, and a reason (min 3 chars) are required',
+    );
+  const order = await c.env.DB.prepare(
+    'SELECT id FROM orders WHERE id=? AND user_id=?',
+  )
+    .bind(body.orderId, c.get('userId'))
+    .first<{ id: string }>();
+  if (!order) return fail(c, 404, 'ORDER_NOT_FOUND', 'Order not found');
+  const id = crypto.randomUUID();
+  const n = now();
+  await c.env.DB.prepare(
+    `INSERT INTO after_sales (id,user_id,order_id,type,reason,status,admin_note,created_at,updated_at)
+     VALUES(?,?,?,?,?,'open','',?,?)`,
+  )
+    .bind(id, c.get('userId'), body.orderId, type, reason, n, n)
+    .run();
+  return ok(c, { id, status: 'open' }, 201);
+});
+featureRoutes.get('/after-sales', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT a.id,a.order_id,a.type,a.reason,a.status,a.admin_note,a.created_at,a.updated_at,o.title order_title
+     FROM after_sales a JOIN orders o ON o.id=a.order_id
+     WHERE a.user_id=? ORDER BY a.created_at DESC LIMIT 100`,
+  )
+    .bind(c.get('userId'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      id: String(row.id),
+      orderId: String(row.order_id),
+      orderTitle: String(row.order_title),
+      type: String(row.type),
+      reason: String(row.reason),
+      status: String(row.status),
+      adminNote: String(row.admin_note),
+      createdAt: new Date(Number(row.created_at) * 1000).toISOString(),
+      updatedAt: new Date(Number(row.updated_at) * 1000).toISOString(),
+    })),
+  });
+});
+
 featureRoutes.get('/withdrawals', async (c) => {
   const result = await c.env.DB.prepare(
     `SELECT id,amount_minor,currency,status,beneficiary_id,destination_snapshot_json,

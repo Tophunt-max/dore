@@ -6,6 +6,7 @@ import {
 } from '@oriva/shared';
 import { fail, ok } from '../lib/http';
 import { nowSeconds } from '../lib/time';
+import { maskPhone } from '../lib/user';
 import type { AppEnv } from '../types';
 
 export const platformRoutes = new Hono<AppEnv>();
@@ -263,30 +264,6 @@ platformRoutes.post('/support/tickets/:id/messages', async (c) => {
   return ok(c, { created: true }, 201);
 });
 
-platformRoutes.get('/banners', async (c) => {
-  const now = nowSeconds();
-  const result = await c.env.DB.prepare(
-    `SELECT id,title,body,image_key,action_url,starts_at,ends_at,sort_order FROM banners
-     WHERE status='active' AND (starts_at IS NULL OR starts_at<=?)
-     AND (ends_at IS NULL OR ends_at>?) ORDER BY sort_order,created_at DESC`,
-  )
-    .bind(now, now)
-    .all<Record<string, unknown>>();
-  return ok(c, {
-    items: result.results.map((row) => ({
-      id: String(row.id),
-      title: String(row.title),
-      body: String(row.body),
-      imageUrl: row.image_key
-        ? `${c.env.PUBLIC_ASSET_BASE}/${String(row.image_key)}`
-        : null,
-      actionUrl: row.action_url == null ? null : String(row.action_url),
-      startsAt: toIso(row.starts_at),
-      endsAt: toIso(row.ends_at),
-      sortOrder: Number(row.sort_order),
-    })),
-  });
-});
 platformRoutes.get('/finance/offers', async (c) => {
   const result = await c.env.DB.prepare(
     `SELECT id,provider_name,title,description,category,disclaimer,external_url
@@ -359,6 +336,240 @@ platformRoutes.post('/games/:id/play', async (c) => {
     201,
   );
 });
+// VIP membership purchase (ORich `vipBuy`): buy an active plan from the wallet
+// balance. Serialized + audited by the WalletCoordinator durable object.
+platformRoutes.post('/memberships/purchase', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    planId?: string;
+    idempotencyKey?: string;
+  };
+  if (!body.planId)
+    return fail(c, 400, 'VALIDATION_ERROR', 'planId is required');
+  const userId = c.get('userId');
+  const stub = c.env.WALLET_COORDINATOR.get(
+    c.env.WALLET_COORDINATOR.idFromName(userId),
+  );
+  const res = await stub.fetch('https://wallet/membership.purchase', {
+    method: 'POST',
+    body: JSON.stringify({
+      operation: 'membership.purchase',
+      userId,
+      planId: body.planId,
+      idempotencyKey: body.idempotencyKey ?? crypto.randomUUID(),
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok)
+    return fail(
+      c,
+      res.status === 404 ? 404 : 409,
+      'MEMBERSHIP_PURCHASE_REJECTED',
+      (data as { message?: string }).message ?? 'Purchase rejected',
+    );
+  return ok(c, data, 201);
+});
+
+// Finance product purchase (ORich `financeBuy`). Debits the wallet and records
+// an order. NOTE: interest/returns are NOT auto-credited here — settlement is an
+// administrator/regulated process (see docs/SETUP.md release gates).
+platformRoutes.post('/finance/offers/:id/purchase', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    principalMinor?: number;
+    idempotencyKey?: string;
+  };
+  const principalMinor = Number(body.principalMinor);
+  if (!Number.isSafeInteger(principalMinor) || principalMinor <= 0)
+    return fail(
+      c,
+      400,
+      'VALIDATION_ERROR',
+      'principalMinor must be a positive integer in minor units',
+    );
+  const userId = c.get('userId');
+  const stub = c.env.WALLET_COORDINATOR.get(
+    c.env.WALLET_COORDINATOR.idFromName(userId),
+  );
+  const res = await stub.fetch('https://wallet/finance.purchase', {
+    method: 'POST',
+    body: JSON.stringify({
+      operation: 'finance.purchase',
+      userId,
+      offerId: c.req.param('id'),
+      principalMinor,
+      idempotencyKey: body.idempotencyKey ?? crypto.randomUUID(),
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok)
+    return fail(
+      c,
+      res.status === 404 ? 404 : 409,
+      'FINANCE_PURCHASE_REJECTED',
+      (data as { message?: string }).message ?? 'Purchase rejected',
+    );
+  return ok(c, data, 201);
+});
+
+// My finance orders (ORich `myFinanceList`).
+platformRoutes.get('/finance/orders', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT o.id,o.offer_id,f.title offer_title,f.provider_name,o.principal_minor,o.currency,o.status,o.created_at,o.updated_at
+     FROM finance_orders o JOIN finance_offers f ON f.id=o.offer_id
+     WHERE o.user_id=? ORDER BY o.created_at DESC LIMIT 100`,
+  )
+    .bind(c.get('userId'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    informationalReturns: true,
+    items: result.results.map(mapFinanceOrder),
+  });
+});
+
+// Recent finance orders (ORich `financeOrderRecent`).
+platformRoutes.get('/finance/orders/recent', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT o.id,o.offer_id,f.title offer_title,f.provider_name,o.principal_minor,o.currency,o.status,o.created_at,o.updated_at
+     FROM finance_orders o JOIN finance_offers f ON f.id=o.offer_id
+     WHERE o.user_id=? ORDER BY o.created_at DESC LIMIT 5`,
+  )
+    .bind(c.get('userId'))
+    .all<Record<string, unknown>>();
+  return ok(c, { items: result.results.map(mapFinanceOrder) });
+});
+
+// Prize activity detail + my participation (ORich `activitydetail`).
+platformRoutes.get('/prize-activities/:id', async (c) => {
+  const row = await c.env.DB.prepare(
+    `SELECT id,title,description,rules,prize_pool_minor,currency,winners_count,
+       required_invites,image_key,status,starts_at,ends_at,drawn_at
+     FROM prize_activities WHERE id=?`,
+  )
+    .bind(c.req.param('id'))
+    .first<Record<string, unknown>>();
+  if (!row) return fail(c, 404, 'ACTIVITY_NOT_FOUND', 'Activity not found');
+  const countRow = await c.env.DB.prepare(
+    'SELECT COUNT(*) n FROM prize_activity_participants WHERE activity_id=?',
+  )
+    .bind(c.req.param('id'))
+    .first<{ n: number }>();
+  const mine = await c.env.DB.prepare(
+    'SELECT status,prize_minor FROM prize_activity_participants WHERE activity_id=? AND user_id=?',
+  )
+    .bind(c.req.param('id'), c.get('userId'))
+    .first<{ status: string; prize_minor: number }>();
+  const participants = await c.env.DB.prepare(
+    `SELECT p.user_id,p.status,p.prize_minor,p.created_at,u.display_name,u.phone_e164
+     FROM prize_activity_participants p JOIN users u ON u.id=p.user_id
+     WHERE p.activity_id=? ORDER BY p.created_at DESC LIMIT 100`,
+  )
+    .bind(c.req.param('id'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    id: String(row.id),
+    title: String(row.title),
+    description: String(row.description),
+    rules: String(row.rules),
+    prizePoolMinor: Number(row.prize_pool_minor),
+    currency: String(row.currency),
+    winnersCount: Number(row.winners_count),
+    requiredInvites: Number(row.required_invites),
+    imageUrl: row.image_key
+      ? `${c.env.PUBLIC_ASSET_BASE}/${String(row.image_key)}`
+      : null,
+    status: String(row.status),
+    startsAt: toIso(row.starts_at),
+    endsAt: toIso(row.ends_at),
+    drawnAt: toIso(row.drawn_at),
+    participantCount: Number(countRow?.n ?? 0),
+    joined: Boolean(mine),
+    myStatus: mine ? mine.status : null,
+    myPrizeMinor: mine ? Number(mine.prize_minor) : 0,
+    participants: participants.results.map((p) => ({
+      userId: String(p.user_id),
+      displayName: p.display_name == null ? null : String(p.display_name),
+      phoneMasked: maskPhone(String(p.phone_e164)),
+      status: String(p.status),
+      prizeMinor: Number(p.prize_minor),
+      createdAt: new Date(Number(p.created_at) * 1000).toISOString(),
+    })),
+  });
+});
+
+// Join a prize activity (ORich `joinactivity`).
+platformRoutes.post('/prize-activities/:id/join', async (c) => {
+  const now = nowSeconds();
+  const activity = await c.env.DB.prepare(
+    'SELECT id,status,ends_at FROM prize_activities WHERE id=?',
+  )
+    .bind(c.req.param('id'))
+    .first<{ id: string; status: string; ends_at: number | null }>();
+  if (!activity) return fail(c, 404, 'ACTIVITY_NOT_FOUND', 'Activity not found');
+  if (activity.status !== 'active' || (activity.ends_at && activity.ends_at < now))
+    return fail(c, 409, 'ACTIVITY_CLOSED', 'This activity is not open to join');
+  const existing = await c.env.DB.prepare(
+    'SELECT id FROM prize_activity_participants WHERE activity_id=? AND user_id=?',
+  )
+    .bind(activity.id, c.get('userId'))
+    .first<{ id: string }>();
+  if (existing) return ok(c, { joined: true, alreadyJoined: true });
+  await c.env.DB.prepare(
+    `INSERT INTO prize_activity_participants (id,activity_id,user_id,status,prize_minor,created_at)
+     VALUES(?,?,?,'joined',0,?)`,
+  )
+    .bind(crypto.randomUUID(), activity.id, c.get('userId'), now)
+    .run();
+  return ok(c, { joined: true }, 201);
+});
+
+// Finance offer detail (ORich `financeDetail`).
+platformRoutes.get('/finance/offers/:id', async (c) => {
+  const row = await c.env.DB.prepare(
+    `SELECT id,provider_name,title,description,category,disclaimer,external_url,sort_order
+     FROM finance_offers WHERE id=? AND status='active'`,
+  )
+    .bind(c.req.param('id'))
+    .first<Record<string, unknown>>();
+  if (!row) return fail(c, 404, 'OFFER_NOT_FOUND', 'Finance offer not found');
+  const stats = await c.env.DB.prepare(
+    `SELECT COUNT(*) participants, COALESCE(SUM(principal_minor),0) total_principal
+     FROM finance_orders WHERE offer_id=?`,
+  )
+    .bind(c.req.param('id'))
+    .first<{ participants: number; total_principal: number }>();
+  return ok(c, {
+    informationalOnly: true,
+    id: String(row.id),
+    providerName: String(row.provider_name),
+    title: String(row.title),
+    description: String(row.description),
+    category: String(row.category),
+    disclaimer: String(row.disclaimer),
+    externalUrl: row.external_url == null ? null : String(row.external_url),
+    participants: Number(stats?.participants ?? 0),
+    totalPrincipalMinor: Number(stats?.total_principal ?? 0),
+  });
+});
+
+// Finance offer participation history (ORich `financeDetailHistory`).
+platformRoutes.get('/finance/offers/:id/history', async (c) => {
+  const result = await c.env.DB.prepare(
+    `SELECT o.principal_minor,o.currency,o.status,o.created_at,u.phone_e164
+     FROM finance_orders o JOIN users u ON u.id=o.user_id
+     WHERE o.offer_id=? ORDER BY o.created_at DESC LIMIT 50`,
+  )
+    .bind(c.req.param('id'))
+    .all<Record<string, unknown>>();
+  return ok(c, {
+    items: result.results.map((row) => ({
+      phoneMasked: maskPhone(String(row.phone_e164)),
+      principalMinor: Number(row.principal_minor),
+      currency: String(row.currency),
+      status: String(row.status),
+      createdAt: new Date(Number(row.created_at) * 1000).toISOString(),
+    })),
+  });
+});
+
 platformRoutes.get('/memberships/plans', async (c) => {
   const result = await c.env.DB.prepare(
     `SELECT id,name,description,benefits_json,price_minor,currency,duration_days
@@ -481,6 +692,19 @@ const mapMessage = (row: MessageRow) => ({
 });
 const toIso = (value: unknown) =>
   value == null ? null : new Date(Number(value) * 1000).toISOString();
+function mapFinanceOrder(row: Record<string, unknown>) {
+  return {
+    id: String(row.id),
+    offerId: String(row.offer_id),
+    offerTitle: String(row.offer_title),
+    providerName: String(row.provider_name),
+    principalMinor: Number(row.principal_minor),
+    currency: String(row.currency),
+    status: String(row.status),
+    createdAt: toIso(row.created_at),
+    updatedAt: toIso(row.updated_at),
+  };
+}
 function safeStringArray(value: unknown): string[] {
   try {
     const parsed: unknown = JSON.parse(String(value));

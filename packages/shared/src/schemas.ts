@@ -50,22 +50,23 @@ export const rejectPaymentSchema = z.object({
   reason: z.string().trim().min(5).max(500),
 });
 
-export const paymentMethodInputSchema = z
-  .object({
-    type: z.enum(['bank', 'upi']),
-    displayName: z.string().trim().min(2).max(80),
-    instructions: z.string().trim().min(5).max(1000),
-    accountName: z.string().trim().max(100).nullable().optional(),
-    accountNumber: z.string().trim().max(40).nullable().optional(),
-    bankName: z.string().trim().max(100).nullable().optional(),
-    ifsc: z.string().trim().max(20).nullable().optional(),
-    upiId: z.string().trim().max(100).nullable().optional(),
-    qrImageKey: z.string().trim().max(500).nullable().optional(),
-    currency: z.enum(['INR', 'USD']).default('INR'),
-    enabled: z.boolean().default(true),
-    sortOrder: z.number().int().min(0).max(1000).default(0),
-  })
-  .superRefine((value, context) => {
+export const paymentMethodBaseSchema = z.object({
+  type: z.enum(['bank', 'upi']),
+  displayName: z.string().trim().min(2).max(80),
+  instructions: z.string().trim().min(5).max(1000),
+  accountName: z.string().trim().max(100).nullable().optional(),
+  accountNumber: z.string().trim().max(40).nullable().optional(),
+  bankName: z.string().trim().max(100).nullable().optional(),
+  ifsc: z.string().trim().max(20).nullable().optional(),
+  upiId: z.string().trim().max(100).nullable().optional(),
+  qrImageKey: z.string().trim().max(500).nullable().optional(),
+  currency: z.enum(['INR', 'USD']).default('INR'),
+  enabled: z.boolean().default(true),
+  sortOrder: z.number().int().min(0).max(1000).default(0),
+});
+
+export const paymentMethodInputSchema = paymentMethodBaseSchema.superRefine(
+  (value, context) => {
     if (value.type === 'upi' && !value.upiId) {
       context.addIssue({
         code: 'custom',
@@ -83,7 +84,13 @@ export const paymentMethodInputSchema = z
         message: 'Bank account name, number, and IFSC are required',
       });
     }
-  });
+  },
+);
+
+// Partial schema for admin PATCH updates. `.partial()` must be called on the
+// plain object schema — a ZodEffects (from `.superRefine`) has no `.partial()`,
+// which previously threw a TypeError and surfaced as "An unexpected error".
+export const paymentMethodUpdateSchema = paymentMethodBaseSchema.partial();
 
 export const userAdminUpdateSchema = z.object({
   displayName: z.string().trim().min(2).max(80).nullable().optional(),
@@ -152,6 +159,7 @@ export const createUploadSchema = z.object({
     'product',
     'campaign',
     'prize',
+    'banner',
     'support',
     'payment_proof',
   ]),
@@ -275,6 +283,30 @@ export const bannerInputSchema = z.object({
   status: z.enum(['draft', 'active', 'archived']).default('draft'),
   startsAt: z.number().int().positive().nullable().optional(),
   endsAt: z.number().int().positive().nullable().optional(),
+  sortOrder: z.number().int().min(0).max(1000).default(0),
+});
+export const prizeActivityInputSchema = z.object({
+  title: z.string().trim().min(2).max(160),
+  description: z.string().trim().max(2000).default(''),
+  rules: z.string().trim().max(5000).default(''),
+  prizePoolMinor: z.number().int().min(0).default(0),
+  winnersCount: z.number().int().min(1).max(1000).default(1),
+  requiredInvites: z.number().int().min(0).max(100).default(0),
+  imageKey: z.string().trim().max(500).nullable().optional(),
+  status: z.enum(['draft', 'active', 'drawing', 'completed', 'cancelled']).default('draft'),
+  startsAt: z.number().int().positive().nullable().optional(),
+  endsAt: z.number().int().positive().nullable().optional(),
+});
+export const categoryInputSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .regex(/^[a-z0-9-]+$/, 'Use lowercase letters, numbers, and hyphens'),
+  imageKey: z.string().trim().max(500).nullable().optional(),
+  status: z.enum(['draft', 'active', 'archived']).default('draft'),
   sortOrder: z.number().int().min(0).max(1000).default(0),
 });
 export const financeOfferInputSchema = z.object({

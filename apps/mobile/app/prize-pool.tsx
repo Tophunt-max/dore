@@ -18,7 +18,7 @@ export default function PrizePoolScreen() {
   const { t, formatMoney } = useI18n();
   const campaigns = useQuery({
     queryKey: ['campaigns'],
-    queryFn: api.campaigns,
+    queryFn: () => api.campaigns(),
   });
   const winners = useQuery({ queryKey: ['winners'], queryFn: api.winners });
   const items = (campaigns.data?.items ?? []).filter(

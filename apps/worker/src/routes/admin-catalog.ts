@@ -2,6 +2,8 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import {
   bannerInputSchema,
+  categoryInputSchema,
+  prizeActivityInputSchema,
   broadcastSchema,
   discountOfferInputSchema,
   financeOfferInputSchema,
@@ -226,6 +228,37 @@ const catalogConfigs: CatalogConfig[] = [
       ['startsAt', 'starts_at'],
       ['endsAt', 'ends_at'],
       ['sortOrder', 'sort_order'],
+    ],
+  },
+  {
+    path: 'categories',
+    table: 'categories',
+    createSchema: categoryInputSchema,
+    updateSchema: categoryInputSchema.partial(),
+    fields: [
+      ['name', 'name'],
+      ['slug', 'slug'],
+      ['imageKey', 'image_key'],
+      ['status', 'status'],
+      ['sortOrder', 'sort_order'],
+    ],
+  },
+  {
+    path: 'prize-activities',
+    table: 'prize_activities',
+    createSchema: prizeActivityInputSchema,
+    updateSchema: prizeActivityInputSchema.partial(),
+    fields: [
+      ['title', 'title'],
+      ['description', 'description'],
+      ['rules', 'rules'],
+      ['prizePoolMinor', 'prize_pool_minor'],
+      ['winnersCount', 'winners_count'],
+      ['requiredInvites', 'required_invites'],
+      ['imageKey', 'image_key'],
+      ['status', 'status'],
+      ['startsAt', 'starts_at'],
+      ['endsAt', 'ends_at'],
     ],
   },
   {

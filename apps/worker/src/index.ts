@@ -14,6 +14,7 @@ import { adminRoutes } from './routes/admin';
 import { featureRoutes } from './routes/features';
 import { payoutRoutes } from './routes/payouts';
 import { platformRoutes } from './routes/platform';
+import { publicRoutes } from './routes/public';
 import { adminOperationsRoutes } from './routes/admin-operations';
 import { adminCatalogRoutes } from './routes/admin-catalog';
 import { requestContext } from './middleware/request-context';
@@ -37,8 +38,13 @@ app.use('*', requestContext);
 app.use(
   '*',
   cors({
-    origin: (origin, c) =>
-      !origin || origin === c.env.API_ORIGIN ? origin : '',
+    origin: (origin, c) => {
+      if (!origin) return origin;
+      const allowed = c.env.API_ORIGIN.split(',')
+        .map((value: string) => value.trim())
+        .filter(Boolean);
+      return allowed.includes(origin) ? origin : '';
+    },
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: [
       'Authorization',
@@ -55,6 +61,7 @@ app.get('/health', (c) =>
 app.route('/api/v1/auth', authRoutes);
 app.route('/api/v1/campaigns', campaignRoutes);
 app.route('/api/v1/winners', winnerRoutes);
+app.route('/api/v1', publicRoutes);
 app.use('/api/v1/*', requireAuth);
 app.route('/api/v1/users', userRoutes);
 app.route('/api/v1/orders', orderRoutes);

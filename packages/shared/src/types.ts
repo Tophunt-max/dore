@@ -367,6 +367,130 @@ export interface Banner {
   sortOrder: number;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  imageUrl: string | null;
+  sortOrder: number;
+}
+
+export interface CampaignParticipant {
+  userId: string;
+  displayName: string | null;
+  phoneMasked: string;
+  entryCount: number;
+  latestEntryAt: string;
+}
+
+export interface CampaignHistoryItem {
+  campaignId: string;
+  status: string;
+  totalEntries: number;
+  soldEntries: number;
+  endsAt: string;
+  winner: {
+    userId: string;
+    displayName: string | null;
+    phoneMasked: string;
+    entryNumber: number;
+    announcedAt: string;
+  } | null;
+}
+
+export interface ReferralSummary {
+  totalInvited: number;
+  qualified: number;
+  rewarded: number;
+  rewardMinor: number;
+  rewardCoins: number;
+  currency: string;
+}
+
+export interface ReferralConsumer {
+  userId: string;
+  displayName: string | null;
+  phoneMasked: string;
+  consumptionMinor: number;
+  currency: string;
+}
+
+export interface ReferralRebate {
+  id: string;
+  role: 'referrer' | 'referred';
+  amountMinor: number;
+  coinAmount: number;
+  currency: string;
+  fromDisplayName: string | null;
+  fromPhoneMasked: string | null;
+  createdAt: string;
+}
+
+export interface FinanceOrder {
+  id: string;
+  offerId: string;
+  offerTitle: string;
+  providerName: string;
+  principalMinor: number;
+  currency: string;
+  status: 'active' | 'matured' | 'settled' | 'cancelled';
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AfterSalesRequest {
+  id: string;
+  orderId: string;
+  orderTitle: string;
+  type: 'return' | 'exchange' | 'complaint' | 'other';
+  reason: string;
+  status: 'open' | 'in_review' | 'resolved' | 'rejected';
+  adminNote: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SystemConfig {
+  settings: Record<string, string>;
+}
+
+export interface PrizeActivity {
+  id: string;
+  title: string;
+  description: string;
+  rules: string;
+  prizePoolMinor: number;
+  currency: string;
+  winnersCount: number;
+  requiredInvites: number;
+  imageUrl: string | null;
+  status: 'draft' | 'active' | 'drawing' | 'completed' | 'cancelled';
+  startsAt: string | null;
+  endsAt: string | null;
+  drawnAt: string | null;
+  participantCount: number;
+  joined?: boolean;
+  myStatus?: 'joined' | 'qualified' | 'won' | 'not_won' | null;
+  myPrizeMinor?: number;
+}
+
+export interface PrizeActivityParticipant {
+  userId: string;
+  displayName: string | null;
+  phoneMasked: string;
+  status: 'joined' | 'qualified' | 'won' | 'not_won';
+  prizeMinor: number;
+  createdAt: string;
+}
+
+export interface FinanceOfferHistoryItem {
+  phoneMasked: string;
+  principalMinor: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+}
+
 export interface FinanceOffer {
   id: string;
   providerName: string;

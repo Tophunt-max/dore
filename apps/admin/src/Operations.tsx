@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AdminApiError, adminApi, type AdminRole } from './api';
 
@@ -11,8 +11,14 @@ export type OperationsPageName =
   | 'support-tickets'
   | 'notifications'
   | 'banners'
+  | 'categories'
+  | 'prize-activities'
   | 'memberships-discounts'
   | 'finance-offers'
+  | 'finance-orders'
+  | 'after-sales'
+  | 'winners'
+  | 'system-settings'
   | 'game-config'
   | 'reports';
 
@@ -21,7 +27,7 @@ type Column = { key: string; label: string };
 type CreateField = {
   name: string;
   label: string;
-  type?: 'text' | 'textarea' | 'number' | 'select';
+  type?: 'text' | 'textarea' | 'number' | 'select' | 'image';
   options?: string[];
   required?: boolean;
   defaultValue?: string;
@@ -53,7 +59,146 @@ const adminOnly: AdminRole[] = ['admin'];
 const finance: AdminRole[] = ['finance', 'admin'];
 const support: AdminRole[] = ['support', 'admin'];
 
-const sections: Record<Exclude<OperationsPageName, 'reports'>, Section[]> = {
+const sections: Record<
+  Exclude<OperationsPageName, 'reports' | 'system-settings'>,
+  Section[]
+> = {
+  'after-sales': [
+    {
+      title: 'After-sales',
+      description: 'Handle returns, exchanges, and complaints on orders.',
+      endpoint: 'after-sales',
+      statuses: ['open', 'in_review', 'resolved', 'rejected'],
+      columns: [
+        { key: 'phoneMasked', label: 'User' },
+        { key: 'orderTitle', label: 'Order' },
+        { key: 'type', label: 'Type' },
+        { key: 'reason', label: 'Reason' },
+        { key: 'status', label: 'Status' },
+        { key: 'createdAt', label: 'Created' },
+      ],
+      actions: [
+        {
+          label: 'Review',
+          roles: support,
+          visible: (r) => String(r.status) === 'open',
+          path: (r) => `after-sales/${r.id}/status`,
+          method: 'POST',
+          confirm: () => 'Move this request to in-review?',
+          body: () => ({ status: 'in_review' }),
+        },
+        {
+          label: 'Resolve',
+          className: 'approve',
+          roles: support,
+          visible: (r) => String(r.status) !== 'resolved',
+          path: (r) => `after-sales/${r.id}/status`,
+          method: 'POST',
+          confirm: () => 'Mark this request resolved?',
+          body: () => ({
+            status: 'resolved',
+            adminNote: window.prompt('Resolution note (optional)') ?? '',
+          }),
+        },
+        {
+          label: 'Reject',
+          className: 'reject',
+          roles: support,
+          visible: (r) => String(r.status) !== 'rejected',
+          path: (r) => `after-sales/${r.id}/status`,
+          method: 'POST',
+          confirm: () => 'Reject this request?',
+          body: () => ({
+            status: 'rejected',
+            adminNote: window.prompt('Rejection reason') ?? '',
+          }),
+        },
+      ],
+    },
+  ],
+  'finance-orders': [
+    {
+      title: 'Finance orders',
+      description:
+        'Review finance purchases and settle them manually. Settlement credits principal + return to the user wallet (regulated — no auto interest).',
+      endpoint: 'finance-orders',
+      statuses: ['active', 'matured', 'settled', 'cancelled'],
+      columns: [
+        { key: 'phoneMasked', label: 'User' },
+        { key: 'offerTitle', label: 'Offer' },
+        { key: 'principalMinor', label: 'Principal (minor)' },
+        { key: 'status', label: 'Status' },
+        { key: 'createdAt', label: 'Created' },
+      ],
+      actions: [
+        {
+          label: 'Settle',
+          className: 'approve',
+          roles: finance,
+          visible: (r) => String(r.status) === 'active',
+          path: (r) => `finance-orders/${r.id}/settle`,
+          method: 'POST',
+          confirm: (r) =>
+            `Settle order ${r.id}? This credits principal + return to the user wallet.`,
+          body: () => {
+            const value = window.prompt(
+              'Return/interest in minor units (e.g. 500 = ₹5.00). Principal is added automatically.',
+              '0',
+            );
+            if (value === null) return null;
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount < 0) {
+              window.alert('Enter a valid non-negative amount.');
+              return null;
+            }
+            return {
+              returnMinor: Math.round(amount),
+              note: window.prompt('Settlement note (optional)') ?? '',
+            };
+          },
+        },
+      ],
+    },
+  ],
+  winners: [
+    {
+      title: 'Winners',
+      description:
+        'Announced winners. For cash-award campaigns, pay the cash prize into the winner wallet (manual, audited).',
+      endpoint: 'winners',
+      columns: [
+        { key: 'phoneMasked', label: 'User' },
+        { key: 'productTitle', label: 'Product' },
+        { key: 'entryNumber', label: 'Lucky code' },
+        { key: 'announcedAt', label: 'Announced' },
+      ],
+      actions: [
+        {
+          label: 'Cash payout',
+          className: 'approve',
+          roles: finance,
+          path: (r) => `winners/${r.id}/payout`,
+          method: 'POST',
+          confirm: (r) => `Pay a cash prize to ${r.phoneMasked}?`,
+          body: () => {
+            const value = window.prompt(
+              'Payout amount in minor units (e.g. 100000 = ₹1000.00)',
+            );
+            if (value === null) return null;
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount <= 0) {
+              window.alert('Enter a valid positive amount.');
+              return null;
+            }
+            return {
+              amountMinor: Math.round(amount),
+              note: window.prompt('Payout note (optional)') ?? '',
+            };
+          },
+        },
+      ],
+    },
+  ],
   draws: [
     {
       title: 'Draw execution',
@@ -338,6 +483,105 @@ const sections: Record<Exclude<OperationsPageName, 'reports'>, Section[]> = {
       ],
     },
   ],
+  categories: [
+    {
+      title: 'Categories',
+      description: 'Product categories used to group and filter draws on home.',
+      endpoint: 'categories',
+      statuses: ['draft', 'active', 'archived'],
+      columns: [
+        { key: 'name', label: 'Name' },
+        { key: 'slug', label: 'Slug' },
+        { key: 'sortOrder', label: 'Order' },
+        { key: 'status', label: 'Status' },
+      ],
+      createLabel: 'New category',
+      createRoles: adminOnly,
+      createFields: [
+        { name: 'name', label: 'Name', required: true },
+        { name: 'slug', label: 'Slug (lowercase-hyphen)', required: true },
+        { name: 'imageKey', label: 'Icon image', type: 'image' },
+        {
+          name: 'status',
+          label: 'Status',
+          type: 'select',
+          options: ['draft', 'active', 'archived'],
+          defaultValue: 'draft',
+        },
+        {
+          name: 'sortOrder',
+          label: 'Sort order',
+          type: 'number',
+          defaultValue: '0',
+        },
+      ],
+    },
+  ],
+  'prize-activities': [
+    {
+      title: 'Prize activities',
+      description:
+        'Cash prize-pool events. Create, then run the draw to split the pool among qualified participants (manual, audited).',
+      endpoint: 'prize-activities',
+      statuses: ['draft', 'active', 'drawing', 'completed', 'cancelled'],
+      columns: [
+        { key: 'title', label: 'Title' },
+        { key: 'prizePoolMinor', label: 'Pool (minor)' },
+        { key: 'winnersCount', label: 'Winners' },
+        { key: 'requiredInvites', label: 'Req. invites' },
+        { key: 'participantCount', label: 'Participants' },
+        { key: 'status', label: 'Status' },
+      ],
+      createLabel: 'New activity',
+      createRoles: adminOnly,
+      createFields: [
+        { name: 'title', label: 'Title', required: true },
+        { name: 'description', label: 'Description', type: 'textarea' },
+        { name: 'rules', label: 'Rules', type: 'textarea' },
+        {
+          name: 'prizePoolMinor',
+          label: 'Prize pool (minor units, e.g. 500000 = ₹5000)',
+          type: 'number',
+          defaultValue: '0',
+        },
+        {
+          name: 'winnersCount',
+          label: 'Number of winners',
+          type: 'number',
+          defaultValue: '1',
+        },
+        {
+          name: 'requiredInvites',
+          label: 'Required qualified invites',
+          type: 'number',
+          defaultValue: '0',
+        },
+        { name: 'imageKey', label: 'Banner image', type: 'image' },
+        {
+          name: 'status',
+          label: 'Status',
+          type: 'select',
+          options: ['draft', 'active', 'drawing', 'completed', 'cancelled'],
+          defaultValue: 'draft',
+        },
+        { name: 'startsAt', label: 'Starts epoch', type: 'number' },
+        { name: 'endsAt', label: 'Ends epoch (deadline)', type: 'number' },
+      ],
+      actions: [
+        {
+          label: 'Run draw',
+          className: 'approve',
+          roles: finance,
+          visible: (r) => ['active', 'drawing'].includes(String(r.status)),
+          path: (r) => `prize-activities/${r.id}/draw`,
+          method: 'POST',
+          confirm: (r) =>
+            `Run the draw for "${r.title}"? This splits the pool among qualified winners and credits their wallets. This cannot be undone.`,
+          body: () => ({}),
+        },
+      ],
+    },
+  ],
   banners: [
     {
       title: 'Banners',
@@ -356,7 +600,7 @@ const sections: Record<Exclude<OperationsPageName, 'reports'>, Section[]> = {
       createFields: [
         { name: 'title', label: 'Title', required: true },
         { name: 'body', label: 'Body', type: 'textarea' },
-        { name: 'imageKey', label: 'Image key' },
+        { name: 'imageKey', label: 'Banner image', type: 'image' },
         { name: 'actionUrl', label: 'Action URL' },
         {
           name: 'status',
@@ -619,6 +863,21 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'The operation failed.';
 }
 
+// A row is "archived" when it has been soft-deleted: catalog items are disabled
+// (enabled = 0/false) and status-driven records carry an "archived" status.
+// Financial records are kept in the DB for audit safety, so this only hides them
+// from the default view — they reappear via the "Show archived" toggle.
+function isArchivedRow(row: Row): boolean {
+  const enabled = row['enabled'];
+  if (enabled === 0 || enabled === false || enabled === '0') return true;
+  const status = row['status'];
+  if (typeof status === 'string') {
+    const normalized = status.toLowerCase();
+    if (normalized === 'archived' || normalized === 'disabled') return true;
+  }
+  return false;
+}
+
 function OperationalSection({
   section,
   role,
@@ -631,6 +890,7 @@ function OperationalSection({
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const [creating, setCreating] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   const query = useQuery({
     queryKey: ['admin-operation', section.endpoint, search, status, page],
     queryFn: () =>
@@ -656,10 +916,14 @@ function OperationalSection({
         queryKey: ['admin-operation', section.endpoint],
       }),
   });
-  const rows = query.data?.items ?? [];
+  const allRows = query.data?.items ?? [];
+  const archivedCount = allRows.filter(isArchivedRow).length;
+  const rows = showArchived
+    ? allRows
+    : allRows.filter((row) => !isArchivedRow(row));
   const hasNext = query.data?.total
     ? page * (query.data.pageSize ?? 25) < query.data.total
-    : rows.length === 25 || Boolean(query.data?.nextCursor);
+    : allRows.length === 25 || Boolean(query.data?.nextCursor);
   return (
     <section className="panel">
       <div className="panel-heading operational-heading">
@@ -700,6 +964,16 @@ function OperationalSection({
             ))}
           </select>
         ) : null}
+        {archivedCount > 0 || showArchived ? (
+          <label className="archive-toggle">
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={(event) => setShowArchived(event.target.checked)}
+            />
+            Show archived{archivedCount > 0 ? ` (${archivedCount})` : ''}
+          </label>
+        ) : null}
       </div>
       {query.isPending ? (
         <div className="state">Loading {section.title.toLowerCase()}…</div>
@@ -727,7 +1001,7 @@ function OperationalSection({
               {rows.map((row, index) => (
                 <tr key={String(row.id ?? `${section.endpoint}-${index}`)}>
                   {section.columns.map((column) => (
-                    <td key={column.key}>
+                    <td key={column.key} data-label={column.label}>
                       {column.key.includes('status') && row[column.key] ? (
                         <span className={`status ${String(row[column.key])}`}>
                           {display(row[column.key])}
@@ -740,7 +1014,7 @@ function OperationalSection({
                   {section.actions?.some((item) =>
                     item.roles.includes(role),
                   ) ? (
-                    <td className="actions">
+                    <td className="actions" data-label="Actions">
                       {section.actions
                         .filter(
                           (item) =>
@@ -883,6 +1157,13 @@ function CreateOperationForm({
                     <option key={option}>{option}</option>
                   ))}
                 </select>
+              ) : field.type === 'image' ? (
+                <ImageUploadField
+                  value={values[field.name] ?? ''}
+                  onChange={(key) =>
+                    setValues({ ...values, [field.name]: key })
+                  }
+                />
               ) : (
                 <input
                   required={field.required}
@@ -901,6 +1182,49 @@ function CreateOperationForm({
           {busy ? 'Saving…' : 'Save'}
         </button>
       </form>
+    </div>
+  );
+}
+
+function ImageUploadField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (key: string) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [preview, setPreview] = useState<string | null>(null);
+  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    setError('');
+    try {
+      const { objectKey, url } = await adminApi.uploadImage(file, 'banner');
+      onChange(objectKey);
+      setPreview(url);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Upload failed.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="image-upload">
+      {preview ? (
+        <img className="image-upload-preview" src={preview} alt="Banner preview" />
+      ) : null}
+      <input
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        disabled={busy}
+        onChange={handleFile}
+      />
+      {busy ? <small>Uploading…</small> : null}
+      {!busy && value ? <small>Uploaded ✓</small> : null}
+      {error ? <small className="error">{error}</small> : null}
     </div>
   );
 }
@@ -986,6 +1310,7 @@ export function OperationsPage({
   role: AdminRole;
 }) {
   if (page === 'reports') return <Reports role={role} />;
+  if (page === 'system-settings') return <SystemSettings />;
   return (
     <>
       {sections[page].map((section) => (
@@ -996,5 +1321,79 @@ export function OperationsPage({
         />
       ))}
     </>
+  );
+}
+
+function SystemSettings() {
+  const client = useQueryClient();
+  const query = useQuery({
+    queryKey: ['admin-operation', 'settings'],
+    queryFn: () => adminApi.operations('settings'),
+  });
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [dirty, setDirty] = useState(false);
+  const items = (query.data?.items ?? []) as Array<{
+    key: string;
+    value: string;
+    updatedAt?: string;
+  }>;
+  const current: Record<string, string> = {};
+  for (const item of items) current[item.key] = item.value;
+  const view = dirty ? values : current;
+  const save = useMutation({
+    mutationFn: () =>
+      adminApi.operationAction('settings', 'PUT', { settings: view }),
+    onSuccess: () => {
+      setDirty(false);
+      void client.invalidateQueries({
+        queryKey: ['admin-operation', 'settings'],
+      });
+    },
+  });
+  return (
+    <section className="panel">
+      <div className="panel-heading">
+        <div>
+          <h2>System settings</h2>
+          <p className="muted">
+            Global configuration surfaced to the apps (withdrawal limits, fees,
+            support contacts, home notice).
+          </p>
+        </div>
+        <button
+          className="primary small"
+          disabled={!dirty || save.isPending}
+          onClick={() => save.mutate()}
+        >
+          {save.isPending ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
+      {query.isPending ? <div className="state">Loading settings…</div> : null}
+      {query.isError ? (
+        <div className="state error">{errorMessage(query.error)}</div>
+      ) : null}
+      {save.isError ? (
+        <div className="state error">{errorMessage(save.error)}</div>
+      ) : null}
+      {!query.isPending && !query.isError ? (
+        <div className="form-grid">
+          {items.map((item) => (
+            <label key={item.key}>
+              {item.key}
+              <input
+                value={view[item.key] ?? ''}
+                onChange={(event) => {
+                  setValues({ ...view, [item.key]: event.target.value });
+                  setDirty(true);
+                }}
+              />
+            </label>
+          ))}
+          {!items.length ? (
+            <div className="empty">No settings configured.</div>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
   );
 }

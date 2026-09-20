@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
+import { useAuthStore } from '@/stores/auth';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { api } from '@/api/endpoints';
@@ -13,6 +14,8 @@ import { useI18n } from '@/i18n';
 import { theme } from '@/theme';
 
 export default function SupportScreen() {
+  const authedUser = useAuthStore((state) => state.user);
+  if (!authedUser) return <Redirect href="/login" />;
   const { formatDate, labelFor, t } = useI18n();
   const client = useQueryClient();
   const tickets = useQuery({

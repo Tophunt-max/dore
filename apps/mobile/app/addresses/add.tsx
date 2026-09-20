@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
+import { useAuthStore } from '@/stores/auth';
 import { Controller, useForm } from 'react-hook-form';
 import {
   KeyboardAvoidingView,
@@ -41,6 +42,8 @@ const fields: ReadonlyArray<{
   { name: 'countryCode', labelKey: 'addresses.countryCode' },
 ];
 export default function AddAddressScreen() {
+  const authedUser = useAuthStore((state) => state.user);
+  if (!authedUser) return <Redirect href="/login" />;
   const { t } = useI18n();
   const client = useQueryClient();
   const {

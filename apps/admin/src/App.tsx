@@ -1,5 +1,45 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import {
+  Component,
+  useEffect,
+  useMemo,
+  useState,
+  type ErrorInfo,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+// Contains a page render error so a single broken page never blanks the whole
+// console. Shows the error (and a reset) while the sidebar stays usable.
+class PageErrorBoundary extends Component<
+  { pageKey: string; children: ReactNode },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Admin page error:', error, info);
+  }
+  componentDidUpdate(prev: { pageKey: string }) {
+    if (prev.pageKey !== this.props.pageKey && this.state.error)
+      this.setState({ error: null });
+  }
+  render() {
+    if (this.state.error)
+      return (
+        <section className="panel state error">
+          <h2>This page hit an error</h2>
+          <p className="muted">{this.state.error.message}</p>
+          <button className="primary small" onClick={() => this.setState({ error: null })}>
+            Retry
+          </button>
+        </section>
+      );
+    return this.props.children;
+  }
+}
 import { formatMoney } from '@oriva/shared';
 import {
   AdminApiError,
@@ -34,6 +74,7 @@ const navigation: NavItem[] = [
   { page: 'payments', roles: finance, group: 'Money' },
   { page: 'payment-methods', roles: finance, group: 'Money' },
   { page: 'withdrawals', roles: finance, group: 'Money' },
+  { page: 'finance-orders', roles: finance, group: 'Money' },
   { page: 'payment-operations', roles: finance, group: 'Money' },
   { page: 'beneficiaries', roles: finance, group: 'Money' },
   { page: 'finance-offers', roles: adminOnly, group: 'Platform' },
@@ -45,14 +86,19 @@ const navigation: NavItem[] = [
   { page: 'content', roles: adminOnly, group: 'Platform' },
   { page: 'prizes', roles: adminOnly, group: 'Platform' },
   { page: 'banners', roles: adminOnly, group: 'Platform' },
+  { page: 'categories', roles: adminOnly, group: 'Platform' },
+  { page: 'prize-activities', roles: adminOnly, group: 'Platform' },
   { page: 'memberships-discounts', roles: adminOnly, group: 'Platform' },
   { page: 'game-config', roles: adminOnly, group: 'Platform' },
   { page: 'users', roles: support, group: 'People' },
   { page: 'referrals-rewards', roles: adminOnly, group: 'People' },
   { page: 'support-tickets', roles: support, group: 'People' },
+  { page: 'after-sales', roles: support, group: 'People' },
+  { page: 'winners', roles: finance, group: 'Platform' },
   { page: 'notifications', roles: adminOnly, group: 'Communication' },
   { page: 'audit-logs', roles: finance, group: 'Governance' },
   { page: 'reports', roles: finance, group: 'Governance' },
+  { page: 'system-settings', roles: adminOnly, group: 'Governance' },
 ];
 
 const label = (value: string) =>
@@ -72,12 +118,18 @@ export function App() {
     adminApi.hasSession() ? adminApi.sessionUser() : null,
   );
   const [page, setPage] = useState<Page>('dashboard');
+  const [navOpen, setNavOpen] = useState(false);
   if (!user) return <Login onAuthenticated={setUser} />;
   const visibleNavigation = navigation.filter((item) =>
     item.roles.includes(user.role),
   );
   return (
-    <div className="app-shell">
+    <div className={navOpen ? 'app-shell nav-open' : 'app-shell'}>
+      <button
+        className="nav-scrim"
+        aria-label="Close menu"
+        onClick={() => setNavOpen(false)}
+      />
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">◇</div>
@@ -85,6 +137,13 @@ export function App() {
             <strong>Oriva</strong>
             <span>Operations</span>
           </div>
+          <button
+            className="nav-close"
+            aria-label="Close menu"
+            onClick={() => setNavOpen(false)}
+          >
+            ✕
+          </button>
         </div>
         <nav>
           {visibleNavigation.map((item, index) => (
@@ -95,7 +154,10 @@ export function App() {
               ) : null}
               <button
                 className={page === item.page ? 'nav active' : 'nav'}
-                onClick={() => setPage(item.page)}
+                onClick={() => {
+                  setPage(item.page);
+                  setNavOpen(false);
+                }}
               >
                 {label(item.page)}
               </button>
@@ -108,6 +170,7 @@ export function App() {
             adminApi.logout();
             setUser(null);
             setPage('dashboard');
+            setNavOpen(false);
           }}
         >
           Sign out
@@ -115,16 +178,29 @@ export function App() {
       </aside>
       <main className="main">
         <header>
-          <div>
-            <p className="eyebrow">Secure operations console</p>
-            <h1>{label(page)}</h1>
+          <div className="header-left">
+            <button
+              className="nav-toggle"
+              aria-label="Open menu"
+              onClick={() => setNavOpen(true)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+            <div>
+              <p className="eyebrow">Secure operations console</p>
+              <h1>{label(page)}</h1>
+            </div>
           </div>
           <div className="identity">
             <strong>{user.displayName ?? user.phoneMasked}</strong>
             <span className="admin-badge">{label(user.role)}</span>
           </div>
         </header>
-        <PageView page={page} user={user} />
+        <PageErrorBoundary pageKey={page}>
+          <PageView page={page} user={user} />
+        </PageErrorBoundary>
       </main>
     </div>
   );
@@ -646,6 +722,9 @@ interface ResourceConfig {
   fields: Field[];
   canCreate?: boolean;
   canDelete?: boolean;
+  // Label for the row delete button. Defaults to 'Archive' (soft-disable). Set
+  // to 'Delete' for resources whose DELETE endpoint permanently removes the row.
+  deleteLabel?: string;
   writeRoles: AdminRole[];
 }
 const configs: Record<ResourcePage, ResourceConfig> = {
@@ -655,6 +734,7 @@ const configs: Record<ResourcePage, ResourceConfig> = {
     description: 'Configure bank and UPI accounts shown to users.',
     canCreate: true,
     canDelete: true,
+    deleteLabel: 'Delete',
     writeRoles: finance,
     columns: [
       { key: 'display_name', label: 'Name' },
@@ -1137,7 +1217,7 @@ function ResourceManager({
               {pageRows.map((row) => (
                 <tr key={String(row.id)}>
                   {config.columns.map((column) => (
-                    <td key={column.key}>
+                    <td key={column.key} data-label={column.label}>
                       {column.key === 'status' ? (
                         <span className={`status ${String(row[column.key])}`}>
                           {display(row[column.key])}
@@ -1148,7 +1228,7 @@ function ResourceManager({
                     </td>
                   ))}
                   {canWrite ? (
-                    <td className="actions">
+                    <td className="actions" data-label="Actions">
                       <button
                         onClick={() => {
                           setSelected(row);
@@ -1164,15 +1244,19 @@ function ResourceManager({
                           className="reject"
                           disabled={remove.isPending}
                           onClick={() => {
-                            if (
-                              window.confirm(
-                                `Archive or disable ${String(row.id)}?`,
-                              )
-                            )
+                            const label = config.deleteLabel ?? 'Archive';
+                            const name = String(
+                              row.display_name ?? row.title ?? row.id,
+                            );
+                            const message =
+                              label === 'Delete'
+                                ? `Permanently delete "${name}"? This cannot be undone — you will need to create it again to use it.`
+                                : `Archive or disable "${name}"?`;
+                            if (window.confirm(message))
                               remove.mutate(String(row.id));
                           }}
                         >
-                          Archive
+                          {config.deleteLabel ?? 'Archive'}
                         </button>
                       ) : null}
                     </td>

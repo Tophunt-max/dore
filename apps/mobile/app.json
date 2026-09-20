@@ -7,7 +7,7 @@
     "scheme": "oriva",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "icon": "../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/logo.png",
+    "icon": "./assets/orich/logo.png",
     "splash": {
       "backgroundColor": "#F8F8F8"
     },
@@ -18,7 +18,7 @@
     "android": {
       "package": "com.oriva.app",
       "adaptiveIcon": {
-        "foregroundImage": "../../ORich_2.1.4_APKPure.xapk_Decompiler.com/resources/com.orich.orichrelease.apk/assets/apps/__UNI__F330A24/www/static/logo.png",
+        "foregroundImage": "./assets/orich/logo.png",
         "backgroundColor": "#FFFFFF"
       },
       "permissions": ["POST_NOTIFICATIONS", "CAMERA", "READ_MEDIA_IMAGES"],

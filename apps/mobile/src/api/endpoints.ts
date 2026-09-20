@@ -4,6 +4,9 @@ import type {
   Banner,
   Campaign,
   CampaignDraw,
+  CampaignHistoryItem,
+  CampaignParticipant,
+  Category,
   CoinSummary,
   ContentPage,
   CreateOrderInput,
@@ -13,18 +16,25 @@ import type {
   CreateSupportTicketInput,
   CreateUploadInput,
   DiscountOffer,
+  AfterSalesRequest,
   FinanceOffer,
+  FinanceOrder,
   GameDefinition,
   LedgerEntry,
   ManualPayment,
   Membership,
   MembershipPlan,
+  PrizeActivity,
+  SystemConfig,
   NotificationInboxItem,
   Order,
   PayoutBeneficiary,
   PayoutBeneficiaryInput,
   PaymentMethod,
   Prize,
+  ReferralConsumer,
+  ReferralRebate,
+  ReferralSummary,
   RequestOtpInput,
   SharePost,
   SubmitPaymentInput,
@@ -82,8 +92,22 @@ export const api = {
       body: input,
     }),
 
-  campaigns: () => apiRequest<{ items: Campaign[] }>('/api/v1/campaigns'),
+  campaigns: (category?: string) =>
+    apiRequest<{ items: Campaign[] }>(
+      category
+        ? `/api/v1/campaigns?category=${encodeURIComponent(category)}`
+        : '/api/v1/campaigns',
+    ),
   campaign: (id: string) => apiRequest<Campaign>(`/api/v1/campaigns/${id}`),
+  campaignParticipants: (id: string) =>
+    apiRequest<{ items: CampaignParticipant[] }>(
+      `/api/v1/campaigns/${id}/participants`,
+    ),
+  campaignHistory: (id: string) =>
+    apiRequest<{ items: CampaignHistoryItem[] }>(
+      `/api/v1/campaigns/${id}/history`,
+    ),
+  categories: () => apiRequest<{ items: Category[] }>('/api/v1/categories'),
   campaignDraw: (id: string) =>
     apiRequest<CampaignDraw>(`/api/v1/winners/draws/${id}`),
   createOrder: (input: CreateOrderInput) =>
@@ -172,6 +196,11 @@ export const api = {
       body: { addressId },
     }),
   team: () => apiRequest<{ items: TeamMember[] }>('/api/v1/team'),
+  teamSummary: () => apiRequest<ReferralSummary>('/api/v1/team/summary'),
+  teamConsumption: () =>
+    apiRequest<{ items: ReferralConsumer[] }>('/api/v1/team/consumption'),
+  teamRebates: () =>
+    apiRequest<{ items: ReferralRebate[] }>('/api/v1/team/rebates'),
   shares: () => apiRequest<{ items: SharePost[] }>('/api/v1/shares'),
   createShare: (input: CreateSharePostInput) =>
     apiRequest<{ id: string }>('/api/v1/shares', {
@@ -222,6 +251,45 @@ export const api = {
     apiRequest<{ informationalOnly: true; items: FinanceOffer[] }>(
       '/api/v1/finance/offers',
     ),
+  financeBuy: (offerId: string, principalMinor: number) =>
+    apiRequest<{ status: string; orderId: string }>(
+      `/api/v1/finance/offers/${offerId}/purchase`,
+      { method: 'POST', body: { principalMinor } },
+    ),
+  financeOrders: () =>
+    apiRequest<{ informationalReturns: true; items: FinanceOrder[] }>(
+      '/api/v1/finance/orders',
+    ),
+  financeOrdersRecent: () =>
+    apiRequest<{ items: FinanceOrder[] }>('/api/v1/finance/orders/recent'),
+  financeOffer: (id: string) =>
+    apiRequest<FinanceOffer & { participants: number; totalPrincipalMinor: number }>(
+      `/api/v1/finance/offers/${id}`,
+    ),
+  financeOfferHistory: (id: string) =>
+    apiRequest<{ items: unknown[] }>(`/api/v1/finance/offers/${id}/history`),
+  prizeActivities: () =>
+    apiRequest<{ items: PrizeActivity[] }>('/api/v1/prize-activities'),
+  prizeActivity: (id: string) =>
+    apiRequest<PrizeActivity & { participants: unknown[] }>(
+      `/api/v1/prize-activities/${id}`,
+    ),
+  joinPrizeActivity: (id: string) =>
+    apiRequest<{ joined: boolean }>(`/api/v1/prize-activities/${id}/join`, {
+      method: 'POST',
+    }),
+  systemConfig: () => apiRequest<SystemConfig>('/api/v1/system'),
+  afterSales: () =>
+    apiRequest<{ items: AfterSalesRequest[] }>('/api/v1/after-sales'),
+  createAfterSales: (input: {
+    orderId: string;
+    type: string;
+    reason: string;
+  }) =>
+    apiRequest<{ id: string; status: string }>('/api/v1/after-sales', {
+      method: 'POST',
+      body: input,
+    }),
   games: () =>
     apiRequest<{ nonMonetary: true; items: GameDefinition[] }>('/api/v1/games'),
   playGame: (id: string) =>
@@ -232,6 +300,11 @@ export const api = {
   membershipPlans: () =>
     apiRequest<{ items: MembershipPlan[] }>('/api/v1/memberships/plans'),
   memberships: () => apiRequest<{ items: Membership[] }>('/api/v1/memberships'),
+  buyMembership: (planId: string) =>
+    apiRequest<{ status: string; membershipId: string }>(
+      '/api/v1/memberships/purchase',
+      { method: 'POST', body: { planId } },
+    ),
   discounts: () => apiRequest<{ items: DiscountOffer[] }>('/api/v1/discounts'),
 
   createUpload: (input: CreateUploadInput) =>

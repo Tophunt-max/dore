@@ -16,7 +16,10 @@ export default function ProductsScreen() {
   const [tab, setTab] = useState<Tab>('active');
   const { width } = useWindowDimensions();
   const { t } = useI18n();
-  const query = useQuery({ queryKey: ['campaigns'], queryFn: api.campaigns });
+  const query = useQuery({
+    queryKey: ['campaigns'],
+    queryFn: () => api.campaigns(),
+  });
   const items = (query.data?.items ?? []).filter((c) =>
     tab === 'active' ? c.status === 'active' : c.status === 'scheduled',
   );

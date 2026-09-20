@@ -232,6 +232,21 @@ export const catalog = {
     hi: 'उपलब्ध होने पर बैंक या UPI ट्रांसफ़र विवरण दिखाई देंगे।',
     zh: '可用时将显示银行或 UPI 转账详情。',
   },
+  'payment.loadingMethods': {
+    en: 'Loading payment methods…',
+    hi: 'भुगतान विधियाँ लोड हो रही हैं…',
+    zh: '正在加载支付方式…',
+  },
+  'payment.methodsError': {
+    en: 'Could not load payment methods. Please check your connection and try again.',
+    hi: 'भुगतान विधियाँ लोड नहीं हो सकीं। कृपया अपना कनेक्शन जांचें और पुनः प्रयास करें।',
+    zh: '无法加载支付方式，请检查网络后重试。',
+  },
+  'payment.loginRequired': {
+    en: 'Please log in to recharge your wallet and view payment methods.',
+    hi: 'वॉलेट रिचार्ज करने और भुगतान विधियाँ देखने के लिए कृपया लॉग इन करें।',
+    zh: '请登录以充值钱包并查看支付方式。',
+  },
   'payment.recharge': {
     en: 'Wallet recharge',
     hi: 'वॉलेट रिचार्ज',
@@ -477,6 +492,31 @@ export const catalog = {
     en: 'This campaign is not currently open.',
     hi: 'यह अभियान अभी खुला नहीं है।',
     zh: '此活动目前未开放。',
+  },
+  'campaign.endIn': {
+    en: 'End in {time}',
+    hi: 'समाप्ति {time}',
+    zh: '{time} 后结束',
+  },
+  'campaign.peopleParticipating': {
+    en: '{count} people are participating',
+    hi: '{count} लोग भाग ले रहे हैं',
+    zh: '{count} 人正在参与',
+  },
+  'campaign.total': {
+    en: 'Total',
+    hi: 'कुल',
+    zh: '总数',
+  },
+  'campaign.needed': {
+    en: 'Needed',
+    hi: 'आवश्यक',
+    zh: '还需',
+  },
+  'campaign.buyNow': {
+    en: 'Buy',
+    hi: 'खरीदें',
+    zh: '购买',
   },
   'winners.title': {
     en: 'Latest winners',
