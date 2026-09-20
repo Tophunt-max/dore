@@ -13,9 +13,11 @@ import {
 } from 'react-native';
 import { api } from '@/api/endpoints';
 import { assets } from '@/assets';
+import { LineProgress } from '@/components/LineProgress';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
+import { countDown } from '@/countdown';
 import { useI18n } from '@/i18n';
 import { rpx } from '@/rpx';
 import { useAuthStore } from '@/stores/auth';
@@ -32,10 +34,6 @@ const C = {
   track: '#f1e4dc',
   numberBg: '#f7f8f9',
 };
-
-function pad(value: number): string {
-  return String(value).padStart(2, '0');
-}
 
 export default function ProductDetailScreen() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
@@ -99,11 +97,8 @@ export default function ProductDetailScreen() {
     }
   }
 
-  const totalSeconds = Math.floor(remaining / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  const countdown = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  // ORich prints accumulated hours (days folded in), e.g. "44:47:05".
+  const countdown = countDown(Date.now() + remaining, Date.now());
 
   const sold = campaign?.soldEntries ?? 0;
   const total = campaign?.totalEntries ?? 0;
@@ -216,7 +211,7 @@ export default function ProductDetailScreen() {
               ) : null}
             </View>
             <View style={styles.track}>
-              <View style={[styles.fill, { width: `${progress}%` }]} />
+              <LineProgress percent={progress} />
             </View>
             <View style={styles.needRow}>
               <Text style={styles.needText}>
@@ -392,16 +387,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
   },
   avatarFirst: { marginLeft: 0 },
-  // .people-progress → <lineprogress> (28rpx tall, rounded, orange fill).
-  track: {
-    marginTop: rpx(20),
-    marginBottom: rpx(4),
-    height: rpx(28),
-    borderRadius: rpx(14),
-    overflow: 'hidden',
-    backgroundColor: C.track,
-  },
-  fill: { height: '100%', borderRadius: rpx(14), backgroundColor: C.orange },
+  // .people-progress { width:100%; margin:4rpx 0 } → <lineprogress> (16rpx).
+  track: { marginTop: rpx(20), marginBottom: rpx(4) },
   // .people-need — "Total: x" left, "Needed: y" right, both orange.
   needRow: {
     marginTop: rpx(8),

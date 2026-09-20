@@ -56,6 +56,8 @@ export interface Product {
 export interface Campaign {
   id: string;
   product: Product;
+  /** Present when the campaign has been assigned to a catalog category. */
+  category?: Category | null;
   entryPriceMinor: number;
   totalEntries: number;
   soldEntries: number;

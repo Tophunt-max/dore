@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Image, StyleSheet } from 'react-native';
 import { assets } from '@/assets';
 import { useI18n } from '@/i18n';
+import { rpx } from '@/rpx';
 import { theme } from '@/theme';
 
 const icons = {
@@ -32,8 +33,10 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.ink,
+        // ORich tabbar: color #17273a, selectedColor #de6436 (also declared in
+        // the app-config tabBar block).
+        tabBarActiveTintColor: '#de6436',
+        tabBarInactiveTintColor: '#17273a',
         tabBarLabelStyle: styles.label,
         tabBarStyle: styles.bar,
         tabBarItemStyle: styles.item,
@@ -87,15 +90,23 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+// ORich `components/tabbar` (scope data-v-1ea0313d):
+//   .tabbar      { height:98rpx; background:#fff; padding:0 60rpx }
+//   .tabbar-item uni-image { width:46rpx; height:46rpx }
+//   .tabbar-item { font-size:20rpx; font-weight:700 }
 const styles = StyleSheet.create({
   bar: {
-    height: 70,
-    paddingTop: 4,
-    paddingBottom: 7,
+    height: rpx(98),
+    paddingTop: rpx(8),
+    paddingBottom: rpx(8),
     backgroundColor: theme.colors.surface,
     borderTopColor: theme.colors.border,
   },
-  item: { paddingVertical: 2 },
-  icon: { width: 38, height: 38 },
-  label: { fontFamily: theme.typography.family.medium, fontSize: 10 },
+  item: { paddingVertical: 0 },
+  icon: { width: rpx(46), height: rpx(46) },
+  label: {
+    fontFamily: theme.typography.family.bold,
+    fontSize: rpx(20),
+    marginTop: rpx(2),
+  },
 });

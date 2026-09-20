@@ -81,7 +81,7 @@ export function BannerCarousel({ banners }: { banners?: Banner[] }) {
         scrollRef.current?.scrollTo({ x: next * pageWidth, animated: true });
         return next;
       });
-    }, 4000);
+    }, 3000); // u-swiper default interval
     return () => clearInterval(timer);
   }, [slides.length, pageWidth]);
 
@@ -152,7 +152,8 @@ export function BannerCarousel({ banners }: { banners?: Banner[] }) {
   );
 }
 
-const RADIUS = rpx(16);
+// u-swiper default `borderRadius` is 8rpx (ORich passes only height + list).
+const RADIUS = rpx(8);
 const styles = StyleSheet.create({
   banner: {
     height: rpx(278),
@@ -181,21 +182,24 @@ const styles = StyleSheet.create({
     lineHeight: rpx(34),
   },
   promoGraphic: { width: rpx(170), height: rpx(220) },
-  // Indicator dots overlaid at the bottom-centre of the swiper (u-swiper style).
+  // u-swiper `mode:"round"` indicator, bottom-centre, container padded 0 24rpx:
+  //   .u-indicator-item-round        { 14x14rpx; radius 20rpx; rgba(0,0,0,.3) }
+  //   .u-indicator-item-round-active { width 34rpx; rgba(255,255,255,.8) }
   dots: {
     position: 'absolute',
     bottom: rpx(16),
     left: 0,
     right: 0,
+    paddingHorizontal: rpx(24),
     flexDirection: 'row',
     justifyContent: 'center',
   },
   dot: {
-    width: rpx(12),
-    height: rpx(12),
-    borderRadius: rpx(6),
+    width: rpx(14),
+    height: rpx(14),
+    borderRadius: rpx(20),
     marginHorizontal: rpx(6),
-    backgroundColor: 'rgba(255,255,255,.55)',
+    backgroundColor: 'rgba(0,0,0,.3)',
   },
-  dotActive: { backgroundColor: '#fff', width: rpx(28) },
+  dotActive: { width: rpx(34), backgroundColor: 'rgba(255,255,255,.8)' },
 });
