@@ -145,3 +145,16 @@ export const TaskListData = (_d: { start: number; limit: number }) =>
     return { list, count: list.length, fixed_list: [], records: [] };
   });
 export const TaskReceive = (d: { id: number }) => api.post(`/api/tasks/${d.id}/claim`);
+
+
+// --- order adapters ---
+// userOrder({status,start,limit}) -> { list:[order...], count }
+export const userOrder = (d: { status?: number; start?: number; limit?: number }) => {
+  // map ORich numeric status filter to backend status string
+  const map: Record<number, string> = { 0: '', 1: 'pending', 3: 'paid', 4: 'shipped', 5: 'won' };
+  const s = map[d.status ?? 0] ?? '';
+  return api.get(`/api/orders${s ? '?status=' + s : ''}`).then((r: any) => ({
+    list: r.orders || [],
+    count: (r.orders || []).length,
+  }));
+};
