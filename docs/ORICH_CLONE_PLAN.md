@@ -42,7 +42,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 27 | payment/cashOut | `/wallet/withdraw` | ⬜ |
 | 28 | richtext/rule | `/rules` | ✅ |
 | 29 | intro | `/intro` | ⬜ (webview orig) |
-| 30 | invitation/invitation | `/referrals` | ⬜ |
+| 30 | invitation/invitation | `/referrals` | ✅ |
 | 31 | help/help | `/help` | ✅ |
 | 32 | help/help_detail | `/help/[topic]` | ✅ |
 | 33 | payment/payrecord | `/payments` | ✅ |
