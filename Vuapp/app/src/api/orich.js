@@ -68,15 +68,33 @@ const goodsItem = (g) => {
 /** A finance product row -> the reference's plan shape. */
 const financeItem = (p) => {
   const it = p || {};
+  const filled = Number(it.filled_minor || 0);
+  const cap = Number(it.max_minor || 0);
   return {
     ...it,
     name: it.title,
+    // the card binds src to `img`; iconurl/imageurl are used elsewhere
+    img: it.image,
     iconurl: it.image,
     imageurl: it.image,
     rate: (it.rate_bps || 0) / 100,
+    rate_income: (it.rate_bps || 0) / 100,
     day: it.term_days,
     min: major(it.min_minor),
     max: major(it.max_minor),
+    price: major(it.min_minor),
+    amount: major(it.min_minor),
+    max_buy: major(it.max_minor),
+    // the progress bar is bound as `100 * progress`, so this must be a 0-1
+    // fraction and never undefined (NaN collapses the bar)
+    progress: cap > 0 ? Math.min(1, filled / cap) : 0,
+    all_buy_num: it.orders_count || 0,
+    countdown: '',
+    // subscriber avatars the reference showed; no equivalent yet
+    userimgurl: [],
+    usernumber: 0,
+    user_headimg: '',
+    user_name: '',
   };
 };
 

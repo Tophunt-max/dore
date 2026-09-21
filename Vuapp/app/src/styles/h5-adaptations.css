@@ -1,0 +1,23 @@
+/* H5 adaptations.
+ *
+ * styles/global.css is a verbatim copy of the reference stylesheet; this file
+ * holds the deliberate changes needed because this build also runs in a normal
+ * browser rather than only in a native webview.
+ */
+
+/* The reference's carousels (finance plans, upcoming, hot picks, the category
+ * strip) are horizontally scrolling flex rows. A native webview never paints a
+ * scrollbar for them; a desktop or Android browser draws a grey bar across the
+ * middle of the card row. Hide it and keep the scrolling. */
+uni-view,
+uni-scroll-view {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+uni-view::-webkit-scrollbar,
+uni-scroll-view::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}

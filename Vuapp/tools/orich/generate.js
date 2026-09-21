@@ -228,7 +228,14 @@ function buildAppVue(bundle, resolve, localeCodes) {
     /^export default /m,
     'export default '
   );
-  const sfc = `<script>\n${script}\n</script>\n\n<style>\n/* The reference app's global stylesheet (uView base + app-wide rules). */\n@import './styles/global.css';\n</style>\n`;
+  const sfc =
+    `<script>\n${script}\n</script>\n\n` +
+    `<style>\n` +
+    `/* The reference app's global stylesheet (uView base + app-wide rules). */\n` +
+    `@import './styles/global.css';\n` +
+    `/* Deliberate changes for running in a browser rather than a webview. */\n` +
+    `@import './styles/h5-adaptations.css';\n` +
+    `</style>\n`;
   return { sfc, warnings: ported.warnings };
 }
 
@@ -562,6 +569,39 @@ export const interopDefault = mescrollMixin;
 }
 
 /**
+ * H5 adaptations layered on top of the reference's verbatim stylesheet.
+ *
+ * Kept in its own file so `styles/global.css` stays a faithful copy: anything
+ * here is a deliberate change, not something recovered from the bundle.
+ */
+function buildH5Adaptations() {
+  return `/* H5 adaptations.
+ *
+ * styles/global.css is a verbatim copy of the reference stylesheet; this file
+ * holds the deliberate changes needed because this build also runs in a normal
+ * browser rather than only in a native webview.
+ */
+
+/* The reference's carousels (finance plans, upcoming, hot picks, the category
+ * strip) are horizontally scrolling flex rows. A native webview never paints a
+ * scrollbar for them; a desktop or Android browser draws a grey bar across the
+ * middle of the card row. Hide it and keep the scrolling. */
+uni-view,
+uni-scroll-view {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+uni-view::-webkit-scrollbar,
+uni-scroll-view::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+`;
+}
+
+/**
  * Compatibility shim for the native-only APIs the reference app used.
  *
  * The reference shipped as an Android build and called `plus.*` and native
@@ -862,6 +902,7 @@ function main() {
   //     plus the app's own global rules, which the components rely on)
   const globalCss = globalStylesheet(bundle);
   write('styles/global.css', globalCss.css + '\n');
+  write('styles/h5-adaptations.css', buildH5Adaptations());
 
   // --- api + utils
   write('utils/native.js', buildNativeShim());
