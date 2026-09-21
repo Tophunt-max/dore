@@ -120,3 +120,28 @@ export const AccountData = () =>
       receive: c.wins || 0,
     };
   });
+
+
+// --- task adapters ---
+export const systemService = (_d?: { type?: number }) => Promise.resolve({ phone: '', content: '' } as any);
+
+const mapTask = (t: any) => ({
+  id: t.id,
+  name: t.title,
+  des: t.description || '',
+  img: '/static/image/task/icon_Goldcoins.png',
+  cycle: t.period === 'daily' ? 1 : t.period === 'weekly' ? 2 : 3,
+  reward_type: 1,
+  reward_price: ((t.reward_minor || 0) / 100).toFixed(0),
+  num: t.target || 1,
+  complete_num: t.progress || 0,
+  form: 1,
+  status: t.claimed ? 3 : (t.progress || 0) >= (t.target || 1) ? 2 : 1,
+  link: '',
+});
+export const TaskListData = (_d: { start: number; limit: number }) =>
+  api.get('/api/tasks').then((r: any) => {
+    const list = (r.tasks || []).map(mapTask);
+    return { list, count: list.length, fixed_list: [], records: [] };
+  });
+export const TaskReceive = (d: { id: number }) => api.post(`/api/tasks/${d.id}/claim`);
