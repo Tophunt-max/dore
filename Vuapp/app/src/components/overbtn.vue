@@ -11,13 +11,14 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ (e: 'btnAction'): void }>();
 const disabled = computed(() => props.btnType === 'disabled' || props.canSubmit === true || props.loading);
+const plain = computed(() => props.btnType === 'plain');
 const fs = computed(() => `${props.fontSize ?? 32}rpx`);
 function tap() {
   if (!disabled.value) emit('btnAction');
 }
 </script>
 <template>
-  <view class="overbtn" :class="{ disabled }" :style="{ fontSize: fs }" @click="tap">
+  <view class="overbtn" :class="{ disabled, plain }" :style="{ fontSize: fs }" @click="tap">
     <text v-if="props.loading" class="spinner" />
     <text>{{ props.btnText }}</text>
   </view>
@@ -28,7 +29,8 @@ function tap() {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 92rpx;
+  height: 100%;
+  min-height: 70rpx;
   border-radius: 12rpx;
   background: #ee5016;
   color: #fff;
@@ -37,6 +39,11 @@ function tap() {
 }
 .overbtn.disabled {
   background: #f4c3b0;
+}
+.overbtn.plain {
+  background: transparent;
+  color: #ee5016;
+  border: 2rpx solid #ee5016;
 }
 .spinner {
   width: 30rpx;
