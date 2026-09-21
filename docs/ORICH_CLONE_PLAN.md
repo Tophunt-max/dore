@@ -18,7 +18,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 3 | address/address | `/addresses` | ✅ |
 | 4 | address/add | `/addresses/add` | ⬜ |
 | 5 | goods/goods | `/products/[id]` | ✅ (prior) |
-| 6 | goods/comfirm | `/checkout/[orderId]` | ⬜ |
+| 6 | goods/comfirm | `/checkout/[orderId]` | ✅ |
 | 7 | goods/calculation | `/calculation` | ✅ |
 | 8 | index/index | `/(tabs)` | ✅ (legacy noop) |
 | 9 | order/detail | `/orders/[orderId]` | ✅ |
@@ -55,7 +55,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 40 | finance/order | `/finance/order` | ⬜ |
 | 41 | task/task | `/(tabs)/tasks` | ⬜ |
 | 42 | task/member | `/(tabs)/member` | ⬜ |
-| 43 | game/game | `/game` | ⬜ |
+| 43 | game/game | `/game` | ⭐ non-monetary shell (ORich bg) |
 
 ## Verification per batch
 
