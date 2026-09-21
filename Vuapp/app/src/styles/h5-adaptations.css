@@ -5,6 +5,22 @@
  * browser rather than only in a native webview.
  */
 
+/* ---------------------------------------------------------------- UI scale --
+ *
+ * uni-app compiles every `rpx` to `rem` and its runtime sets
+ *     document.documentElement.style.fontSize = viewportWidth / 23.4375 + 'px'
+ * (23.4375 = 750 / 32, i.e. 1rem = 32rpx on the reference's 750rpx design grid).
+ *
+ * That makes the root font size a single knob for the whole interface - text,
+ * heights, widths and padding all scale together, so proportions are preserved.
+ * `!important` is required because the runtime writes an inline style.
+ *
+ * 1 = exactly the reference sizing. Lower shrinks the whole UI.
+ */
+html {
+  font-size: calc(100vw / 23.4375 * 0.88) !important;
+}
+
 /* Chrome on Android inflates font sizes ("font boosting") when a block is much
  * wider than the viewport - which the horizontally scrolling carousels are by
  * design. In a native webview this never happened, so the reference's rpx sizes
