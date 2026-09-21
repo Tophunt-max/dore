@@ -177,7 +177,7 @@ onShow(() => {
         </view>
         <view class="mine_finance_total_item">
           <view class="number">{{ userInfo.finance_all_income }}</view>
-          <view class="tip">{{ $t('finance.iincome') }}</view>
+          <view class="tip">{{ $t('finance.inincome') }}</view>
         </view>
       </view>
     </view>
