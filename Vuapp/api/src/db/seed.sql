@@ -1,21 +1,21 @@
 -- Demo seed data for vuapp. Run after schema.sql.
 INSERT INTO banners (image, link, sort, active) VALUES
-  ('/static/image/home/bg_Yellow.png', '', 0, 1),
-  ('/static/image/home/bg_homepage.png', '', 1, 1);
+  ('/static/image/demo/banner-1.svg', '', 0, 1),
+  ('/static/image/demo/banner-2.svg', '', 1, 1);
 
 INSERT INTO notices (text, active, created_at) VALUES
   ('Welcome to vuapp — join a group buy and win big!', 1, strftime('%s','now')),
   ('New finance plans now live with daily returns.', 1, strftime('%s','now'));
 
 INSERT INTO goods (title, image, description, category, price_minor, market_price_minor, total_slots, filled_slots, issue, status, end_at, created_at) VALUES
-  ('Smartphone 5G 128GB', '/static/image/goods/icon1.png', 'Latest 5G smartphone', 'newbie', 100, 1999900, 200, 45, '20260921A', 'active', strftime('%s','now')+86400, strftime('%s','now')),
-  ('Wireless Earbuds Pro', '/static/image/goods/icon2.png', 'Noise cancelling earbuds', 'normal', 100, 799900, 100, 12, '20260921B', 'active', strftime('%s','now')+86400, strftime('%s','now')),
-  ('Smart Watch Series X', '/static/image/goods/icon3.png', 'Fitness smart watch', 'high', 500, 2499900, 150, 88, '20260921C', 'active', strftime('%s','now')+43200, strftime('%s','now')),
-  ('Gold Coin 1g', '/static/image/goods/icon4.png', 'Certified gold coin', 'high', 1000, 699900, 300, 210, '20260921D', 'active', strftime('%s','now')+21600, strftime('%s','now'));
+  ('Smartphone 5G 128GB', '/static/image/demo/prod-phone.svg', 'Latest 5G smartphone', 'newbie', 100, 1999900, 200, 45, '20260921A', 'active', strftime('%s','now')+86400, strftime('%s','now')),
+  ('Wireless Earbuds Pro', '/static/image/demo/prod-earbuds.svg', 'Noise cancelling earbuds', 'normal', 100, 799900, 100, 12, '20260921B', 'active', strftime('%s','now')+86400, strftime('%s','now')),
+  ('Smart Watch Series X', '/static/image/demo/prod-watch.svg', 'Fitness smart watch', 'high', 500, 2499900, 150, 88, '20260921C', 'active', strftime('%s','now')+43200, strftime('%s','now')),
+  ('Gold Coin 1g', '/static/image/demo/prod-coin.svg', 'Certified gold coin', 'high', 1000, 699900, 300, 210, '20260921D', 'active', strftime('%s','now')+21600, strftime('%s','now'));
 
 INSERT INTO finance_products (title, image, rate_bps, term_days, min_minor, max_minor, status, created_at) VALUES
-  ('Daily Saver 7d', '/static/image/goods/icon1.png', 1200, 7, 10000, 5000000, 'active', strftime('%s','now')),
-  ('Growth Plan 30d', '/static/image/goods/icon2.png', 1800, 30, 50000, 10000000, 'active', strftime('%s','now'));
+  ('Daily Saver 7d', '/static/image/demo/banner-2.svg', 1200, 7, 10000, 5000000, 'active', strftime('%s','now')),
+  ('Growth Plan 30d', '/static/image/demo/banner-2.svg', 1800, 30, 50000, 10000000, 'active', strftime('%s','now'));
 
 INSERT INTO tasks (title, description, reward_minor, period, target, active, created_at) VALUES
   ('Daily check-in', 'Open the app today', 500, 'daily', 1, 1, strftime('%s','now')),
