@@ -1,26 +1,51 @@
 <script setup lang="ts">
 // Faithful port of ORich pages/account/setting.
+// Rows mirror the original: Avatar, Name, Phone, Address, Bank Account + Log Out.
 import { ref } from 'vue';
-import { Logout } from '@/api/orich';
-import { clearTokens } from '@/api/request';
+import { onShow } from '@dcloudio/uni-app';
+import { AccountData, Logout, SetAvatar } from '@/api/orich';
+import { clearTokens, api } from '@/api/request';
 import { LOCALES, setLocale, currentLocale } from '@/locale';
 
+const info = ref<any>({ nickname: '-', mobile: '-', headimgurl: '' });
 const showLang = ref(false);
 const langLabel = () => LOCALES.find((l) => l.code === currentLocale())?.label || 'English';
 
-const rows = [
-  { title: 'account.username', url: './username' },
-  { title: 'address.title', url: '../address/address' },
-  { title: 'account.myteam', url: './team' },
-];
+onShow(async () => {
+  const r: any = await AccountData();
+  if (r && r.ok !== false) info.value = r;
+});
 
 function go(url: string) {
   uni.navigateTo({ url });
 }
+function pickAvatar() {
+  uni.chooseImage({
+    count: 1,
+    success: (res) => {
+      uni.uploadFile({
+        url: `${api.base}/api/upload`,
+        filePath: res.tempFilePaths[0],
+        name: 'file',
+        header: { Authorization: `Bearer ${uni.getStorageSync('access_token')}`, 'Content-Type': 'image/jpeg' },
+        success: async (up) => {
+          try {
+            const d = JSON.parse(up.data);
+            if (d.ok) {
+              await SetAvatar({ avatar: d.key });
+              uni.showToast({ title: 'Edit success!', icon: 'none' });
+            }
+          } catch {
+            uni.showToast({ title: 'Edit fail', icon: 'none' });
+          }
+        },
+      });
+    },
+  });
+}
 function pickLang(code: string) {
   setLocale(code);
   showLang.value = false;
-  setTimeout(() => uni.showToast({ title: code === 'hi_di' ? 'हिंदी' : 'English', icon: 'none' }), 100);
 }
 function logout() {
   uni.showModal({
@@ -39,11 +64,39 @@ function logout() {
 
 <template>
   <view class="setting">
-    <navbar title="Settings" background="#ffffff" />
+    <navbar :title="$t('account.settitle')" background="#ffffff" />
 
     <view class="setting_main">
-      <view v-for="(r, i) in rows" :key="i" class="setting_item" @click="go(r.url)">
-        <view class="setting_item_left">{{ $t(r.title) }}</view>
+      <view class="setting_item" @click="pickAvatar">
+        <view class="setting_item_left">{{ $t('common.avatar') }}</view>
+        <view class="setting_item_right">
+          <image class="setting_avatar" :src="info.headimgurl || '/static/image/other.png'" mode="aspectFill" />
+          <u-icon name="arrow-right" color="#cccccc" size="14" />
+        </view>
+      </view>
+
+      <view class="setting_item" @click="go('./username')">
+        <view class="setting_item_left">{{ $t('common.name') }}</view>
+        <view class="setting_item_right">
+          <text class="setting_item_value">{{ info.nickname }}</text>
+          <u-icon name="arrow-right" color="#cccccc" size="14" />
+        </view>
+      </view>
+
+      <view class="setting_item">
+        <view class="setting_item_left">{{ $t('common.phone') }}</view>
+        <view class="setting_item_right">
+          <text class="setting_item_value">{{ info.mobile }}</text>
+        </view>
+      </view>
+
+      <view class="setting_item" @click="go('../address/address')">
+        <view class="setting_item_left">{{ $t('common.address') }}</view>
+        <u-icon name="arrow-right" color="#cccccc" size="14" />
+      </view>
+
+      <view class="setting_item" @click="go('../payment/payment')">
+        <view class="setting_item_left">{{ $t('account.bank') }}</view>
         <u-icon name="arrow-right" color="#cccccc" size="14" />
       </view>
 
@@ -51,18 +104,6 @@ function logout() {
         <view class="setting_item_left">Language</view>
         <view class="setting_item_right">
           <text class="setting_item_value">{{ langLabel() }}</text>
-          <u-icon name="arrow-right" color="#cccccc" size="14" />
-        </view>
-      </view>
-
-      <view class="setting_item" @click="go('../richtext/rule')">
-        <view class="setting_item_left">{{ $t('prize.rules') }}</view>
-        <u-icon name="arrow-right" color="#cccccc" size="14" />
-      </view>
-      <view class="setting_item" @click="go('./aboutus')">
-        <view class="setting_item_left">{{ $t('account.about') }}</view>
-        <view class="setting_item_right">
-          <text class="setting_item_value">{{ $t('account.version') }}1.0.0</text>
           <u-icon name="arrow-right" color="#cccccc" size="14" />
         </view>
       </view>
@@ -92,6 +133,7 @@ function logout() {
 .setting_item_left { font-size: 30rpx; color: #17273a; }
 .setting_item_right { display: flex; align-items: center; }
 .setting_item_value { font-size: 26rpx; color: #b9b9b9; margin-right: 10rpx; }
+.setting_avatar { width: 68rpx; height: 68rpx; border-radius: 50%; margin-right: 12rpx; }
 .setting_logout { margin: 40rpx 30rpx; height: 92rpx; line-height: 92rpx; text-align: center; background: #fff; border-radius: 16rpx; color: #ff5c5c; font-size: 30rpx; }
 .lang_mask { position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-end; }
 .lang_sheet { width: 100%; background: #fff; border-radius: 24rpx 24rpx 0 0; padding: 20rpx 0 40rpx; }

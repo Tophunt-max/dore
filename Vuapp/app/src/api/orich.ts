@@ -182,3 +182,7 @@ export const myWinner = (_d: { start: number; limit: number }) =>
     }));
     return { list, count: list.length };
   });
+
+
+// avatar update (ORich SetAvatar)
+export const SetAvatar = (d: { avatar: string }) => api.put('/api/account/avatar', d);

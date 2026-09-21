@@ -1,27 +1,49 @@
 <script setup lang="ts">
+// Faithful port of ORich pages/account/username (edit nickname).
 import { ref } from 'vue';
-import { useUserStore } from '@/store/user';
-import { api } from '@/api/request';
-const store = useUserStore();
-const username = ref(store.user?.username || '');
+import { onShow } from '@dcloudio/uni-app';
+import { AccountData, SetUsername } from '@/api/orich';
+
+const username = ref('');
+
+onShow(async () => {
+  const r: any = await AccountData();
+  if (r && r.ok !== false) username.value = r.nickname === '-' ? '' : r.nickname;
+});
+
 async function save() {
-  const res = await api.put('/api/account/username', { username: username.value });
-  if (res.ok) {
-    if (store.user) store.user.username = username.value;
-    uni.showToast({ title: 'Saved', icon: 'success' });
-    setTimeout(() => uni.navigateBack(), 500);
-  } else uni.showToast({ title: res.error || 'Failed', icon: 'none' });
+  const v = username.value.trim();
+  if (!v) {
+    uni.showToast({ title: 'Please enter a name', icon: 'none' });
+    return;
+  }
+  if (v.length > 24) {
+    uni.showToast({ title: 'The number of nickname characters exceeds the limit.', icon: 'none' });
+    return;
+  }
+  const r: any = await SetUsername({ username: v });
+  if (r.ok) {
+    uni.showToast({ title: 'Edit success!', icon: 'none' });
+    setTimeout(() => uni.navigateBack(), 600);
+  } else uni.showToast({ title: 'Edit fail', icon: 'none' });
 }
 </script>
+
 <template>
-  <view class="page">
-    <view class="card"><input v-model="username" class="i" placeholder="Enter username" /></view>
-    <view class="primary-btn save" @click="save">Save</view>
+  <view class="username">
+    <navbar :title="$t('common.name')" background="#ffffff" />
+    <view class="username_main">
+      <input v-model="username" class="username_input" :placeholder="$t('common.name')" maxlength="24" />
+    </view>
+    <view class="username_btn">
+      <overbtn :btnText="$t('common.confirm')" :fontSize="30" btnType="submit" @btnAction="save" />
+    </view>
   </view>
 </template>
+
 <style scoped>
-.page { min-height: 100vh; padding: 20rpx; }
-.card { background: #fff; border-radius: 16rpx; padding: 10rpx 30rpx; }
-.i { height: 100rpx; font-size: 32rpx; }
-.save { height: 88rpx; line-height: 88rpx; margin-top: 30rpx; font-size: 30rpx; }
+.username { min-height: 100vh; background: #f9f9f9; }
+.username_main { background: #fff; margin-top: 16rpx; padding: 0 30rpx; }
+.username_input { height: 110rpx; font-size: 32rpx; color: #17273a; }
+.username_btn { margin: 40rpx 30rpx; height: 92rpx; }
 </style>
