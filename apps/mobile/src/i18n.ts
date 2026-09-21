@@ -857,6 +857,7 @@ export const catalog = {
     hi: 'आपने सब देख लिया है।',
     zh: '您已查看全部通知。',
   },
+  'orders.all': { en: 'All', hi: 'सभी', zh: '全部' },
   'addresses.title': {
     en: 'Delivery addresses',
     hi: 'डिलीवरी पते',

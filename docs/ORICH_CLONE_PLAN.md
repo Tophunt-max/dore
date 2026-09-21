@@ -22,7 +22,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 7 | goods/calculation | `/calculation` | ⬜ |
 | 8 | index/index | `/(tabs)` | ✅ (legacy noop) |
 | 9 | order/detail | `/orders/[orderId]` | ⬜ |
-| 10 | order/record | `/orders` | ⬜ |
+| 10 | order/record | `/orders` | ✅ |
 | 11 | order/discount | `/discounts` | ⬜ (winner ranking) |
 | 12 | success/index | `/result` | ⬜ |
 | 13 | account/account | `/(tabs)/account` | ✅ (prior) |
