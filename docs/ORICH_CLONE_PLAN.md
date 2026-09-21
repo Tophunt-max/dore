@@ -36,7 +36,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 21 | bask/index | `/bask/share` | ✅ |
 | 22 | winner/winner | `/(tabs)/winners` | ✅ |
 | 23 | winner/myShare | `/my-shares` | ✅ |
-| 24 | payment/payment | `/payment-methods` | ⬜ |
+| 24 | payment/payment | `/wallet/beneficiaries` | ✅ |
 | 25 | payment/add | `/wallet/beneficiaries/add` | ⬜ |
 | 26 | payment/recharge | `/wallet/recharge` | ⬜ |
 | 27 | payment/cashOut | `/wallet/withdraw` | ⬜ |
