@@ -41,6 +41,27 @@ const goodsItem = (g) => {
     // blank instead of the template reading a length off undefined.
     userimgurl: [],
     usernumber: 0,
+
+    // --- detail-screen fields ---
+    galleryurl: it.gallery || (it.image ? [it.image] : []),
+    description: it.description || '',
+    current_price: major(it.price_minor),
+    type: it.category || '',
+    newid: it.id,
+    normal: 1,
+    nickname: '',
+    // draw bookkeeping the reference displayed; no equivalent yet
+    getnumber: 0,
+    getnumberall: 0,
+    getnumbercount: 0,
+    lottery_time: it.end_at || 0,
+    lottery_sn: '',
+    lotteryallocation: [],
+    fair_sn_local: '',
+    faq_url: '',
+    del_type: 0,
+    auto_return: 0,
+    max_return: 0,
   };
 };
 
@@ -144,10 +165,18 @@ export const GetResult = (d = {}) => (d.id ? get('/api/orders/' + d.id + '/ranki
 export const GoodsBuyDetail = (d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'));
 
 /** POST /index/duobaoitemdetail */
-export const GoodsDetail = (d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'));
+export const GoodsDetail = (d = {}) =>
+    (d.id ? get('/api/goods/' + d.id) : get('/api/goods')).then((r) => {
+      const row = (r && r.goods) || r || {};
+      return goodsItem(Array.isArray(row) ? row[0] : row);
+    });
 
 /** POST /index/duobaoitemhistory */
-export const GoodsHisDetail = (d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'));
+export const GoodsHisDetail = (d = {}) =>
+    (d.id ? get('/api/goods/' + d.id) : get('/api/goods')).then((r) => {
+      const row = (r && r.goods) || r || {};
+      return goodsItem(Array.isArray(row) ? row[0] : row);
+    });
 
 /** POST /index/duobaoitemlist */
 export const GoodsList = (d = {}) =>
@@ -157,7 +186,11 @@ export const GoodsList = (d = {}) =>
     });
 
 /** POST /index/duobaoitemshare */
-export const GoodsShareDetail = (d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'));
+export const GoodsShareDetail = (d = {}) =>
+    (d.id ? get('/api/goods/' + d.id) : get('/api/goods')).then((r) => {
+      const row = (r && r.goods) || r || {};
+      return goodsItem(Array.isArray(row) ? row[0] : row);
+    });
 
 /** POST /index/index */
 export const Index = () =>
@@ -265,7 +298,20 @@ export const getActivity = () => get('/api/prizes');
 export const getAnswer = (d = {}) => (d.id || d.topic ? get('/api/help/' + (d.id || d.topic)) : get('/api/help'));
 
 /** POST /index/gettitle */
-export const getTitle = () => get('/api/help');
+export const getTitle = () =>
+    get('/api/help').then((r) => {
+      const groups = [];
+      for (const a of listOf(r, 'articles')) {
+        const topic = a.topic || 'general';
+        let g = groups.find((x) => x.category === topic);
+        if (!g) {
+          g = { category: topic, image_url: '/static/image/faq/icon_faq.png', chr: [] };
+          groups.push(g);
+        }
+        g.chr.push({ que_id: a.id, title: a.title });
+      }
+      return groups;
+    });
 
 /** POST /index/getUserAfs */
 export const getUserAfs = () => get('/api/payments');

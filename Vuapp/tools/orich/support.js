@@ -52,6 +52,27 @@ const goodsItem = (g) => {
     // blank instead of the template reading a length off undefined.
     userimgurl: [],
     usernumber: 0,
+
+    // --- detail-screen fields ---
+    galleryurl: it.gallery || (it.image ? [it.image] : []),
+    description: it.description || '',
+    current_price: major(it.price_minor),
+    type: it.category || '',
+    newid: it.id,
+    normal: 1,
+    nickname: '',
+    // draw bookkeeping the reference displayed; no equivalent yet
+    getnumber: 0,
+    getnumberall: 0,
+    getnumbercount: 0,
+    lottery_time: it.end_at || 0,
+    lottery_sn: '',
+    lotteryallocation: [],
+    fair_sn_local: '',
+    faq_url: '',
+    del_type: 0,
+    auto_return: 0,
+    max_return: 0,
   };
 };
 
@@ -200,9 +221,21 @@ const MAP = {
       for (const g of listOf(r, 'goods')) if (g.category && !cats.includes(g.category)) cats.push(g.category);
       return cats.map((c) => ({ label: c.charAt(0).toUpperCase() + c.slice(1), value: c }));
     })`,
-  GoodsDetail: `(d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'))`,
-  GoodsHisDetail: `(d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'))`,
-  GoodsShareDetail: `(d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'))`,
+  GoodsDetail: `(d = {}) =>
+    (d.id ? get('/api/goods/' + d.id) : get('/api/goods')).then((r) => {
+      const row = (r && r.goods) || r || {};
+      return goodsItem(Array.isArray(row) ? row[0] : row);
+    })`,
+  GoodsHisDetail: `(d = {}) =>
+    (d.id ? get('/api/goods/' + d.id) : get('/api/goods')).then((r) => {
+      const row = (r && r.goods) || r || {};
+      return goodsItem(Array.isArray(row) ? row[0] : row);
+    })`,
+  GoodsShareDetail: `(d = {}) =>
+    (d.id ? get('/api/goods/' + d.id) : get('/api/goods')).then((r) => {
+      const row = (r && r.goods) || r || {};
+      return goodsItem(Array.isArray(row) ? row[0] : row);
+    })`,
   GoodsBuyDetail: `(d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'))`,
   GetLottery: `(d = {}) => (d.id ? post('/api/goods/' + d.id + '/draw', d) : Promise.resolve({ list: [] }))`,
   // --- orders
@@ -252,7 +285,20 @@ const MAP = {
   luckyOrderList: `() => get('/api/orders', { kind: 'lucky' })`,
 
   // --- help
-  getTitle: `() => get('/api/help')`,
+  getTitle: `() =>
+    get('/api/help').then((r) => {
+      const groups = [];
+      for (const a of listOf(r, 'articles')) {
+        const topic = a.topic || 'general';
+        let g = groups.find((x) => x.category === topic);
+        if (!g) {
+          g = { category: topic, image_url: '/static/image/faq/icon_faq.png', chr: [] };
+          groups.push(g);
+        }
+        g.chr.push({ que_id: a.id, title: a.title });
+      }
+      return groups;
+    })`,
   getAnswer: `(d = {}) => (d.id || d.topic ? get('/api/help/' + (d.id || d.topic)) : get('/api/help'))`,
 };
 
