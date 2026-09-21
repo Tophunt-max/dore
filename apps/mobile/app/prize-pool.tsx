@@ -21,9 +21,10 @@ import { rpx } from '@/rpx';
 import { theme } from '@/theme';
 
 // ORich `pages/prize/prize` (scope 27458cd0): the whole page is the prize
-// machine illustration (750x1891) and content is absolutely positioned over it
-// at the exact ORich offsets — people 120rpx, amount 636rpx (marquee display),
-// invite 940rpx (machine body), tabs 1367rpx, participants 1490rpx (screen).
+// machine illustration (750x1891). Content is absolutely positioned over it
+// using PERCENTAGE offsets so it tracks the machine's frames at any width —
+// amount over the marquee display, avatars/button on the body, participants on
+// the white screen slip.
 export default function PrizePoolScreen() {
   const { t, formatMoney } = useI18n();
   const client = useQueryClient();
@@ -60,19 +61,19 @@ export default function PrizePoolScreen() {
           contentContainerStyle={styles.scroll}
         >
           <View style={styles.stage}>
-            {/* full-width prize machine illustration */}
+            {/* full-width prize machine illustration (fills the stage) */}
             <Image source={assets.prizeBackground} style={styles.bgImg} />
 
             {activity ? (
               <>
-                {/* people pill (top:120rpx) */}
+                {/* people pill — over the gift banner */}
                 <View style={styles.people}>
                   <Text style={styles.peopleText}>
                     {activity.participantCount} {t('prize.people')}
                   </Text>
                 </View>
 
-                {/* amount over the marquee display (top:636rpx) */}
+                {/* amount — inside the marquee display */}
                 <View style={styles.amount}>
                   <Text style={styles.amountTitle}>
                     {t('prize.amountTitle')}
@@ -91,7 +92,7 @@ export default function PrizePoolScreen() {
                   ) : null}
                 </View>
 
-                {/* invite (top:940rpx) */}
+                {/* invite — on the machine body */}
                 <View style={styles.invite}>
                   <View style={styles.avatars}>
                     {[0, 1, 2, 3].map((i) => (
@@ -109,11 +110,13 @@ export default function PrizePoolScreen() {
                       activity.joined ? router.push('/referrals') : join.mutate()
                     }
                   >
-                    <Text style={styles.inviteBtnText}>{t('prize.inviteBtn')}</Text>
+                    <Text style={styles.inviteBtnText}>
+                      {t('prize.inviteBtn')}
+                    </Text>
                   </Pressable>
                 </View>
 
-                {/* tabs (top:1367rpx) */}
+                {/* tabs */}
                 <View style={styles.tabs}>
                   {[t('prize.participants'), t('prize.rulesTab')].map(
                     (label, i) => (
@@ -129,7 +132,7 @@ export default function PrizePoolScreen() {
                   )}
                 </View>
 
-                {/* participants / rules over the screen (top:1490rpx) */}
+                {/* participants / rules — on the white screen slip */}
                 <View style={styles.main}>
                   {tab === 0 ? (
                     <>
@@ -161,93 +164,86 @@ export default function PrizePoolScreen() {
 }
 
 const styles = StyleSheet.create({
-  // .prize { background:#35a2ff }
   root: { flex: 1, backgroundColor: '#35a2ff' },
   safe: { flex: 1 },
   scroll: { paddingBottom: rpx(40) },
-  // stage holds the 1891rpx-tall illustration + absolute content
-  stage: { width: '100%', height: rpx(2060) },
-  // .prize_bg uni-image { width:100% } — 750x1891 → full width, exact aspect
-  bgImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: rpx(1891) },
-  // .prize_people { top:120rpx; 472x56rpx; rgba(0,0,0,.2) pill }
+  // stage sized to the illustration's exact aspect (750x1891) so % offsets track
+  stage: { width: '100%', aspectRatio: 750 / 1891, position: 'relative' },
+  bgImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+  // people pill over the gift banner
   people: {
     position: 'absolute',
-    top: rpx(120),
+    top: '14%',
     alignSelf: 'center',
-    width: rpx(472),
-    height: rpx(56),
+    paddingHorizontal: rpx(40),
+    height: rpx(52),
     borderRadius: rpx(200),
     backgroundColor: 'rgba(0,0,0,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   peopleText: {
-    fontSize: rpx(28),
+    fontSize: rpx(26),
     color: '#fff',
     fontFamily: theme.typography.family.regular,
   },
-  // .prize_amount { top:636rpx; column center }
+  // amount centered in the marquee display (money lands ~38%)
   amount: {
     position: 'absolute',
-    top: rpx(636),
+    top: '31%',
     left: 0,
     right: 0,
     alignItems: 'center',
   },
-  // .prize_amount_title { 32rpx #bb451e }
   amountTitle: {
-    fontSize: rpx(32),
+    fontSize: rpx(30),
     color: '#bb451e',
     fontFamily: theme.typography.family.medium,
   },
-  // .prize_amount_money { 92rpx #ff5c5c }
   amountMoney: {
-    marginTop: rpx(8),
-    fontSize: rpx(88),
-    lineHeight: rpx(120),
+    marginTop: rpx(6),
+    fontSize: rpx(76),
+    lineHeight: rpx(90),
     color: '#ff5c5c',
     fontFamily: theme.typography.family.bold,
     paddingHorizontal: rpx(40),
   },
-  // .prize_amount_time { 28rpx #ee5016 }
   amountTime: {
-    marginTop: rpx(6),
-    fontSize: rpx(28),
+    marginTop: rpx(2),
+    fontSize: rpx(26),
     color: '#ee5016',
     fontFamily: theme.typography.family.regular,
   },
-  // .prize_invite { top:940rpx; column center }
+  // invite block on the machine body
   invite: {
     position: 'absolute',
-    top: rpx(940),
+    top: '50%',
     left: 0,
     right: 0,
     alignItems: 'center',
   },
   avatars: { flexDirection: 'row', justifyContent: 'center' },
-  // .prize_invite_avatar_item { 96rpx; 2rpx #fff border; margin 0 22rpx }
   avatar: {
-    width: rpx(96),
-    height: rpx(96),
-    borderRadius: rpx(48),
+    width: rpx(90),
+    height: rpx(90),
+    borderRadius: rpx(45),
     borderWidth: rpx(2),
     borderColor: '#fff',
-    marginHorizontal: rpx(22),
+    marginHorizontal: rpx(18),
     backgroundColor: '#eee',
   },
-  // .prize_invite_tips { 28rpx #ffdc93; margin-top:40rpx }
   inviteTip: {
-    marginTop: rpx(40),
+    marginTop: rpx(26),
     fontSize: rpx(28),
     color: '#ffdc93',
     textAlign: 'center',
     fontFamily: theme.typography.family.regular,
   },
-  // .prize_invite_btn { width:100%; height:80rpx; 32rpx #c86904 }
+  // invite button aligns over the yellow bar
   inviteBtn: {
-    marginTop: rpx(40),
-    width: rpx(560),
-    height: rpx(88),
+    marginTop: rpx(30),
+    width: rpx(540),
+    height: rpx(84),
     borderRadius: rpx(44),
     backgroundColor: '#ffce3d',
     alignItems: 'center',
@@ -258,42 +254,35 @@ const styles = StyleSheet.create({
     color: '#c86904',
     fontFamily: theme.typography.family.bold,
   },
-  // .prize_tabs { top:1367rpx; center }
+  // tabs just below the yellow bar
   tabs: {
     position: 'absolute',
-    top: rpx(1367),
+    top: '71%',
     left: 0,
     right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
   },
-  // .prize_tabs_item { 32rpx #ffc84e } nth-child(1) margin-right:126rpx
   tabItem: { alignItems: 'center', marginHorizontal: rpx(63) },
   tabText: {
-    fontSize: rpx(32),
+    fontSize: rpx(30),
     color: '#ffc84e',
     fontFamily: theme.typography.family.medium,
   },
-  // .prize_tabs_item_icon { 76x8rpx #ffc84e }
   tabBar: {
-    marginTop: rpx(12),
+    marginTop: rpx(10),
     width: rpx(76),
     height: rpx(8),
     borderRadius: rpx(200),
     backgroundColor: '#ffc84e',
   },
-  // .prize_main { top:1490rpx; users 85% width } over the machine screen
-  main: {
-    position: 'absolute',
-    top: rpx(1490),
-    left: '7.5%',
-    width: '85%',
-  },
+  // participants / rules on the white screen slip
+  main: { position: 'absolute', top: '79%', left: '8%', width: '84%' },
   winnersLine: {
     fontSize: rpx(30),
     color: '#ee5016',
     fontFamily: theme.typography.family.bold,
-    marginBottom: rpx(16),
+    marginBottom: rpx(14),
   },
   rulesText: {
     fontSize: rpx(26),
