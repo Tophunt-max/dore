@@ -125,7 +125,14 @@ export default function PrizePoolScreen() {
                         onPress={() => setTab(i)}
                         style={styles.tabItem}
                       >
-                        <Text style={styles.tabText}>{label}</Text>
+                        <Text
+                          style={[
+                            styles.tabText,
+                            tab === i && styles.tabTextActive,
+                          ]}
+                        >
+                          {label}
+                        </Text>
                         {tab === i ? <View style={styles.tabBar} /> : null}
                       </Pressable>
                     ),
@@ -264,17 +271,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabItem: { alignItems: 'center', marginHorizontal: rpx(63) },
+  // tabs sit on the white screen slip → dark/orange for readability
   tabText: {
     fontSize: rpx(30),
-    color: '#ffc84e',
+    color: '#b9b9b9',
     fontFamily: theme.typography.family.medium,
+  },
+  tabTextActive: {
+    color: '#ee5016',
+    fontFamily: theme.typography.family.bold,
   },
   tabBar: {
     marginTop: rpx(10),
     width: rpx(76),
     height: rpx(8),
     borderRadius: rpx(200),
-    backgroundColor: '#ffc84e',
+    backgroundColor: '#ee5016',
   },
   // participants / rules on the white screen slip
   main: { position: 'absolute', top: '79%', left: '8%', width: '84%' },
