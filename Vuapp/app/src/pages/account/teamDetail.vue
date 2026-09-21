@@ -7,7 +7,7 @@
           <view class="detail_count_march_title" @click="open">{{ showMonth }}</view>
           <view class="detail_count_march_select" @click="openYear">
             {{ search.year }}
-            <image :src="'/static/image/account/icon_Downarrow.png'" />
+            <image :src="'/static/image/account/icon_Downarrow.png'" mode="" />
           </view>
         </view>
         <view class="detail_count_march_rew otw">Rewards(₹): {{ count.reward }}</view>
@@ -32,7 +32,7 @@
           @click="changeTab(item.type)"
         >
           <view class="detail_list_tab_item_title" :class="{ item_active: search.type == item.type }">{{ item.title }}</view>
-          <image v-if="search.type == item.type" src="/static/image/icon_Select.png" />
+          <image v-if="search.type == item.type" src="/static/image/icon_Select.png" mode="" />
         </view>
       </view>
       <mescroll-body
@@ -47,11 +47,11 @@
           <view v-for="(item, index) in detailList" :key="index" class="detail_list_content_item">
             <view class="detail_list_content_item_user">
               <view class="detail_list_content_item_avatar">
-                <image :src="item.headimg" />
+                <image :src="item.headimg" mode="" />
               </view>
               <view class="detail_list_content_item_name otw">{{ item.nickname }}</view>
               <view class="detail_list_content_item_vipimg">
-                <image :src="item.vip_img" />
+                <image :src="item.vip_img" mode="" />
               </view>
               <view class="detail_list_content_item_team">
                 {{ $t('account.liteam') }}

@@ -53,21 +53,21 @@
       <view class="team_invite_step">
         <view class="team_invite_step_item">
           <view class="team_invite_step_item_icon">
-            <image :src="'/static/image/account/icon_Sharelink.png'" />
+            <image :src="'/static/image/account/icon_Sharelink.png'" mode="" />
           </view>
           <view class="team_invite_step_item_title">{{ $t('account.step1') }}</view>
         </view>
         <text></text>
         <view class="team_invite_step_item">
           <view class="team_invite_step_item_icon">
-            <image :src="'/static/image/account/icon_Registion.png'" />
+            <image :src="'/static/image/account/icon_Registion.png'" mode="" />
           </view>
           <view class="team_invite_step_item_title">{{ $t('account.step2') }}</view>
         </view>
         <text></text>
         <view class="team_invite_step_item">
           <view class="team_invite_step_item_icon">
-            <image :src="'/static/image/account/icon_Earnrewards.png'" />
+            <image :src="'/static/image/account/icon_Earnrewards.png'" mode="" />
           </view>
           <view class="team_invite_step_item_title">{{ $t('account.step3') }}</view>
         </view>
@@ -92,7 +92,7 @@
           @click="changeTab(item.type)"
         >
           <view class="team_list_tab_item_title" :class="{ item_active: tabIndex == item.type }">{{ item.title }}</view>
-          <image v-if="tabIndex == item.type" src="/static/image/icon_Select.png" />
+          <image v-if="tabIndex == item.type" src="/static/image/icon_Select.png" mode="" />
         </view>
       </view>
       <mescroll-body
@@ -112,7 +112,7 @@
             <view class="team_list_content_item_left">
               <view class="rank">
                 <view v-if="index < 3" class="rank_img">
-                  <image :src="rankImg[index]" />
+                  <image :src="rankImg[index]" mode="" />
                 </view>
                 <view v-else></view>
                 <view class="rank_user">

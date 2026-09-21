@@ -70,7 +70,7 @@
       </view>
       <view class="whatsapp" @click="openWhatsapp">
         <view class="whatsapp_img">
-          <image :src="'/static/image/bask/img_whatsapp.png'" />
+          <image :src="'/static/image/bask/img_whatsapp.png'" mode="" />
         </view>
         <view class="whatsapp_text"></view>
       </view>

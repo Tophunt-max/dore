@@ -1,5 +1,21 @@
 <template>
-  <u-navbar>
+  <u-navbar
+    class="navbar"
+    :back-icon-size="36"
+    :back-icon-name="backIcon"
+    :back-icon-color="backColor"
+    back-text=""
+    :title="title"
+    :title-color="titleColor"
+    :border-bottom="borderBottom"
+    :title-bold="true"
+    :custom-back="back"
+    :backgroundColor="true"
+    :background="backgroundObj"
+    :isBack="isBack"
+    titleWidth="340"
+    v-bind="$attrs"
+  >
     <slot name="center"></slot>
     <slot name="right"></slot>
   </u-navbar>

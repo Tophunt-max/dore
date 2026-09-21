@@ -10,7 +10,7 @@
         >
           {{ item.title }}
         </view>
-        <image v-show="item.type == tabIndex" :src="'/static/image/icon_Select.png'" />
+        <image v-show="item.type == tabIndex" :src="'/static/image/icon_Select.png'" mode="" />
       </view>
     </view>
     <mescroll-body

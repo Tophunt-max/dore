@@ -36,7 +36,7 @@
           <view class="intro-title">{{ goodsData.name }}</view>
           <view class="intro-text">{{ $t('goods.issue') }} {{ goodsData.issue }}</view>
         </view>
-        <image @click="handleShare" src="/static/image/goods/icon_Share.png" />
+        <image @click="handleShare" src="/static/image/goods/icon_Share.png" mode="" />
       </view>
       <view v-if="1 == goodsData.auto_return" class="loser">
         <view class="loser-text">
@@ -44,14 +44,14 @@
           <text>₹{{ goodsData.max_return }}</text>
         </view>
         <view class="loser-help" @click="toNav(goodsData.faq_url)">
-          <image src="/static/image/icon_faq.png" />
+          <image src="/static/image/icon_faq.png" mode="" />
         </view>
       </view>
       <view class="people card">
         <view class="people-view">
           <view class="people-text">{{ goodsData.usernumber }} {{ $t('goods.joined') }}</view>
           <view class="people-avatar">
-            <image v-for="(item, index) in goodsData.userimgurl" v-if="item" :key="index" :src="item" />
+            <image v-for="(item, index) in goodsData.userimgurl" v-if="item" :key="index" :src="item" mode="" />
           </view>
         </view>
         <view class="people-progress">
@@ -111,7 +111,7 @@
         <view class="draw-title" @click="toRich">
           <view class="draw-op"></view>
           <view class="draw-text">{{ $t('goods.draw') }}</view>
-          <image class="draw-more" src="/static/image/goods/icon_Arrow.png" />
+          <image class="draw-more" src="/static/image/goods/icon_Arrow.png" mode="" />
         </view>
         <buystep page="goodsPage"></buystep>
       </view>
@@ -127,7 +127,7 @@
           <view v-for="(item, index) in goodsData.lotteryallocation" :key="index" class="prize-rank">
             <view class="prize-rank-box">
               <view class="rank-icon">
-                <image v-if="+index < 3" :src="iconList[index]" />
+                <image v-if="+index < 3" :src="iconList[index]" mode="" />
                 <view v-else class="rank-iconnum">
                   <text>{{ index + 1 }}</text>
                 </view>
@@ -147,19 +147,19 @@
         <view class="ltab">
           <view class="ltab-item" :class="1 == ltabIndex ? 'ltab-item-active' : ''" @click="ltabIndex = 1">
             <view class="ltab-item-text">{{ $t('goods.lparti') }}</view>
-            <image src="/static/image/icon_Select.png" />
+            <image src="/static/image/icon_Select.png" mode="" />
           </view>
           <view class="ltab-item" :class="2 == ltabIndex ? 'ltab-item-active' : ''" @click="ltabIndex = 2">
             <view class="ltab-item-text">{{ $t('goods.ldetail') }}</view>
-            <image src="/static/image/icon_Select.png" />
+            <image src="/static/image/icon_Select.png" mode="" />
           </view>
           <view class="ltab-item" :class="3 == ltabIndex ? 'ltab-item-active' : ''" @click="ltabIndex = 3">
             <view class="ltab-item-text">{{ $t('goods.lwinner') }}</view>
-            <image src="/static/image/icon_Select.png" />
+            <image src="/static/image/icon_Select.png" mode="" />
           </view>
           <view class="ltab-item" :class="4 == ltabIndex ? 'ltab-item-active' : ''" @click="ltabIndex = 4">
             <view class="ltab-item-text">{{ $t('goods.lreviews') }}</view>
-            <image src="/static/image/icon_Select.png" />
+            <image src="/static/image/icon_Select.png" mode="" />
           </view>
         </view>
       </u-sticky>
@@ -176,12 +176,12 @@
         <view v-if="1 == ltabIndex" class="participation">
           <view v-for="(item, index) in dataList" :key="index" class="item">
             <view v-if="index + 1 !== dataList.length" class="op"></view>
-            <image class="avatar" :src="item.headimgurl" />
+            <image class="avatar" :src="item.headimgurl" mode="" />
             <view class="detail">
               <view class="header">
                 <view class="header-top">
                   <view class="header-name otw">{{ item.nickname }}</view>
-                  <image :src="item.vip_img" />
+                  <image :src="item.vip_img" mode="" />
                   <view class="header-time">{{ item.created }}</view>
                 </view>
                 <view class="header-bottom">
@@ -201,7 +201,7 @@
                   <text>{{ $t('common.winners') }}</text>
                 </view>
                 <view class="headimg">
-                  <image :src="item.iconurl" />
+                  <image :src="item.iconurl" mode="" />
                 </view>
                 <view class="name">{{ item.nickname }}</view>
                 <view v-if="2 == +item.dumnormal" class="img-more" @click="toPrize(item.id)">{{ $t('goods.more') }}</view>
@@ -214,10 +214,10 @@
         <view v-if="4 == ltabIndex" class="reviews">
           <view v-for="(item, index) in dataList" :key="index" class="item">
             <view class="header">
-              <image class="avatar" :src="item.headimgurl" />
+              <image class="avatar" :src="item.headimgurl" mode="" />
               <view class="name otw">{{ item.nickname }}</view>
               <view class="issue">{{ $t('common.niss') }} {{ item.issue }}</view>
-              <image class="vipimg" :src="item.vip_img" />
+              <image class="vipimg" :src="item.vip_img" mode="" />
               <view class="time">{{ item.time }}</view>
             </view>
             <view class="main">
@@ -229,6 +229,7 @@
                   :key="index2"
                   :src="item2"
                   @click="enlargeImg(item.imgurl, index2)"
+                  mode=""
                  />
               </view>
             </view>
@@ -243,8 +244,8 @@
       <view class="pkbtn-blue">
         <view class="pkbtn-blue-box">
           <view class="pkbtn-blue-box-avatar">
-            <image v-if="PKList.length" :src="PKList[0].headimgurl" />
-            <image v-else @click="paynow" src="/static/image/icon_questionmark_blue.png" />
+            <image v-if="PKList.length" :src="PKList[0].headimgurl" mode="" />
+            <image v-else @click="paynow" src="/static/image/icon_questionmark_blue.png" mode="" />
           </view>
           <view class="pkbtn-blue-box-title">
             <text v-if="PKList.length">{{ PKList[0].nickname }}</text>
@@ -253,12 +254,12 @@
         </view>
       </view>
       <view class="pkbtn-pkicon">
-        <image src="/static/image/goods/icon_VS.png" />
+        <image src="/static/image/goods/icon_VS.png" mode="" />
       </view>
       <view class="pkbtn-redi">
         <view class="pkbtn-redi-box" @click="paynow">
           <view class="pkbtn-redi-box-avatar" :class="{ avatar_bj: PKList.length <= 1 }">
-            <image v-if="PKList.length > 1" :src="PKList[1].headimgurl" />
+            <image v-if="PKList.length > 1" :src="PKList[1].headimgurl" mode="" />
             <text v-else></text>
           </view>
           <view class="pkbtn-redi-box-title">
@@ -322,8 +323,13 @@
       class="normal_mask"
     >
       <view class="guide-price" :style="{ bottom: 3 == goodsData.normal ? '166rpx' : '98rpx' }">
-        <image :src="'/static/image/home/sus.png'" />
-        <image class="guide-del" :src="'/static/image/home/del.png'" @click.stop="changeNormal($event)" />
+        <image :src="'/static/image/home/sus.png'" mode="" />
+        <image
+          class="guide-del"
+          :src="'/static/image/home/del.png'"
+          @click.stop="changeNormal($event)"
+          mode=""
+         />
         <view>{{ $t('goods.normaltip') }}</view>
       </view>
     </view>

@@ -3,12 +3,12 @@
     <view class="mine_user" @click="checkLogin">
       <view class="mine_user_main">
         <view class="mine_user_img" :class="isLogin ? 'login' : 'nologin'">
-          <image class="img" :src="userInfo.imgUrl" />
+          <image class="img" :src="userInfo.imgUrl" mode="" />
         </view>
         <view class="mine_user_info">
           <view class="mine_user_info_name">
             <view class="u-m-r-20">{{ 1 == userInfo.status ? userInfo.name : 'Log in' }}</view>
-            <image v-if="1 == userInfo.status" :src="userInfo.vip_img" />
+            <image v-if="1 == userInfo.status" :src="userInfo.vip_img" mode="" />
           </view>
           <view class="mine_user_info_number">{{ userInfo.mobile }}</view>
         </view>
@@ -16,22 +16,22 @@
       <view class="mine_user_member">
         <view class="mine_user_member_title">
           <view class="icon">
-            <image src="/static/image/member/icon_vip.png" />
+            <image src="/static/image/member/icon_vip.png" mode="" />
           </view>
           <view class="name">{{ $t('member.openvip') }}</view>
         </view>
         <view class="mine_user_member_item">
           <view class="benefits">{{ $t('member.benefits') }}</view>
           <view class="coin">
-            <image src="/static/image/member/icon_goldcoins.png" />
+            <image src="/static/image/member/icon_goldcoins.png" mode="" />
           </view>
           <view class="enjoy1">{{ $t('member.eorder') }}</view>
           <view class="redpacket">
-            <image src="/static/image/member/icon_redenvelope.png" />
+            <image src="/static/image/member/icon_redenvelope.png" mode="" />
           </view>
           <view class="enjoy2">{{ $t('member.ivip') }}</view>
           <view class="tovip" @click="toMember">
-            <image src="/static/image/member/icon_vector.png" />
+            <image src="/static/image/member/icon_vector.png" mode="" />
           </view>
         </view>
       </view>
@@ -88,7 +88,7 @@
       <view class="mine_finance_bar">
         <view class="mine_finance_bar_title">{{ $t('finance.htitle') }}</view>
         <view class="mine_finance_bar_icon" @click="toFinance">
-          <image src="/static/image/icon_CaretRight.png" />
+          <image src="/static/image/icon_CaretRight.png" mode="" />
         </view>
       </view>
       <view class="mine_finance_total">

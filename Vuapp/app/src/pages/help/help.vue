@@ -6,7 +6,7 @@
       <view v-for="(item, index) in itemList" :key="index" class="help_main_item">
         <view class="help_main_item_icon">
           <view class="help_main_item_icon_url">
-            <image :src="item.image_url" />
+            <image :src="item.image_url" mode="" />
           </view>
           <view class="help_main_item_icon_title">{{ item.category }}</view>
         </view>

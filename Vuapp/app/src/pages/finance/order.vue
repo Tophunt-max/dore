@@ -31,7 +31,7 @@
         >
           <view class="name" :class="{ active: tabIndex == item.value }">{{ item.name }}</view>
           <view class="img">
-            <image v-if="tabIndex == item.value" src="/static/image/icon_Select.png" />
+            <image v-if="tabIndex == item.value" src="/static/image/icon_Select.png" mode="" />
           </view>
         </view>
       </view>

@@ -41,15 +41,15 @@
       <template v-if="'en_us' == lang">
         <view class="middle_top">
           <view class="link_img">
-            <image :src="'/static/image/invite/icon_Sharelink.png'" />
+            <image :src="'/static/image/invite/icon_Sharelink.png'" mode="" />
           </view>
           <view class="point"></view>
           <view class="reg_img">
-            <image :src="'/static/image/invite/icon_Registion.png'" />
+            <image :src="'/static/image/invite/icon_Registion.png'" mode="" />
           </view>
           <view class="point"></view>
           <view class="earn_img">
-            <image :src="'/static/image/invite/icon_Earnrewards.png'" />
+            <image :src="'/static/image/invite/icon_Earnrewards.png'" mode="" />
           </view>
         </view>
         <view class="middle_bottom">
@@ -64,11 +64,11 @@
       <view class="tab_item">
         <view class="item_left">
           <view :class="1 == tabStyle ? 'tab_rec' : 'tab_rul'" @click="changeTab(1)">{{ $t('invite.fri') }}</view>
-          <image v-if="1 == tabStyle" src="/static/image/icon_Select.png" />
+          <image v-if="1 == tabStyle" src="/static/image/icon_Select.png" mode="" />
         </view>
         <view class="item_right">
           <view :class="2 == tabStyle ? 'tab_rec' : 'tab_rul'" @click="changeTab(2)">{{ $t('invite.reb') }}</view>
-          <image v-if="2 == tabStyle" src="/static/image/icon_Select.png" />
+          <image v-if="2 == tabStyle" src="/static/image/icon_Select.png" mode="" />
         </view>
       </view>
       <mescroll-body
@@ -83,14 +83,14 @@
         <view v-for="(item, index) in invitadList" :key="index" class="tabs">
           <view class="tabs_rank">
             <view v-if="1 == tabStyle" class="tabs_rank_icon">
-              <image v-if="index < 3" :src="rankImg[index]" />
+              <image v-if="index < 3" :src="rankImg[index]" mode="" />
               <view v-else class="tabs_rank_num">{{ index + 1 }}</view>
             </view>
             <view class="tabs_left">
               <view class="tabs_user">
                 <text v-if="1 == tabStyle">{{ item.mobile }}</text>
                 <text v-else>{{ item.user }}</text>
-                <image :src="item.vip_img" />
+                <image :src="item.vip_img" mode="" />
               </view>
               <view class="tabs_time">{{ item.time }}</view>
             </view>

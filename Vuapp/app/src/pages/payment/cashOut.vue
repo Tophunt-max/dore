@@ -15,7 +15,7 @@
         >
           <view class="title" :class="{ tabactive: tabIndex == item.type }">{{ item.name }}</view>
           <view v-if="tabIndex == item.type" class="icon">
-            <image src="/static/image/icon_Select.png" />
+            <image src="/static/image/icon_Select.png" mode="" />
           </view>
         </view>
       </view>
@@ -31,7 +31,7 @@
           <view class="cashout_main_title_right">
             <view class="cashout_main_title_right_item">
               <view class="cashout_main_title_img">
-                <image :src="cardData.imageurl" />
+                <image :src="cardData.imageurl" mode="" />
               </view>
               <view class="cashout_main_title_name">{{ cardData.name }}</view>
               <view class="cashout_main_title_icon">
@@ -53,7 +53,7 @@
         <view class="cashout_main_money_input">
           <input v-model="money" />
           <view class="viptip" @click="toVIP">
-            <image src="/static/image/finance/icon_Arrow.png" />
+            <image src="/static/image/finance/icon_Arrow.png" mode="" />
             {{ $t('member.cashtip') }}
           </view>
         </view>

@@ -10,6 +10,7 @@
       <image
         :class="{ winner: 1 == index }"
         :src="page == item.pagePath ? item.selectedIconPath : item.iconPath"
+        mode=""
        />
       <view>{{ item.text }}</view>
       <view v-show="1 == $store.state.takeIcon && 2 == index" class="tabbar-item-icon"></view>

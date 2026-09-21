@@ -6,25 +6,25 @@
         <view class="main_app">
           <view class="main_app_item" @click="share(1)">
             <view class="main_app_item_icon">
-              <image :src="shareList[1].icon" />
+              <image :src="shareList[1].icon" mode="" />
             </view>
             <view class="main_app_item_name">{{ shareList[1].name }}</view>
           </view>
           <view v-if="!posterShow" class="main_app_item" @click="share(2)">
             <view class="main_app_item_icon">
-              <image :src="shareList[2].icon" />
+              <image :src="shareList[2].icon" mode="" />
             </view>
             <view class="main_app_item_name">{{ shareList[2].name }}</view>
           </view>
           <view v-if="!posterShow" class="main_app_item" @click="share(3)">
             <view class="main_app_item_icon">
-              <image :src="shareList[3].icon" />
+              <image :src="shareList[3].icon" mode="" />
             </view>
             <view class="main_app_item_name">{{ shareList[3].name }}</view>
           </view>
           <view v-if="posterShow" class="main_app_item" @click="share(4)">
             <view class="main_app_item_icon">
-              <image :src="shareList[4].icon" />
+              <image :src="shareList[4].icon" mode="" />
             </view>
             <view class="main_app_item_name">{{ shareList[4].name }}</view>
           </view>

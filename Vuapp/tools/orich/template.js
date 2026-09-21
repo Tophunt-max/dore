@@ -593,10 +593,31 @@ class Transpiler {
     }
     const e = el(tag);
 
+    // The vnode data may be wrapped in the spread helpers:
+    //   _g(_b(DATA, tag, attrsObj, asProp), listenersObj)
+    // which is how `v-bind="$attrs"` / `v-on="$listeners"` compile. Unwrapping
+    // is what makes the inner data object reachable - without it every prop on
+    // the element is silently dropped.
+    const spreads = [];
+    const unwrapData = (n) => {
+      if (isCall(n, '_b')) {
+        const value = n.arguments[2];
+        if (value) spreads.push(['v-bind', value]);
+        return unwrapData(n.arguments[0]);
+      }
+      if (isCall(n, '_g')) {
+        // Vue 3 removed `$listeners`; listeners arrive through `$attrs`, which
+        // the accompanying v-bind already forwards.
+        return unwrapData(n.arguments[0]);
+      }
+      return n;
+    };
+
     let data = null;
     let children = null;
-    for (const r of rest) {
-      if (!r) continue;
+    for (const raw of rest) {
+      if (!raw) continue;
+      const r = unwrapData(raw);
       if (r.type === 'ObjectExpression' && !data) data = r;
       else if (r.type === 'ArrayExpression' || isCall(r, '_l') || isCall(r, '_v') || r.type === 'ConditionalExpression' || (r.type === 'CallExpression' && r.callee.name === this.ctx.creator)) {
         if (!children) children = r;
@@ -604,6 +625,12 @@ class Transpiler {
     }
 
     if (data) this.applyData(e, data);
+
+    for (const [name, value] of spreads) {
+      const m = marker(value);
+      const src = expr(m ? m.value : value, this.ctx);
+      if (src) e.attrs.push([name, src]);
+    }
 
     // merge the static attributes that only the view layer retained
     const id = data ? nodeIdOf(getProp(data, 'attrs')) : null;
@@ -882,9 +909,11 @@ class Transpiler {
       if (!values.has(k)) order.push(k);
       values.set(k, v);
     }
-    const attrs = order
-      .filter((k) => values.get(k) === null || String(values.get(k)).length > 0)
-      .map((k) => (values.get(k) === null ? k : `${k}="${attrQuote(values.get(k))}"`));
+    // An empty value is kept: `back-text=""` and `mode=""` deliberately override
+    // a component's non-empty prop default in the reference.
+    const attrs = order.map((k) =>
+      values.get(k) === null ? k : `${k}="${attrQuote(values.get(k))}"`
+    );
 
     let open = node.tag;
     if (attrs.length) {

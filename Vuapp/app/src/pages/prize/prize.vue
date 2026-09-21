@@ -24,7 +24,7 @@
     <view class="prize_invite">
       <view class="prize_invite_avatar">
         <view v-for="(item, index) in avatarList" :key="index" class="prize_invite_avatar_item">
-          <image :src="item" />
+          <image :src="item" mode="" />
         </view>
       </view>
       <view class="prize_invite_tips">{{ $t('prize.inviteTip') }}</view>
@@ -56,7 +56,7 @@
             class="prize_main_users_item"
           >
             <view class="prize_main_users_item_left">
-              <image :src="item2.headimg" />
+              <image :src="item2.headimg" mode="" />
             </view>
             <view class="prize_main_users_item_right">
               <view class="top">
@@ -80,7 +80,7 @@
         <view class="p-title">{{ $t('home.prizetitle') }}</view>
         <view class="p-main">
           <view class="p-main-icon">
-            <image :src="'/static/image/prize/icon_partition.png'" />
+            <image :src="'/static/image/prize/icon_partition.png'" mode="" />
           </view>
           <view class="p-main-tips">{{ $t('home.prizetips1') }}</view>
           <view class="p-main-price">

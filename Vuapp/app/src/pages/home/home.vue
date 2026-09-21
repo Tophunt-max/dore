@@ -17,7 +17,7 @@
       </view>
       <view v-if="0 != tabList.length" class="tab">
         <view v-for="(item, index) in tabList" :key="index" class="tab-item" @click="toUrl(item)">
-          <image :src="item.imageurl" />
+          <image :src="item.imageurl" mode="" />
           <view class="tab-item-text">{{ item.title }}</view>
         </view>
       </view>
@@ -39,7 +39,7 @@
       </view>
       <view v-if="0 !== Object.keys(newData).length" class="newbie" :class="{ 'guide-new': guideShow }">
         <view v-if="guideShow" class="guide-tips">
-          <image class="guide-del" :src="'/static/image/home/del.png'" @click.stop="NoFirst($event)" />
+          <image class="guide-del" :src="'/static/image/home/del.png'" @click.stop="NoFirst($event)" mode="" />
           <view class="guide-text">{{ $t('home.view') }}</view>
         </view>
         <view class="newbie-title" @click="toRich">
@@ -49,7 +49,7 @@
         </view>
         <buystep page="homePage"></buystep>
         <view class="nshop" @click="toGoods(newData.id, 'new')">
-          <image class="nshop-img" :src="newData.iconurl" />
+          <image class="nshop-img" :src="newData.iconurl" mode="" />
           <view class="nshop-detail">
             <view class="nshop-title otw">{{ newData.name }}</view>
             <view class="nshop-precent">
@@ -78,14 +78,14 @@
         <view class="finance-header">
           <view class="finance-header-item">
             <view class="iconimg">
-              <image src="/static/image/finance/icon_Finance.png" />
+              <image src="/static/image/finance/icon_Finance.png" mode="" />
             </view>
             <view class="title">{{ $t('finance.htitle') }}</view>
           </view>
           <view class="finance-header-item" @click="toFinance">
             <view class="more">{{ $t('home.more') }}</view>
             <view class="moreimg">
-              <image src="/static/image/finance/icon_Arrow.png" />
+              <image src="/static/image/finance/icon_Arrow.png" mode="" />
             </view>
           </view>
         </view>
@@ -97,7 +97,7 @@
             @click="toFDetail(item.id)"
           >
             <view class="finance-main-card-image">
-              <image :src="item.img" />
+              <image :src="item.img" mode="" />
             </view>
             <view class="finance-main-card-content">
               <view class="ctitle">{{ item.name }}</view>
@@ -114,12 +114,12 @@
               </view>
             </view>
             <view v-if="2 == item.status" class="finance-main-card-finish">
-              <image src="/static/image/finance/img_Soldout.png" />
+              <image src="/static/image/finance/img_Soldout.png" mode="" />
             </view>
           </view>
           <view class="finance-main-more" @click="toFinance">
             <view class="more-icon">
-              <image src="/static/image/finance/icon_Arrow.png" />
+              <image src="/static/image/finance/icon_Arrow.png" mode="" />
             </view>
           </view>
         </view>
@@ -127,14 +127,14 @@
       <view v-if="0 !== upcomimgList.length" class="high glist">
         <view class="header">
           <view class="header-title">
-            <image src="/static/image/home/icon_Upcoming.png" />
+            <image src="/static/image/home/icon_Upcoming.png" mode="" />
             {{ $t('home.upcoming') }}
           </view>
         </view>
         <view class="main">
           <view v-for="(item, index) in upcomimgList" :key="index" class="item" @click="toGoods(item.id)">
             <view class="item-show">
-              <image :src="item.iconurl" />
+              <image :src="item.iconurl" mode="" />
             </view>
             <view class="item-text">
               <view class="item-name otw">{{ item.name }}</view>
@@ -149,7 +149,7 @@
       </view>
       <view v-if="firstLoad" class="invite">
         <view class="invite-icon">
-          <image src="/static/image/home/icon_Invite.png" />
+          <image src="/static/image/home/icon_Invite.png" mode="" />
         </view>
         <view class="invite-main">{{ $t('home.invitemoney') }}</view>
         <view class="invite-btn" @click="toInvite">{{ $t('prize.btnTitle') }}</view>
@@ -157,14 +157,14 @@
       <view v-if="0 !== highList.length" class="high glist">
         <view class="header">
           <view class="header-title">
-            <image src="/static/image/home/icon_HotPicks.png" />
+            <image src="/static/image/home/icon_HotPicks.png" mode="" />
             {{ $t('home.high') }}
           </view>
         </view>
         <view class="main">
           <view v-for="(item, index) in highList" :key="index" class="item" @click="toGoods(item.id)">
             <view class="item-show">
-              <image :src="item.iconurl" />
+              <image :src="item.iconurl" mode="" />
               <view v-if="2 == item.normal" class="item-show-prize">{{ $t('home.multiple') }}</view>
             </view>
             <view class="item-text">
@@ -184,7 +184,7 @@
         <view v-if="firstLoad" class="ltab">
           <view class="ltab-price" @click="showPrice = true">
             <view class="ltab-price-select">{{ tabPrice }}</view>
-            <image src="/static/image/icon_arrow.png" />
+            <image src="/static/image/icon_arrow.png" mode="" />
           </view>
           <view class="ltab-tab">
             <view
@@ -195,7 +195,7 @@
               @click="ltabIndex = item.value"
             >
               <view class="ltab-item-text">{{ item.label }}</view>
-              <image src="/static/image/icon_Select.png" />
+              <image src="/static/image/icon_Select.png" mode="" />
             </view>
           </view>
         </view>
@@ -224,7 +224,13 @@
               class="litem-avatar"
               :class="item.countdown ? 'litem-avatar-end' : ''"
             >
-              <image v-for="(item2, index2) in item.userimgurl" v-if="item2" :key="index2" :src="item2" />
+              <image
+                v-for="(item2, index2) in item.userimgurl"
+                v-if="item2"
+                :key="index2"
+                :src="item2"
+                mode=""
+               />
             </view>
           </view>
           <view class="litem-right">
@@ -256,7 +262,7 @@
                 @click.stop="snatch(item, item.has_lottery)"
               >
                 <view>{{ $t('home.snatch') }}</view>
-                <image src="/static/image/home/icon_RightArrow.png" />
+                <image src="/static/image/home/icon_RightArrow.png" mode="" />
               </view>
             </view>
           </view>
@@ -274,15 +280,15 @@
           {{ 1 == pickData.status ? $t('home.regret') : $t('home.congara') }}
         </view>
         <view v-if="lotteryList.length > 1" class="m-left" @click.stop="pickLeft($event)">
-          <image :src="'/static/image/home/icon_Arrow.png'" />
+          <image :src="'/static/image/home/icon_Arrow.png'" mode="" />
         </view>
         <view v-if="lotteryList.length > 1" class="m-right" @click.stop="pickRight($event)">
-          <image :src="'/static/image/home/icon_Arrow_right.png'" />
+          <image :src="'/static/image/home/icon_Arrow_right.png'" mode="" />
         </view>
         <view class="m-main" @click="stopPropagation()">
           <view class="m-header">
             <view class="m-header-img">
-              <image :src="pickData.iconurl" />
+              <image :src="pickData.iconurl" mode="" />
             </view>
             <view class="m-header-desc">
               <view class="m-header-title otw2">{{ pickData.name }}</view>
@@ -321,7 +327,7 @@
         <view class="p-title">{{ $t('home.prizetitle') }}</view>
         <view class="p-main">
           <view class="p-main-icon">
-            <image :src="'/static/image/prize/icon_partition.png'" />
+            <image :src="'/static/image/prize/icon_partition.png'" mode="" />
           </view>
           <view class="p-main-tips">{{ $t('home.prizetips1') }}</view>
           <view class="p-main-price">
@@ -342,7 +348,7 @@
       <view class="m-guide"></view>
     </view>
     <view v-if="activityTime && 0 != activityTime" class="home-prize" @click="toPrize">
-      <image :src="'/static/image/prize/icon_partition.png'" />
+      <image :src="'/static/image/prize/icon_partition.png'" mode="" />
     </view>
     <u-popup mode="bottom" v-model="snatchShow">
       <view class="snatch">

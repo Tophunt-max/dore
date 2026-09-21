@@ -6,7 +6,7 @@
         <view class="member_user">
           <view class="member_user_item">
             <view class="avatar">
-              <image :src="vipList.user_img" />
+              <image :src="vipList.user_img" mode="" />
             </view>
             <view class="info">
               <view class="info_name">{{ vipList.user_name }}</view>
@@ -20,7 +20,7 @@
       </view>
       <view v-if="vipList.user_level < vipList.count - 1" class="member_open">
         <view class="member_open_title">
-          <image src="/static/image/member/group381.png" />
+          <image src="/static/image/member/group381.png" mode="" />
         </view>
         <view class="member_open_card">
           <view
@@ -42,13 +42,13 @@
       <view class="member_detail" :class="{ member_detailbg: !vipList.user_level < vipList.count - 1 }">
         <view class="member_detail_title">
           <view class="name">
-            <image src="/static/image/member/group382.png" />
+            <image src="/static/image/member/group382.png" mode="" />
           </view>
         </view>
         <view class="member_detail_strip">
           <view v-for="(item, index) in vipList.stripList" :key="index" class="member_detail_strip_item">
             <view class="icon">
-              <image :src="item.icon" />
+              <image :src="item.icon" mode="" />
             </view>
             <view class="info">{{ item.name }}</view>
           </view>
@@ -64,7 +64,7 @@
                 :class="{ 'u-m-t-22': index > 0 }"
               >
                 <view class="main_item_icon">
-                  <image src="/static/image/member/icon_select.png" />
+                  <image src="/static/image/member/icon_select.png" mode="" />
                 </view>
                 <view class="main_item_des">{{ item }}</view>
               </view>
