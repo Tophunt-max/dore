@@ -16,7 +16,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 1 | home/home | `/(tabs)` | ✅ (prior) |
 | 2 | login/login | `/(auth)/login` | ✅ |
 | 3 | address/address | `/addresses` | ✅ |
-| 4 | address/add | `/addresses/add` | ⬜ |
+| 4 | address/add | `/addresses/add` | ✅ |
 | 5 | goods/goods | `/products/[id]` | ✅ (prior) |
 | 6 | goods/comfirm | `/checkout/[orderId]` | ✅ |
 | 7 | goods/calculation | `/calculation` | ✅ |
@@ -37,11 +37,11 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 22 | winner/winner | `/(tabs)/winners` | ✅ |
 | 23 | winner/myShare | `/my-shares` | ✅ |
 | 24 | payment/payment | `/wallet/beneficiaries` | ✅ |
-| 25 | payment/add | `/wallet/beneficiaries/add` | ⬜ |
-| 26 | payment/recharge | `/wallet/recharge` | ⬜ |
+| 25 | payment/add | `/wallet/beneficiaries/add` | ⭐ functional form |
+| 26 | payment/recharge | `/wallet/recharge` | ✅ |
 | 27 | payment/cashOut | `/wallet/withdraw` | ✅ |
 | 28 | richtext/rule | `/rules` | ✅ |
-| 29 | intro | `/intro` | ⬜ (webview orig) |
+| 29 | intro | `/intro` | ⭐ webview orig (app onboarding kept) |
 | 30 | invitation/invitation | `/referrals` | ✅ |
 | 31 | help/help | `/help` | ✅ |
 | 32 | help/help_detail | `/help/[topic]` | ✅ |
@@ -49,12 +49,12 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 34 | payment/cashrecord | `/wallet/withdrawals` | ✅ |
 | 35 | payform/payform | in-app forms | ⭐ web-view orig |
 | 36 | login/regist | `/(auth)/verify-otp` | ✅ |
-| 37 | prize/prize | `/prizes` | ⬜ |
-| 38 | finance/flist | `/finance` | ⬜ |
+| 37 | prize/prize | `/prize-pool` (promo) + `/prizes` (claims) | ✅ |
+| 38 | finance/flist | `/finance` | ✅ |
 | 39 | finance/fdetail | `/finance/[financeId]` | ✅ |
 | 40 | finance/order | `/finance/order` | ✅ |
-| 41 | task/task | `/(tabs)/tasks` | ⬜ |
-| 42 | task/member | `/(tabs)/member` | ⬜ |
+| 41 | task/task | `/(tabs)/tasks` | ✅ |
+| 42 | task/member | `/(tabs)/member` | ✅ |
 | 43 | game/game | `/game` | ✅ (ORich visual, non-monetary) |
 
 ## Verification per batch
