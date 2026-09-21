@@ -23,7 +23,7 @@ const reLanguage = computed(() => (LOCALES.find((l) => l.code === currentLocale(
 const quickNav = [
   { img: `${H}/icon_1GroupBuy.png`, text: 'Group Buy', fn: () => uni.navigateTo({ url: '/pages/prize/prize' }) },
   { img: `${H}/icon_Category.png`, text: 'Finance', fn: () => uni.navigateTo({ url: '/pages/finance/flist' }) },
-  { img: `${H}/high.png`, text: 'Hot', fn: () => uni.switchTab({ url: '/pages/task/task' }) },
+  { img: '/static/image/goods/icon_Trophy.png', text: 'Hot', fn: () => uni.switchTab({ url: '/pages/task/task' }) },
   { img: `${H}/icon_news.png`, text: 'Game', fn: () => uni.navigateTo({ url: '/pages/game/game' }) },
 ];
 const ltabs = ['home.lnew', 'home.lhot', 'home.lsoon'];
