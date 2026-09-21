@@ -30,6 +30,8 @@ export const assets = {
   walletBackground: require('../assets/orich/image/account/bg_Wallet.png'),
   accountBackground: require('../assets/orich/image/account/bg_my.png'),
   financeBackground: require('../assets/orich/image/finance/bg_list.png'),
+  financeDetailBg: require('../assets/orich/image/finance/bg_Detailpage.png'),
+  financeIcon: require('../assets/orich/image/finance/icon_Finance.png'),
   inviteBackground: require('../assets/orich/image/invite/invite_bg.png'),
   faqBackground: require('../assets/orich/image/faq/bg_FAQ.png'),
   taskBackground: require('../assets/orich/image/task/task_bj.png'),
