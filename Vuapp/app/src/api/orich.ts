@@ -158,3 +158,27 @@ export const userOrder = (d: { status?: number; start?: number; limit?: number }
     count: (r.orders || []).length,
   }));
 };
+
+
+// --- finance adapters ---
+export const financeList = (_d: { start: number; limit: number }) =>
+  api.get('/api/finance').then((r: any) => ({ list: r.products || [], count: (r.products || []).length }));
+export const financeOrderRecent = () => Promise.resolve({ list: [] as any[] });
+
+
+// --- my winner (shared/won) adapter ---
+export const myWinner = (_d: { start: number; limit: number }) =>
+  api.get('/api/my-shares').then((r: any) => {
+    const list = (r.shares || []).map((s: any) => ({
+      userheadimgurl: '/static/image/other.png',
+      username: 'You',
+      time: s.drawn_at ? new Date(s.drawn_at * 1000).toLocaleString() : '',
+      content: `Won ${s.title} · No. ${s.winning_no || ''}`,
+      imagesurl: s.image ? [s.image] : [],
+      iconurl: s.image,
+      delname: s.title,
+      issue: 'Issue ' + (s.issue || ''),
+      dumid: s.goods_id || s.id,
+    }));
+    return { list, count: list.length };
+  });
