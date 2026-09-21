@@ -651,7 +651,9 @@ export const catalog = {
     hi: 'निष्पादन तक प्रतिबद्ध सीड छिपा रहता है।',
     zh: '承诺的种子在执行前保持隐藏。',
   },
-  'discount.title': { en: 'Discounts', hi: 'छूट', zh: '优惠' },
+  'discount.title': { en: 'Winners', hi: 'विजेता', zh: '中奖名单' },
+  'discount.rankNo': { en: 'Prize {n}', hi: 'पुरस्कार {n}', zh: '第 {n} 名' },
+  'discount.winner': { en: 'Winner', hi: 'विजेता', zh: '中奖者' },
   'discount.off': { en: 'OFF', hi: 'छूट', zh: '优惠' },
   'discount.available': { en: 'Available', hi: 'उपलब्ध', zh: '可用' },
   'discount.ends': {

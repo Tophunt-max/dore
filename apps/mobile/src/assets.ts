@@ -40,6 +40,15 @@ export const assets = {
   paymentFailed: require('../assets/orich/image/bask/img_Paymentfail.png'),
   paytm: require('../assets/orich/image/pay/paytm.png'),
   xpay: require('../assets/orich/image/pay/xpay.png'),
+  // Discount (winner-ranking) coloured card backgrounds + crown.
+  discountBgs: [
+    require('../assets/orich/image/discount/bg_red.png'),
+    require('../assets/orich/image/discount/bg_Yellow.png'),
+    require('../assets/orich/image/discount/bg_Cyan.png'),
+    require('../assets/orich/image/discount/bg_Purple.png'),
+    require('../assets/orich/image/discount/bg_Green.png'),
+  ],
+  crown: require('../assets/orich/image/discount/icon_Crown.png'),
   // Account (mine) page assets
   financeBackground2: require('../assets/orich/image/account/bg_finance.png'),
   rewardBackground: require('../assets/orich/image/account/bg_reward.png'),
