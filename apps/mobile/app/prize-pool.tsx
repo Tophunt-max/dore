@@ -4,7 +4,6 @@ import { useState } from 'react';
 import {
   Alert,
   Image,
-  ImageBackground,
   Pressable,
   StyleSheet,
   Text,
@@ -52,17 +51,13 @@ export default function PrizePoolScreen() {
       : COUNTDOWN_ZERO;
 
   return (
-    <ImageBackground
-      source={assets.prizeBackground}
-      resizeMode="cover"
-      style={styles.bg}
-    >
       <Screen
-        header={<TopBar title={t('account.prizes')} white transparent />}
+        header={<TopBar title={t('account.prizes')} white />}
         contentStyle={styles.page}
         refreshing={activities.isRefetching}
         onRefresh={() => void activities.refetch()}
       >
+        <Image source={assets.prizeBackground} style={styles.hero} />
         <QueryNotice
           loading={activities.isLoading}
           error={activities.error}
@@ -149,14 +144,13 @@ export default function PrizePoolScreen() {
           <Text style={styles.empty}>{t('finance.empty')}</Text>
         ) : null}
       </Screen>
-    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   // .prize { background:#35a2ff }
-  bg: { flex: 1, backgroundColor: '#35a2ff' },
-  page: { paddingBottom: rpx(40) },
+  page: { backgroundColor: '#35a2ff', paddingBottom: rpx(40) },
+  hero: { width: '100%', height: rpx(360), resizeMode: 'cover' },
   // .prize_people { pill; rgba black .2 }
   peoplePill: {
     alignSelf: 'center',

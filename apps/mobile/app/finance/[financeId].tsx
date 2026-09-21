@@ -27,14 +27,8 @@ export default function FinanceDetailScreen() {
   const offer = query.data?.items.find((item) => item.id === financeId);
 
   return (
-    <ImageBackground
-      source={assets.financeDetailBg}
-      resizeMode="stretch"
-      style={styles.bg}
-      imageStyle={styles.bgImg}
-    >
       <Screen
-        header={<TopBar title={t('finance.title')} white transparent />}
+        header={<TopBar title={t('finance.title')} white />}
         contentStyle={styles.page}
       >
         <QueryNotice
@@ -44,18 +38,24 @@ export default function FinanceDetailScreen() {
         />
         {offer ? (
           <>
-            {/* info row */}
-            <View style={styles.info}>
-              <View style={styles.infoImg}>
-                <Image source={assets.financeIcon} style={styles.infoImgInner} />
+            {/* hero + info row (white text over the finance art) */}
+            <ImageBackground
+              source={assets.financeDetailBg}
+              resizeMode="stretch"
+              style={styles.hero}
+            >
+              <View style={styles.info}>
+                <View style={styles.infoImg}>
+                  <Image source={assets.financeIcon} style={styles.infoImgInner} />
+                </View>
+                <View style={styles.infoDd}>
+                  <Text style={styles.infoTitle} numberOfLines={2}>
+                    {offer.title}
+                  </Text>
+                  <Text style={styles.infoStrip}>{offer.providerName}</Text>
+                </View>
               </View>
-              <View style={styles.infoDd}>
-                <Text style={styles.infoTitle} numberOfLines={2}>
-                  {offer.title}
-                </Text>
-                <Text style={styles.infoStrip}>{offer.providerName}</Text>
-              </View>
-            </View>
+            </ImageBackground>
 
             {/* detail card */}
             <View style={styles.card}>
@@ -85,7 +85,6 @@ export default function FinanceDetailScreen() {
           <Text style={styles.empty}>{t('finance.offerUnavailable')}</Text>
         ) : null}
       </Screen>
-    </ImageBackground>
   );
 }
 
@@ -101,9 +100,8 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  bg: { flex: 1, backgroundColor: '#f9f9f9' },
-  bgImg: { height: rpx(400) },
-  page: { paddingBottom: rpx(60) },
+  page: { backgroundColor: '#f9f9f9', paddingBottom: rpx(60) },
+  hero: { width: '100%', height: rpx(360), paddingTop: rpx(30) },
   // .fdetail_info { padding:0 22rpx }
   info: {
     flexDirection: 'row',
