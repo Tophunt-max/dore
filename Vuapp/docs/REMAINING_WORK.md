@@ -1,59 +1,47 @@
 # Remaining work
 
-State after regenerating `app/src` from the ORich reference bundle
-(`tools/orich`). What is **done**: all 43 screens and 41 components are generated
-from the compiled artifacts — templates, verbatim scoped CSS, the reference i18n
-catalogs, the static assets, the vuex store and the component behaviour. The H5
-build is green and all 43 routes load with **no script errors**.
+`app/src` is generated from the ORich reference bundle by `tools/orich` — all 43
+screens and 41 components, with templates, verbatim scoped CSS, the reference
+i18n catalogs, the static assets, the vuex store and the component behaviour.
 
-What is left is mostly **data plumbing**, not UI.
+**Current state:** all 43 routes walked in a headless browser at 390×844 against
+the deployed worker, **signed in**, with real query parameters where a screen
+needs them — **0 console errors, 0 broken images, no NaN/undefined text**.
+
+Live: https://vuapp-user.pages.dev · API: https://vuapp-api.mohantasumanta660.workers.dev
 
 ---
 
-## 1. API response-shape adapters — the main gap
+## 1. Response-shape adapters — largely done
 
-`api/orich.js` exposes all 78 function names the screens call and maps 69 of them
-onto Worker endpoints. The *names* line up; the *payload shapes* mostly do not.
-The reference screens read reference-shaped responses, so until each is adapted
-the screen renders its empty state.
+The screens read the reference payload shapes; the Worker returns its own field
+names and integer minor units. Adapt in `tools/orich/support.js` (the `MAP` table
+and the mappers above it), **never in a screen**, so the pages stay comparable
+with the reference.
 
-Adapt in `tools/orich/support.js` (the `MAP` table) and regenerate — **not** in
-the screens, so the pages stay comparable with the reference.
+Mapped so far: `Index`, `ActiveList`, `GKind`, `DuobaoItem`, `DuobaoSwiperItem`,
+`GoodsList`, `GoodsDetail`, `GoodsHisDetail`, `GoodsShareDetail`, `financeList`,
+`financeDetail`, `financeDetailHistory`, `financeOrderRecent`, `myFinanceList`,
+`WinnerList`, `myWinner`, `userShare`, `getTitle`, `getAnswer`, `userAccount`,
+`UserInfo`, `UserBalance`, `myTeam`, `userInviteTop`, `userInviteList`,
+`userOrder`, `orderDetail`, `taskList`, `bankList`, `rechargeList`, `cashList`,
+`userConsume`, `userRebateList`.
 
-`Index` is already done as the worked example:
+Shared mappers: `goodsItem`, `financeItem`, `winnerItem`, `userShape`.
 
-```js
-Index: () => get('/api/home').then((r) => ({
-  title: 'vuapp',
-  bannerlist: (r.banners || []).map((b) => ({ imageurl: b.image, type: b.type || '', url: b.link || '' })),
-  navigationlist: r.navigation || [],
-  system: r.system || { whatsapp: '', customercontent: '' },
-  ...r,
-}))
-```
-
-Still to adapt, in rough priority order:
-
-| Function | Screen | Expects (reference shape) | Worker returns |
-|---|---|---|---|
-| `ActiveList` | home | `{ runoob: {...}, new: { list: [] } }` | `{ goods: [] }` |
-| `DuobaoItem` / `DuobaoSwiperItem` | home carousels | item arrays with `imageurl`, `unit_price`, `current_buy`, `max_buy` | `{ goods: [] }` with `price_minor`, `filled_slots`, `total_slots` |
-| `financeList` / `myFinanceList` | home, finance/* | `{ list: [] }` | `{ products: [] }` |
-| `GoodsDetail` | goods/goods, goods/comfirm | detail object with `description`, `allprice`, `unit_price`, `issue` | `{ goods: {...} }` with `*_minor` fields |
-| `userOrder` / `orderDetail` | order/*, bask | `{ list: [], cardList: [] }` | `{ orders: [] }` |
-| `WinnerList` / `myWinner` | winner/* | `{ list: [] }` | `{ winners: [] }` |
-| `taskList` / `vipLevel` | task/task, task/member | `{ list: [], user_level, count }` | `{ tasks: [] }` / not implemented |
-| `userAccount` | account/* | `nickname`, `balance`, `headimgurl`, `new` | `{ user: {...} }` |
-| `bankList` / `rechargeList` / `cashList` | payment/* | `{ list: [] }` | `{ beneficiaries / records: [] }` |
-
-Note the unit convention: the Worker stores integer **minor units**
-(`price_minor`), the reference screens print major-unit strings. Convert in the
-adapter (`utils/money.ts` in the old tree did this) rather than in templates.
+Still returning the raw payload (no screen currently shows wrong data because of
+them, but they should be mapped before those flows are exercised):
+`AddOrder`, `itemEdit`, `ItemShare`, `AddAddress`, `EditAddress`, `DelAddress`,
+`EditAccount`, `itemDefaultAddr`, `bankadd`, `userWithdraw`, `addRechargePay`,
+`financeBuy`, `taskReceive`, `GetLottery`, `joinActivity`, `luckyBuy`,
+`getActivity`, `activityDetail`, `luckyNow`, `luckyList`, `luckyOrderList`,
+`OrderNews`, `RunoobDetail`, `systemService`, `chlWhatsApp`, `GoodsBuyDetail`,
+`UserJoin`, `AccountEdit`, `SendVerify`, `Login`, `Logout`, `getUserAfs`.
 
 ## 2. Endpoints with no backend counterpart
 
-These 9 resolve to `{}` and log a one-time warning. They need Worker routes (or a
-deliberate decision to drop the feature):
+These 9 resolve to an empty (or shaped) result and log a one-time warning. They
+need Worker routes, or a decision to drop the feature:
 
 `GetTime`, `NumberMax`, `gPrice`, `bankEdit`, `addOrderPay`, `payStatus`,
 `editAfStatus`, `vipLevel`, `vipBuy`
@@ -62,53 +50,53 @@ Feature impact: lottery countdown feed, per-user slot cap, price filter table,
 beneficiary editing, the order payment intent / status poll, payment-method
 toggle, and the VIP tier screen.
 
-## 2b. Current live audit (unauthenticated surface)
+## 3. Thin seed data
 
-All 43 routes walked in a headless browser at 390×844 against the deployed
-worker. **0 console errors and 0 broken images across every page.** What the
-audit still flags, and why each is not a defect:
+Several screens correctly show their empty state because the tables are empty,
+not because anything is broken. Seed these to exercise the screens properly:
 
-| Flag | Page(s) | Explanation |
-|---|---|---|
-| `NaN` in the price | `goods/comfirm` | Only when opened directly without `?num=`. Reached normally (`?id=4&num=1`) it renders `₹6999 / ₹10 / ₹10.00`. The reference behaves the same — the screen is only reachable from a goods page. |
-| near-empty | `index/index`, `intro`, `payform/payform` | Near-empty in the reference too (its `index/index` spec is ~530 bytes). |
-| empty | `order/detail` | Root `v-if="cardList.length"` — gated on loaded data, as in the reference. Needs `?id=` plus a signed-in user. |
-| "No data" | `winner/winner` | Correct: the `winners` table has no seed rows. Seed some to exercise it. |
-| avatars / share poster have no `src` | `goods/goods`, `order/record`, `invitation`, `task/member` | Participant avatars and the generated share poster. The backend has no participant data, so the mappers supply empty arrays deliberately. |
+- `winners` — `winner/winner` shows "No data", and the home "latest winners"
+  ticker stays hidden
+- `orders` — `order/record`, `order/detail`, `bask`, `winner/myShare`
+- `beneficiaries`, `recharges`, `withdrawals` — the payment screens
+- finance `orders` — `finance/order` shows all zeroes
+- goods `filled_minor` / participant rows — the finance progress bars read 0 and
+  the participant-avatar strips render empty (the mappers supply empty arrays
+  deliberately, since the backend has no participant data)
 
-## 3. Verification not yet done
+## 4. Verification not yet done
 
-- **Authenticated flows.** The sweep ran unauthenticated, so `/api/tasks`,
-  `/api/account`, wallet and order screens returned 401. Log in with a seeded
-  user and re-check those screens with real data.
-- **Interaction testing.** Only page loads were verified. Forms (address add,
-  beneficiary add, recharge, withdraw), the number-box / popup / collapse
-  components and the game bet flow have not been exercised.
-- **Screens that render nothing without data** — expected, since the reference
-  gates them the same way, but re-confirm once adapters land:
-  `goods/comfirm`, `order/detail`, `finance/fdetail` (root `v-if` on loaded data),
-  and `index/index`, `intro`, `payform/payform` (near-empty by design).
+- **Interactions.** Only page loads and data binding are verified. Forms (address
+  add, beneficiary add, recharge, withdraw), the number-box / popup / collapse
+  components, and the game bet flow have not been exercised end to end.
+- **The login screen's own flow.** Sessions were established through the API and
+  the token injected, so the OTP screen itself is untested.
+- **Admin panel** beyond its login page rendering.
 
-## 4. Smaller follow-ups
+## 5. Smaller follow-ups
 
 - `navbar`, `u-collapse`, `u-form` generate no `<style>` block. They appear to
-  have no CSS of their own in the reference; worth a second check against the
-  bundle before assuming so.
+  have no CSS of their own in the reference; worth a second check.
 - The reference's own CSS typo (`ont-size:1rem`) is reproduced verbatim and shows
-  up as an esbuild warning. Left as-is for fidelity — fix only if the warning is
-  noisy enough to matter.
+  as an esbuild warning. Left for fidelity.
 - One reference template repeats an attribute (`u-badge type="success" …
   type="error"`); the generator keeps the last value, matching what the original
-  actually ran. No action needed, noted so it is not mistaken for a bug.
+  ran. Noted so it is not mistaken for a bug.
 - `tools/orich` has no tests. The highest-value ones would be golden-file tests
-  for `template.js` (a page's transpiled output) and `css.js` (rule counts per
-  scope), so the scope-id and interop pitfalls listed in `tools/orich/README.md`
-  cannot regress silently.
+  for `template.js` and `css.js`, so the scope-id, require-alias and interop
+  pitfalls in `tools/orich/README.md` cannot regress silently.
 
-## 5. Deployment
+## 6. Deployment
 
-Nothing deployed yet from this branch. Per the project workflow: merge to `main`,
-then build and deploy all three targets manually with `wrangler`
-(see [`DEPLOY.md`](../DEPLOY.md)). The user app must be built with
-`VITE_API_URL` pointing at the live Worker, and needs `dist/_redirects`
-containing `/*  /index.html  200` because it is an SPA.
+`main` is deployed. Per the project workflow, deploys are manual:
+
+```bash
+cd vuapp/api   && npx wrangler deploy
+cd vuapp/app   && VITE_API_URL=<worker> npm run build:h5 \
+               && cp _redirects dist/build/h5/_redirects \
+               && npx wrangler pages deploy dist/build/h5 --project-name vuapp-user  --branch main
+cd vuapp/admin && VITE_API_URL=<worker> npm run build \
+               && npx wrangler pages deploy dist --project-name vuapp-admin --branch main
+```
+
+Both Pages apps are SPAs and need `_redirects` containing `/*  /index.html  200`.
