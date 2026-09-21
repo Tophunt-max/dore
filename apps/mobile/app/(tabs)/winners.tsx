@@ -5,169 +5,164 @@ import { api } from '@/api/endpoints';
 import { assets } from '@/assets';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
+import { TopBar } from '@/components/TopBar';
 import { useI18n } from '@/i18n';
 import { rpx } from '@/rpx';
 import { theme } from '@/theme';
 
+// ORich `pages/winner/winner` (scope 034dd157): a #f9f9f9 feed of white cards.
+// Each card = header (avatar 56rpx + name + time), optional content text +
+// image gallery, then a goods row (116rpx thumb + grey rounded desc box).
 export default function WinnersScreen() {
-  const { formatDate } = useI18n();
+  const { formatDate, t } = useI18n();
   const query = useQuery({ queryKey: ['winners'], queryFn: api.winners });
+  const items = query.data?.items ?? [];
+
   return (
     <Screen
+      header={<TopBar title={t('winners.title')} white canGoBack={false} />}
       contentStyle={styles.root}
       refreshing={query.isRefetching}
       onRefresh={() => void query.refetch()}
     >
-      <View style={styles.headerBar}>
-        <Text style={styles.headerTitle}>Latest winners</Text>
-      </View>
-
-      <View style={styles.banner}>
-        <Image source={assets.winnerDrawn} style={styles.bannerIcon} />
-        <Text style={styles.bannerText}>Published campaign results</Text>
-      </View>
-
       <QueryNotice
         loading={query.isLoading}
         error={query.error}
         onRetry={() => void query.refetch()}
       />
 
-      <View style={styles.list}>
-        {query.data?.items.map((winner) => (
-          <Pressable
-            key={winner.id}
-            onPress={() =>
-              router.push({
-                pathname: '/calculation',
-                params: { campaignId: winner.campaignId },
-              })
-            }
-            style={styles.card}
-          >
-            <View style={styles.cardHeader}>
-              {winner.avatarUrl ? (
-                <Image
-                  source={{ uri: winner.avatarUrl }}
-                  style={styles.avatar}
-                />
-              ) : (
-                <Image source={assets.defaultAvatar} style={styles.avatar} />
-              )}
-              <View style={styles.cardHeaderInfo}>
-                <Text style={styles.name}>{winner.displayName}</Text>
-                <Text style={styles.time}>
-                  {formatDate(winner.announcedAt)}
-                </Text>
-              </View>
-              <View style={styles.wonBadge}>
-                <Text style={styles.wonBadgeText}>Winner</Text>
-              </View>
-            </View>
-            <View style={styles.cardBody}>
-              <Image source={assets.goodsOne} style={styles.goodsImg} />
-              <View style={styles.goodsInfo}>
-                <Text style={styles.goodsName} numberOfLines={2}>
-                  {winner.productTitle}
-                </Text>
-                <Text style={styles.goodsIssue}>You won this prize</Text>
-              </View>
-            </View>
-          </Pressable>
-        ))}
-      </View>
+      {items.map((winner) => (
+        <Pressable
+          key={winner.id}
+          onPress={() =>
+            router.push({
+              pathname: '/calculation',
+              params: { campaignId: winner.campaignId },
+            })
+          }
+          style={styles.main}
+        >
+          {/* .header */}
+          <View style={styles.header}>
+            <Image
+              source={
+                winner.avatarUrl
+                  ? { uri: winner.avatarUrl }
+                  : assets.defaultAvatar
+              }
+              style={styles.headerAvatar}
+            />
+            <Text style={styles.headerName} numberOfLines={1}>
+              {winner.displayName}
+            </Text>
+            <Text style={styles.headerTime}>
+              {formatDate(winner.announcedAt)}
+            </Text>
+          </View>
 
-      {!query.isLoading && !query.error && !query.data?.items.length ? (
-        <Text style={styles.empty}>No winner announcements yet.</Text>
+          {/* .content */}
+          <Text style={styles.content}>
+            {t('winners.result')}: {winner.productTitle}
+          </Text>
+
+          {/* .goods */}
+          <View style={styles.goods}>
+            <Image source={assets.goodsOne} style={styles.goodsImg} />
+            <View style={styles.goodsDesc}>
+              <Text style={styles.goodsName} numberOfLines={1}>
+                {winner.productTitle}
+              </Text>
+              <Text style={styles.goodsIssue}>
+                {t('winners.announced', {
+                  date: formatDate(winner.announcedAt),
+                })}
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      ))}
+
+      {!query.isLoading && !query.error && !items.length ? (
+        <Text style={styles.empty}>{t('home.noWinners')}</Text>
       ) : null}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: theme.colors.background, paddingBottom: rpx(40) },
-  headerBar: {
-    paddingTop: rpx(24),
-    paddingHorizontal: rpx(32),
-    paddingBottom: rpx(16),
-  },
-  headerTitle: {
-    fontSize: rpx(40),
-    fontFamily: theme.typography.family.bold,
-    color: theme.colors.ink,
-  },
-  banner: {
-    marginHorizontal: rpx(24),
-    height: rpx(200),
-    borderRadius: rpx(20),
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bannerIcon: { width: rpx(90), height: rpx(90) },
-  bannerText: {
+  // .winner { background:#f9f9f9; padding-bottom:98rpx }
+  root: { backgroundColor: '#f9f9f9', paddingBottom: rpx(98) },
+  // .main { margin-top:16rpx; padding:30rpx 26rpx; background:#fff }
+  main: {
     marginTop: rpx(16),
-    fontSize: rpx(30),
-    fontFamily: theme.typography.family.bold,
-    color: '#fff',
-  },
-  list: { marginTop: rpx(24), marginHorizontal: rpx(24) },
-  card: {
+    paddingVertical: rpx(30),
+    paddingHorizontal: rpx(26),
     backgroundColor: '#fff',
-    borderRadius: rpx(20),
-    padding: rpx(24),
-    marginBottom: rpx(20),
-    ...theme.shadows.card,
   },
-  cardHeader: { flexDirection: 'row', alignItems: 'center' },
-  avatar: {
-    width: rpx(72),
-    height: rpx(72),
-    borderRadius: rpx(36),
-    backgroundColor: '#FFF1EA',
+  // .header { row; center }
+  header: { flexDirection: 'row', alignItems: 'center' },
+  // header uni-image { 56rpx; radius 50% }
+  headerAvatar: {
+    width: rpx(56),
+    height: rpx(56),
+    borderRadius: rpx(28),
+    marginRight: rpx(18),
+    backgroundColor: '#eee',
   },
-  cardHeaderInfo: { flex: 1, marginLeft: rpx(20) },
-  name: {
-    fontSize: rpx(30),
-    fontFamily: theme.typography.family.bold,
-    color: theme.colors.ink,
+  // .header-name { flex:1; 26rpx; weight 600; #17273a }
+  headerName: {
+    flex: 1,
+    marginRight: rpx(18),
+    fontSize: rpx(26),
+    color: '#17273a',
+    fontFamily: theme.typography.family.medium,
   },
-  time: { marginTop: rpx(6), fontSize: rpx(22), color: theme.colors.textMuted },
-  wonBadge: {
-    paddingHorizontal: rpx(20),
-    paddingVertical: rpx(8),
-    borderRadius: rpx(24),
-    backgroundColor: '#FFF3E9',
+  // .header-time { 26rpx; #b9b9b9 }
+  headerTime: {
+    fontSize: rpx(26),
+    color: '#b9b9b9',
+    fontFamily: theme.typography.family.regular,
   },
-  wonBadgeText: {
-    fontSize: rpx(22),
-    color: theme.colors.primary,
-    fontFamily: theme.typography.family.bold,
-  },
-  cardBody: {
+  // .content { margin:20rpx 0; 28rpx; #686868 }
+  content: {
     marginTop: rpx(20),
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: rpx(20),
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#f0f0f0',
+    marginBottom: rpx(20),
+    fontSize: rpx(28),
+    lineHeight: rpx(40),
+    color: '#686868',
+    fontFamily: theme.typography.family.regular,
   },
+  // .goods { row; center }
+  goods: { flexDirection: 'row', alignItems: 'center' },
+  // .goods uni-image { 116rpx; radius 8px }
   goodsImg: {
-    width: rpx(120),
-    height: rpx(120),
-    borderRadius: rpx(12),
+    width: rpx(116),
+    height: rpx(116),
+    borderRadius: rpx(8),
+    marginRight: rpx(14),
     backgroundColor: '#f4f4f4',
   },
-  goodsInfo: { flex: 1, marginLeft: rpx(20) },
+  // .goods-desc { flex:1; height:134rpx; padding:24 32 26 32; bg #f7f8f9; radius 24rpx }
+  goodsDesc: {
+    flex: 1,
+    height: rpx(134),
+    paddingVertical: rpx(24),
+    paddingHorizontal: rpx(32),
+    backgroundColor: '#f7f8f9',
+    borderRadius: rpx(24),
+    justifyContent: 'space-between',
+  },
+  // .goods-name { 28rpx; weight 700; #17273a }
   goodsName: {
     fontSize: rpx(28),
-    color: theme.colors.ink,
-    lineHeight: rpx(38),
+    color: '#17273a',
+    fontFamily: theme.typography.family.bold,
   },
+  // .goods-issue { 26rpx; #b9b9b9 }
   goodsIssue: {
-    marginTop: rpx(8),
-    fontSize: rpx(24),
-    color: theme.colors.primary,
+    fontSize: rpx(26),
+    color: '#b9b9b9',
+    fontFamily: theme.typography.family.regular,
   },
   empty: {
     padding: rpx(60),
