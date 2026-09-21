@@ -23,7 +23,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 8 | index/index | `/(tabs)` | ✅ (legacy noop) |
 | 9 | order/detail | `/orders/[orderId]` | ⬜ |
 | 10 | order/record | `/orders` | ✅ |
-| 11 | order/discount | `/discounts` | ⬜ (winner ranking) |
+| 11 | order/discount | `/discounts` | ✅ (winner ranking) |
 | 12 | success/index | `/result` | ✅ |
 | 13 | account/account | `/(tabs)/account` | ✅ (prior) |
 | 14 | account/setting | `/settings` | ✅ |
@@ -42,7 +42,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 27 | payment/cashOut | `/wallet/withdraw` | ⬜ |
 | 28 | richtext/rule | `/rules` | ✅ |
 | 29 | intro | `/intro` | ⬜ (webview orig) |
-| 30 | invitation/invitation | `/referrals` | ⬜ |
+| 30 | invitation/invitation | `/referrals` | ✅ |
 | 31 | help/help | `/help` | ✅ |
 | 32 | help/help_detail | `/help/[topic]` | ✅ |
 | 33 | payment/payrecord | `/payments` | ✅ |
