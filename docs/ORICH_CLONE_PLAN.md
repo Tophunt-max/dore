@@ -24,7 +24,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 9 | order/detail | `/orders/[orderId]` | ⬜ |
 | 10 | order/record | `/orders` | ✅ |
 | 11 | order/discount | `/discounts` | ⬜ (winner ranking) |
-| 12 | success/index | `/result` | ⬜ |
+| 12 | success/index | `/result` | ✅ |
 | 13 | account/account | `/(tabs)/account` | ✅ (prior) |
 | 14 | account/setting | `/settings` | ✅ |
 | 15 | account/aboutus | `/about` | ✅ |
@@ -32,7 +32,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 17 | account/funding | `/wallet/transactions` | ✅ |
 | 18 | account/username | `/profile/username` | ✅ |
 | 19 | account/team | `/team` | ✅ |
-| 20 | account/teamDetail | `/team/[memberId]` | ⬜ |
+| 20 | account/teamDetail | `/team/[memberId]` | ✅ |
 | 21 | bask/index | `/bask/share` | ⬜ |
 | 22 | winner/winner | `/(tabs)/winners` | ✅ |
 | 23 | winner/myShare | `/my-shares` | ✅ |
