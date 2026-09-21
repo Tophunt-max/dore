@@ -1538,6 +1538,13 @@ export const catalog = {
     hi: 'इस जीत को खास किसने बनाया?',
     zh: '是什么让这次获奖如此特别？',
   },
+  'shareWin.charsTip': {
+    en: 'Write {count} more characters for a better chance',
+    hi: 'बेहतर मौके के लिए {count} और अक्षर लिखें',
+    zh: '再写 {count} 个字获得更大机会',
+  },
+  'shareWin.upload': { en: 'Upload', hi: 'अपलोड', zh: '上传' },
+  'shareWin.submit': { en: 'Submit', hi: 'जमा करें', zh: '提交' },
   'shareWin.tip': {
     en: 'Keep personal details out of public stories. Stories are persisted only after the service validates ownership.',
     hi: 'सार्वजनिक कहानियों में व्यक्तिगत विवरण न दें। सेवा द्वारा स्वामित्व सत्यापित होने के बाद ही कहानियाँ सहेजी जाती हैं।',

@@ -33,7 +33,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 18 | account/username | `/profile/username` | ✅ |
 | 19 | account/team | `/team` | ✅ |
 | 20 | account/teamDetail | `/team/[memberId]` | ✅ |
-| 21 | bask/index | `/bask/share` | ⬜ |
+| 21 | bask/index | `/bask/share` | ✅ |
 | 22 | winner/winner | `/(tabs)/winners` | ✅ |
 | 23 | winner/myShare | `/my-shares` | ✅ |
 | 24 | payment/payment | `/payment-methods` | ⬜ |
