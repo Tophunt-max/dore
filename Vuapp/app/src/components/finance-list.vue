@@ -3,10 +3,10 @@
     <view v-for="(item, index) in list" :key="index" class="list_item" @click="toBuy(item)">
       <view class="list_item_left">
         <view class="list_item_left_img">
-          <image :src="item.img" />
+          <image :src="item.img" mode="" />
         </view>
         <view class="list_item_left_avatar">
-          <image v-for="(item2, index2) in item.userimgurl" :key="index2" :src="item2" />
+          <image v-for="(item2, index2) in item.userimgurl" :key="index2" :src="item2" mode="" />
         </view>
         <view v-if="item.countdown && '00:00:00' != item.countdown" class="list_item_left_time">End in {{ item.countdown }}</view>
       </view>
@@ -42,10 +42,10 @@
       </view>
       <view class="list_item_btn" @click="toBuy(item)">
         <text>{{ $t('home.snatch') }}</text>
-        <image src="/static/image/home/icon_RightArrow.png" />
+        <image src="/static/image/home/icon_RightArrow.png" mode="" />
       </view>
       <view v-if="2 == item.status" class="list_item_finish">
-        <image src="/static/image/finance/img_Soldout.png" />
+        <image src="/static/image/finance/img_Soldout.png" mode="" />
       </view>
     </view>
   </view>

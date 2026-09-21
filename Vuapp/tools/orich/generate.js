@@ -582,6 +582,25 @@ function buildH5Adaptations() {
  * browser rather than only in a native webview.
  */
 
+/* Chrome on Android inflates font sizes ("font boosting") when a block is much
+ * wider than the viewport - which the horizontally scrolling carousels are by
+ * design. In a native webview this never happened, so the reference's rpx sizes
+ * rendered as authored. Opt out so text matches the design. */
+html,
+body,
+uni-app,
+uni-page-body {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Keep the carousels' overflow inside their own scroll containers rather than
+ * widening the document, which is what triggers the boosting above. */
+uni-page-body {
+  overflow-x: hidden;
+}
+
 /* The reference's carousels (finance plans, upcoming, hot picks, the category
  * strip) are horizontally scrolling flex rows. A native webview never paints a
  * scrollbar for them; a desktop or Android browser draws a grey bar across the

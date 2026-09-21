@@ -8,7 +8,7 @@
         <view class="comfirm-text">{{ $t('goods.det') }}</view>
       </view>
       <view class="goods">
-        <image :src="1 == gtype ? goodsData.iconurl : goodsData.img" />
+        <image :src="1 == gtype ? goodsData.iconurl : goodsData.img" mode="" />
         <view class="goods-desc">
           <view class="goods-title">
             <view class="goods-title-text otw">{{ goodsData.name }}</view>
@@ -35,7 +35,7 @@
       </view>
       <view class="pay-list">
         <view class="pay-item" @click="payIndex = 1">
-          <image class="pay-icon" :src="'/static/image/pay/Group272.png'" />
+          <image class="pay-icon" :src="'/static/image/pay/Group272.png'" mode="" />
           <view class="pay-name">Balance ({{ this.userInfo.money }}₹ )</view>
           <view class="pay-radio" :class="1 == payIndex ? 'pay-select' : ''">
             <view class="pay-op"></view>

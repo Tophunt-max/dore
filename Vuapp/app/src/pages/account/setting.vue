@@ -5,7 +5,7 @@
       <view class="avatar" @click="changeHead">
         <span class="avatar_title">{{ $t('common.avatar') }}</span>
         <span class="avatar_img">
-          <image class="img" :src="headImg" />
+          <image class="img" :src="headImg" mode="" />
         </span>
         <u-icon class="avatar_icon" name="arrow-right" color="#B9B9B9" size="30"></u-icon>
       </view>

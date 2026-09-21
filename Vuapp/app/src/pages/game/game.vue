@@ -3,7 +3,7 @@
     <navbar background="#fff" :title="$t('game.navtitle')" :isBack="false">
       <template #right>
         <view class="nav_help" @click="showRule = true">
-          <image src="/static/image/member/icon_problem.png" />
+          <image src="/static/image/member/icon_problem.png" mode="" />
           <view class="nav_help_rule">{{ $t('account.rules') }}</view>
         </view>
       </template>
@@ -20,7 +20,7 @@
         <view class="game_lucky_info_recharge" @click="toRecharge">
           <view class="title">{{ $t('account.btnrech') }}</view>
           <view class="icon">
-            <image src="/static/image/home/icon_Vector_White.png" />
+            <image src="/static/image/home/icon_Vector_White.png" mode="" />
           </view>
         </view>
       </view>
@@ -29,7 +29,7 @@
           <swiper-item v-for="(item, index) in swiperList" :key="index">
             <view class="swiper-item">
               <view class="icon">
-                <image src="/static/image/game/icon_notice.png" />
+                <image src="/static/image/game/icon_notice.png" mode="" />
               </view>
               <view class="content">
                 <text class="content_name">{{ item.usr_nickname }}</text>
@@ -45,7 +45,7 @@
           <view class="game_lucky_join_period_issue">
             <view class="title">
               {{ $t('game.trial') }}
-              <image src="/static/image/game/icon_Violet.png" />
+              <image src="/static/image/game/icon_Violet.png" mode="" />
             </view>
             <view class="tdown">{{ nowlucky.pid }}</view>
           </view>
@@ -89,7 +89,7 @@
       <view v-for="(item, index) in tabList" :key="index" class="game_tab_item" @click="changeTab(item.type)">
         <view class="game_tab_item_title" :class="{ tabselect: tabIndex == item.type }">{{ item.title }}</view>
         <view v-show="tabIndex == item.type" class="game_tab_item_select">
-          <image src="/static/image/icon_Select.png" />
+          <image src="/static/image/icon_Select.png" mode="" />
         </view>
       </view>
     </view>
@@ -122,7 +122,7 @@
         </view>
       </view>
       <view class="game_close" @click="showRule = false">
-        <image src="/static/image/game/icon_delete.png" />
+        <image src="/static/image/game/icon_delete.png" mode="" />
       </view>
     </u-popup>
     <tabbar page="/pages/game/game"></tabbar>

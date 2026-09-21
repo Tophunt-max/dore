@@ -4,7 +4,7 @@
       <navbar :title="navTitle" background="#ffffff">
         <template #right>
           <view v-if="addressId" class="navbar-more" @click="del" slot="right">
-            <image :src="'/static/image/address/icon_Delete.png'" />
+            <image :src="'/static/image/address/icon_Delete.png'" mode="" />
           </view>
         </template>
       </navbar>

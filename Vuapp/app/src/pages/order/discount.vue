@@ -4,7 +4,7 @@
     <view class="discount_main">
       <view v-for="(item, index) in rankList" :key="index" class="discount_main_item">
         <view class="discount_main_item_bg_1" :style="{ height: +index > 0 ? '300rpx' : '240rpx' }">
-          <image :src="bgList[index]" />
+          <image :src="bgList[index]" mode="" />
         </view>
         <view class="discount_main_item_name">
           <view>{{ toRank(index) }} prize</view>
@@ -13,10 +13,10 @@
         <view v-if="0 == index" class="discount_main_item_info">
           <view class="discount_main_item_info_avatar">
             <view class="avatar_king">
-              <image :src="'/static/image/discount/icon_Crown.png'" />
+              <image :src="'/static/image/discount/icon_Crown.png'" mode="" />
             </view>
             <view class="avatar_main">
-              <image :src="item[0].headimg" />
+              <image :src="item[0].headimg" mode="" />
             </view>
           </view>
           <view class="discount_main_item_info_code">

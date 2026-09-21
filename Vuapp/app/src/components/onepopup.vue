@@ -36,7 +36,7 @@
         <template v-if="3 == popType">
           <view class="icon">
             <view class="icon_addr">
-              <image class="img" :src="'/static/image/goods/icon_MapPinLine.png'" />
+              <image class="img" :src="'/static/image/goods/icon_MapPinLine.png'" mode="" />
             </view>
             <view class="line">
               <image class="img" :src="'/static/image/goods/img_Dividingline.png'" mode="widthFix" />

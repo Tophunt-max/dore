@@ -40,7 +40,7 @@
     <view class="invitation">
       <view class="code_people">{{ $t('login.icode') }}</view>
       <view class="code_ipu">
-        <image src="/static/image/login/icon_invitation.png" />
+        <image src="/static/image/login/icon_invitation.png" mode="" />
         <input v-model="invitation" placeholder-class="inv" />
       </view>
     </view>

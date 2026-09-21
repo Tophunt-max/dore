@@ -1,6 +1,6 @@
 <template>
   <view class="winner">
-    <navbar :title="$t('common.winnerTitle')" background="#ffffff"></navbar>
+    <navbar backIcon="" :title="$t('common.winnerTitle')" background="#ffffff"></navbar>
     <mescroll-body
       ref="mescrollRef"
       :down="downOption"
@@ -11,7 +11,7 @@
     >
       <view v-for="(item, index) in dataList" :key="index" class="main">
         <view class="header">
-          <image :src="item.userheadimgurl" />
+          <image :src="item.userheadimgurl" mode="" />
           <view class="header-name">{{ item.username }}</view>
           <view class="header-time">{{ item.time }}</view>
         </view>
@@ -22,10 +22,11 @@
             :key="index2"
             :src="item2"
             @click="enlargeImg(item.imagesurl, index2)"
+            mode=""
            />
         </view>
         <view class="goods" @click="toDetail(item.dumid)">
-          <image :src="item.iconurl" />
+          <image :src="item.iconurl" mode="" />
           <view class="goods-desc">
             <view class="goods-name otw">{{ item.delname }}</view>
             <view class="goods-issue">Issue: {{ item.issue }}</view>

@@ -56,11 +56,11 @@
             :class="{ task_border: index < taskList.length - 1 }"
           >
             <view class="timg">
-              <image :src="item.img" />
+              <image :src="item.img" mode="" />
               <view class="timg_icon">
-                <image v-if="1 == item.cycle" src="/static/image/task/icon_thisday.png" />
-                <image v-else-if="2 == item.cycle" src="/static/image/task/icon_week.png" />
-                <image v-else src="/static/image/task/icon_mouth.png" />
+                <image v-if="1 == item.cycle" src="/static/image/task/icon_thisday.png" mode="" />
+                <image v-else-if="2 == item.cycle" src="/static/image/task/icon_week.png" mode="" />
+                <image v-else src="/static/image/task/icon_mouth.png" mode="" />
               </view>
             </view>
             <view class="content">
@@ -68,7 +68,7 @@
                 <view class="u-m-r-20">{{ item.name }}</view>
                 <view v-if="1 == item.reward_type" class="content_title_bal">
                   <view class="content_img">
-                    <image src="/static/image/task/icon_Goldcoins.png" />
+                    <image src="/static/image/task/icon_Goldcoins.png" mode="" />
                   </view>
                   <view class="content_balances">+{{ $t('task.balances') }} {{ item.reward_price }}</view>
                 </view>

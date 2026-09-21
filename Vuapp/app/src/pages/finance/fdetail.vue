@@ -3,16 +3,16 @@
     <navbar backColor="#f5f5f5" titleColor="#f5f5f5">
       <template #right>
         <view class="bar_help" @click="openShare" slot="right">
-          <image src="/static/image/finance/icon_Share.png" />
+          <image src="/static/image/finance/icon_Share.png" mode="" />
         </view>
       </template>
     </navbar>
     <view class="fdetail_info">
       <view class="fdetail_info_img">
-        <image :src="detailList.img" />
+        <image :src="detailList.img" mode="" />
         <view v-if="countdown && '00:00:00' != countdown" class="fdetail_info_time">End in {{ countdown }}</view>
         <view v-if="2 == detailList.status" class="fdetail_info_finish">
-          <image src="/static/image/finance/img_Soldout.png" />
+          <image src="/static/image/finance/img_Soldout.png" mode="" />
         </view>
       </view>
       <view class="fdetail_info_dd">
@@ -81,7 +81,7 @@
           @click="changeTab(item)"
         >
           <view class="tab_name" :class="{ active: tabIndex == item.type }">{{ item.name }}</view>
-          <image v-if="tabIndex == item.type" src="/static/image/icon_Select.png" />
+          <image v-if="tabIndex == item.type" src="/static/image/icon_Select.png" mode="" />
         </view>
       </view>
       <mescroll-body
@@ -97,12 +97,12 @@
         <view class="fdetail_part_main">
           <view v-for="(item, index) in historyList" :key="index" class="fdetail_part_main_item">
             <view class="fdetail_part_main_item_avatar">
-              <image :src="item.user_headimg" />
+              <image :src="item.user_headimg" mode="" />
             </view>
             <view class="fdetail_part_main_item_user">
               <view class="fdetail_part_main_item_user_info">
                 <view class="name otw">{{ item.user_name }}</view>
-                <image :src="item.vip_img" />
+                <image :src="item.vip_img" mode="" />
                 <view class="time">{{ countDown(item.created) }}</view>
               </view>
               <view class="fdetail_part_main_item_user_buyin">

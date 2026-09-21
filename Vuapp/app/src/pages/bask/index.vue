@@ -20,8 +20,8 @@
       </view>
       <view class="upload_file">
         <view v-for="(item, index) in imgList" :key="index" class="upload-item">
-          <image :src="item" />
-          <image class="del" :src="'/static/image/error.png'" @click="delImg(index)" />
+          <image :src="item" mode="" />
+          <image class="del" :src="'/static/image/error.png'" @click="delImg(index)" mode="" />
         </view>
         <view v-if="imgList.length < 6" class="btn" @click="pickImg">
           <u-icon class="btn_icon" name="plus" color="#B9B9B9" size="50"></u-icon>
