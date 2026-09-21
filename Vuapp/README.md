@@ -55,19 +55,50 @@ The generator is deterministic and reports what it produced:
 ## Deliberate deviations from the reference
 
 The reference targeted a native Android build on Vue 2; this app also runs on H5
-under Vue 3, so a small, enumerated set of changes is applied during generation:
+under Vue 3. Every change is enumerated here — anything not listed is recovered
+from the bundle as-is.
 
-- **Vue 2 → Vue 3 APIs**: `beforeDestroy`/`destroyed` → `beforeUnmount`/`unmounted`,
-  `this.$set(o,k,v)` → `o[k]=v`, `this.createIntersectionObserver(...)` →
-  `uni.createIntersectionObserver(this, ...)`, `v-model` on a prop → `:value` +
-  a forwarded `input` event.
-- **`$on` / `$children` / self-`$emit`** (removed in Vue 3) are reimplemented in
+**Vue 2 → Vue 3**
+
+- `beforeDestroy`/`destroyed` → `beforeUnmount`/`unmounted`, `this.$set(o,k,v)` →
+  `o[k]=v`, `this.createIntersectionObserver(...)` →
+  `uni.createIntersectionObserver(this, ...)`, `v-model` on a prop → `:value`
+  plus a forwarded `input` event.
+- `v-bind="$attrs"` spreads are emitted **before** the explicit props, matching
+  Vue 2's `_b`, which only fills in keys the data does not already have.
+  `v-on="$listeners"` is dropped: Vue 3 removed it and delivers listeners through
+  `$attrs`.
+- `$on` / `$children` / self-`$emit` (all removed in Vue 3) are reimplemented in
   `utils/vue2-compat.js`, which uView's form components depend on.
-- **mescroll** (`utils/mescroll-mixin.js`): pages call `this.mescroll.*` from
-  `onShow`, which in Vue 3 runs before the child has mounted, so calls are
-  queued and replayed once the instance exists.
-- **Native APIs**: `plus.*` and the native analytics plugins go through
-  `utils/native.js` — real APIs on a native build, working fallbacks on the web.
+- `utils/mescroll-mixin.js`: pages call `this.mescroll.*` from `onShow`, which in
+  Vue 3 runs before the child has mounted, so calls are queued and replayed once
+  the instance exists.
+
+**Native → web** (`utils/native.js`)
+
+- `plus.*` and the native analytics plugins go through a shim — real APIs on a
+  native build, working fallbacks on the web.
+
+**Styling** (`styles/h5-adaptations.css`, imported after the verbatim
+`styles/global.css` so the recovered stylesheet stays untouched)
+
+- `text-size-adjust: 100%`, and the carousel overflow kept inside its own scroll
+  container. Chrome on Android inflates text when a block is much wider than the
+  viewport — which the horizontally scrolling carousels are by design — and a
+  native webview never did that.
+- Scrollbars hidden on the carousels; a webview never painted them.
+- **UI scale.** uni-app compiles every `rpx` to `rem` and its runtime sets the
+  root font size to `viewportWidth / 23.4375` (750/32, so 1rem = 32rpx on the
+  reference grid). That makes the root font size a single knob for the whole
+  interface — text, heights, widths and padding scale together. Default **0.88**;
+  `node generate.js --ui-scale 1` gives exactly the reference sizing.
+
+**Content**
+
+- The home navbar renders `static/image/logo.png` instead of the text title. The
+  reference ships `.home .nav-logo` styling *and* that asset, but no render
+  function ever creates the element, so the CSS was dead and the navbar showed
+  plain text.
 
 ## What is intentionally NOT copied
 
