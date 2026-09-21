@@ -62,6 +62,20 @@ Feature impact: lottery countdown feed, per-user slot cap, price filter table,
 beneficiary editing, the order payment intent / status poll, payment-method
 toggle, and the VIP tier screen.
 
+## 2b. Current live audit (unauthenticated surface)
+
+All 43 routes walked in a headless browser at 390×844 against the deployed
+worker. **0 console errors and 0 broken images across every page.** What the
+audit still flags, and why each is not a defect:
+
+| Flag | Page(s) | Explanation |
+|---|---|---|
+| `NaN` in the price | `goods/comfirm` | Only when opened directly without `?num=`. Reached normally (`?id=4&num=1`) it renders `₹6999 / ₹10 / ₹10.00`. The reference behaves the same — the screen is only reachable from a goods page. |
+| near-empty | `index/index`, `intro`, `payform/payform` | Near-empty in the reference too (its `index/index` spec is ~530 bytes). |
+| empty | `order/detail` | Root `v-if="cardList.length"` — gated on loaded data, as in the reference. Needs `?id=` plus a signed-in user. |
+| "No data" | `winner/winner` | Correct: the `winners` table has no seed rows. Seed some to exercise it. |
+| avatars / share poster have no `src` | `goods/goods`, `order/record`, `invitation`, `task/member` | Participant avatars and the generated share poster. The backend has no participant data, so the mappers supply empty arrays deliberately. |
+
 ## 3. Verification not yet done
 
 - **Authenticated flows.** The sweep ran unauthenticated, so `/api/tasks`,

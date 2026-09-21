@@ -90,6 +90,15 @@ const financeItem = (p) => {
     progress: cap > 0 ? Math.min(1, filled / cap) : 0,
     all_buy_num: it.orders_count || 0,
     countdown: '',
+    description: it.description || '',
+    // the countdown is countDown(end_in, server_time); the vuapp plans have no
+    // end date, so 0 makes it resolve to 00:00:00, which the screen hides
+    end_in: it.end_at || 0,
+    server_time: nowSec(),
+    // what a minimum subscription returns over the full term
+    receive: Math.round(major(it.min_minor) * ((it.rate_bps || 0) / 10000) * (it.term_days || 0) * 100) / 100,
+    surplus: major(it.max_minor),
+    balance: 0,
     // subscriber avatars the reference showed; no equivalent yet
     userimgurl: [],
     usernumber: 0,
@@ -297,10 +306,19 @@ export const chlWhatsApp = () => get('/api/pages/support');
 export const financeBuy = (d = {}) => post('/api/finance/order', d);
 
 /** POST /index/financeDetail */
-export const financeDetail = (d = {}) => (d.id ? get('/api/finance/' + d.id) : get('/api/finance'));
+export const financeDetail = (d = {}) =>
+    (d.id ? get('/api/finance/' + d.id) : get('/api/finance')).then((r) => {
+      const row = (r && (r.product || r.products)) || r || {};
+      return financeItem(Array.isArray(row) ? row[0] : row);
+    });
 
 /** POST /index/financeDetailHistory */
-export const financeDetailHistory = (d = {}) => (d.id ? get('/api/finance/' + d.id) : get('/api/finance'));
+export const financeDetailHistory = (d = {}) =>
+    (d.id ? get('/api/finance/' + d.id) : get('/api/finance')).then((r) => {
+      const row = (r && (r.product || r.products)) || r || {};
+      const it = financeItem(Array.isArray(row) ? row[0] : row);
+      return { list: it.history || [] };
+    });
 
 /** POST /index/financeList */
 export const financeList = () =>
@@ -323,7 +341,7 @@ export const getTitle = () =>
         const topic = a.topic || 'general';
         let g = groups.find((x) => x.category === topic);
         if (!g) {
-          g = { category: topic, image_url: '/static/image/faq/icon_faq.png', chr: [] };
+          g = { category: topic, image_url: '/static/image/icon_faq.png', chr: [] };
           groups.push(g);
         }
         g.chr.push({ que_id: a.id, title: a.title });
