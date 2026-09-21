@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "vuapp-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "adcdeaeb-b5f7-4dad-93b1-20c7fef0f6b0"
 
 # R2 bucket for private uploads (create with: wrangler r2 bucket create vuapp-uploads)
 [[r2_buckets]]
@@ -17,7 +17,7 @@ bucket_name = "vuapp-uploads"
 # KV for OTP + short-lived session data (create with: wrangler kv namespace create VUAPP_KV)
 [[kv_namespaces]]
 binding = "KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "6daac6e148834298aec56da63a10770b"
 
 [vars]
 APP_NAME = "vuapp"
