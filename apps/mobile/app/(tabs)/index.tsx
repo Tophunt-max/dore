@@ -151,10 +151,14 @@ export default function HomeScreen() {
           resizeMode="stretch"
           style={styles.headerBg}
         />
-        {/* ORich renders the wordmark as navbar text at 32rpx — its `.nav-logo`
-            image rule is dead CSS in this build. */}
+        {/* .nav-logo uni-image { height:66rpx } — ORich shows the logo image
+            centered in the 88rpx navbar, not a text wordmark. */}
         <View style={styles.navLogo}>
-          <Text style={styles.brand}>ORich</Text>
+          <Image
+            source={assets.logo}
+            style={styles.navLogoImg}
+            resizeMode="contain"
+          />
         </View>
         {/* .toTop { padding: 0 14rpx } > .banner */}
         <View style={styles.toTop}>
@@ -176,6 +180,60 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
         ))}
+      </View>
+
+      {/* .activities — two promo entry cards (Prize + Finance) */}
+      <View style={styles.activities}>
+        <Pressable
+          style={styles.actItem}
+          onPress={() => router.push('/prize-pool')}
+        >
+          <LinearGradient
+            colors={['#d0fad6', '#a0c4fe', '#fb9deb']}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 0 }}
+            style={styles.actTitle}
+          >
+            <Text style={styles.actContent} numberOfLines={1}>
+              {t('account.prizes')}
+            </Text>
+          </LinearGradient>
+          <View style={styles.actBody}>
+            <Text style={styles.actBodyText}>{t('prize.inviteTip')}</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          style={styles.actItem}
+          onPress={() => router.push('/finance')}
+        >
+          <LinearGradient
+            colors={['#d0e8fa', '#60e5be', '#64ccf9']}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 0 }}
+            style={styles.actTitle}
+          >
+            <Text style={styles.actContent} numberOfLines={1}>
+              {t('finance.title')}
+            </Text>
+          </LinearGradient>
+          <View style={styles.actBody}>
+            <Text style={styles.actBodyText}>{t('finance.heroCopy')}</Text>
+          </View>
+        </Pressable>
+      </View>
+
+      {/* .invite — banner */}
+      <View style={styles.inviteWrap}>
+        <Pressable
+          style={styles.inviteBanner}
+          onPress={() => router.push('/referrals')}
+        >
+          <Image source={assets.shareLink} style={styles.inviteIcon} />
+          <Text style={styles.inviteMain}>{t('referrals.inviteFriends')}</Text>
+          <View style={styles.inviteBtn}>
+            <Text style={styles.inviteBtnText}>{t('home.go')}</Text>
+          </View>
+        </Pressable>
       </View>
 
       {/* .toast — latest winner ticker */}
@@ -399,12 +457,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   navLogo: { height: rpx(88), alignItems: 'center', justifyContent: 'center' },
-  // navbar title: 32rpx, white over the hero art.
-  brand: {
-    fontSize: rpx(32),
-    color: '#fff',
-    fontFamily: theme.typography.family.bold,
-  },
+  // .nav-logo uni-image { height:66rpx } (width follows the logo aspect ratio)
+  navLogoImg: { height: rpx(66), width: rpx(200) },
   toTop: { paddingHorizontal: rpx(14) },
   // .tab { padding:26rpx 30rpx; background-color:#fff }
   tab: {
@@ -423,6 +477,80 @@ const styles = StyleSheet.create({
     fontSize: rpx(26),
     textAlign: 'center',
     color: C.tabLabel,
+    fontFamily: theme.typography.family.bold,
+  },
+  // .activities { margin-top:22rpx; space-between } — two 49% promo cards
+  activities: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: rpx(22),
+    marginHorizontal: rpx(28),
+  },
+  // .activities-item { width:49%; bg #fff; radius 10rpx }
+  actItem: {
+    width: '49%',
+    backgroundColor: '#fff',
+    borderRadius: rpx(10),
+    overflow: 'hidden',
+  },
+  // .activities-item-title { height:72rpx; gradient bar }
+  actTitle: {
+    height: rpx(72),
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: rpx(18),
+  },
+  // .content { 26rpx; weight 700; #000 }
+  actContent: {
+    fontSize: rpx(26),
+    color: '#000',
+    fontFamily: theme.typography.family.bold,
+  },
+  actBody: { padding: rpx(20), minHeight: rpx(120) },
+  actBodyText: {
+    fontSize: rpx(24),
+    lineHeight: rpx(34),
+    color: C.grey,
+    fontFamily: theme.typography.family.regular,
+  },
+  // .invite { height:100rpx; bg #ffe9e1; radius 10rpx; margin-top:28rpx }
+  inviteWrap: { marginHorizontal: rpx(28) },
+  inviteBanner: {
+    height: rpx(100),
+    marginTop: rpx(28),
+    borderRadius: rpx(10),
+    backgroundColor: '#ffe9e1',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  // .invite-icon { width:70rpx; height:60rpx; margin-left:38rpx }
+  inviteIcon: {
+    width: rpx(64),
+    height: rpx(60),
+    marginLeft: rpx(38),
+    resizeMode: 'contain',
+  },
+  // .invite-main { margin-left:40rpx; 36rpx; #ee5016 }
+  inviteMain: {
+    flex: 1,
+    marginLeft: rpx(40),
+    fontSize: rpx(32),
+    color: '#ee5016',
+    fontFamily: theme.typography.family.regular,
+  },
+  // .invite-btn { 130x54rpx; #ee5016; pill }
+  inviteBtn: {
+    width: rpx(130),
+    height: rpx(54),
+    marginRight: rpx(24),
+    borderRadius: rpx(199),
+    backgroundColor: '#ee5016',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inviteBtnText: {
+    color: '#fff',
+    fontSize: rpx(28),
     fontFamily: theme.typography.family.bold,
   },
   // .toast { border-top:2rpx solid #f6f6f6; padding:22rpx 0 12rpx }
