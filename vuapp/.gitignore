@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.output/
+unpackage/
+.env
+.dev.vars
+.wrangler/
+*.log
+.DS_Store
