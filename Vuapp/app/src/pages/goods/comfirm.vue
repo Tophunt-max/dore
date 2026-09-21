@@ -42,7 +42,7 @@ async function pay() {
   uni.hideLoading();
   if (res.ok) {
     store.refreshBalance();
-    uni.redirectTo({ url: `/pages/success/index?order=${res.order_id}` });
+    uni.redirectTo({ url: `/pages/success/index?type=1&id=${goods.value.id}` });
   } else {
     uni.showToast({ title: res.error || 'Failed', icon: 'none' });
   }
