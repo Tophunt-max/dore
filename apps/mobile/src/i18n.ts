@@ -1120,6 +1120,11 @@ export const catalog = {
     hi: 'कृपया रिचार्ज राशि चुनें:',
     zh: '请选择充值金额：',
   },
+  'wallet.enterAmount': {
+    en: 'Enter amount',
+    hi: 'राशि दर्ज करें',
+    zh: '输入金额',
+  },
   'wallet.noTransactions': {
     en: 'No transactions',
     hi: 'कोई लेन-देन नहीं',
