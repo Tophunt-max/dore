@@ -37,6 +37,17 @@ const acorn = require('acorn');
 
 // ---------------------------------------------------------------------- setup
 
+/**
+ * Whole-interface scale. uni-app expresses every rpx as rem off the root font
+ * size, so this one number scales text and layout together (see
+ * styles/h5-adaptations.css). 1 = exactly the reference sizing.
+ */
+const UI_SCALE = (() => {
+  const i = process.argv.indexOf('--ui-scale');
+  const v = i !== -1 ? Number(process.argv[i + 1]) : NaN;
+  return Number.isFinite(v) && v > 0 ? v : 0.88;
+})();
+
 const argOut = (() => {
   const i = process.argv.indexOf('--out');
   return i !== -1 ? process.argv[i + 1] : path.join(REPO, 'Vuapp', 'app', 'src');
@@ -574,13 +585,29 @@ export const interopDefault = mescrollMixin;
  * Kept in its own file so `styles/global.css` stays a faithful copy: anything
  * here is a deliberate change, not something recovered from the bundle.
  */
-function buildH5Adaptations() {
+function buildH5Adaptations({ uiScale }) {
   return `/* H5 adaptations.
  *
  * styles/global.css is a verbatim copy of the reference stylesheet; this file
  * holds the deliberate changes needed because this build also runs in a normal
  * browser rather than only in a native webview.
  */
+
+/* ---------------------------------------------------------------- UI scale --
+ *
+ * uni-app compiles every \`rpx\` to \`rem\` and its runtime sets
+ *     document.documentElement.style.fontSize = viewportWidth / 23.4375 + 'px'
+ * (23.4375 = 750 / 32, i.e. 1rem = 32rpx on the reference's 750rpx design grid).
+ *
+ * That makes the root font size a single knob for the whole interface - text,
+ * heights, widths and padding all scale together, so proportions are preserved.
+ * \`!important\` is required because the runtime writes an inline style.
+ *
+ * 1 = exactly the reference sizing. Lower shrinks the whole UI.
+ */
+html {
+  font-size: calc(100vw / 23.4375 * ${uiScale}) !important;
+}
 
 /* Chrome on Android inflates font sizes ("font boosting") when a block is much
  * wider than the viewport - which the horizontally scrolling carousels are by
@@ -700,6 +727,34 @@ function buildManifest(bundle) {
     null,
     2
   ) + '\n';
+}
+
+/**
+ * Put the brand logo in the home navbar.
+ *
+ * The reference ships `.home .nav-logo` styling (centred, 88rpx tall, image at
+ * 66rpx) and a `static/image/logo.png` asset, but no render function ever
+ * creates that element - the home navbar fell back to the plain text title. This
+ * is a deliberate deviation: it renders the logo the leftover CSS was written
+ * for, in place of the text.
+ */
+function patchHomeLogo(sfc, report) {
+  const needle = `<navbar :isBack="false" :titleColor="titleColor" :background="navBg" :title="$t('common.orich')">`;
+  if (!sfc.includes(needle)) {
+    report.warnings.push('home logo patch: navbar call site not found, left as generated');
+    return sfc;
+  }
+  // The reference styles the image at 66rpx, but that was written for a wordmark;
+  // the shipped asset is a square app icon, which reads as tiny at that height.
+  // Sized inline so it is obvious this is the deviation, not recovered CSS.
+  const replacement =
+    `<navbar :isBack="false" :titleColor="titleColor" :background="navBg">\n` +
+    `      <template #center>\n` +
+    `        <view class="nav-logo">\n` +
+    `          <image src="/static/image/logo.png" mode="aspectFit" style="height: 84rpx; width: 84rpx" />\n` +
+    `        </view>\n` +
+    `      </template>`;
+  return sfc.replace(needle, replacement);
 }
 
 // ---------------------------------------------------------------------- assets
@@ -834,6 +889,7 @@ function main() {
   // --- pages
   for (const d of pages) {
     const built = buildSfc(bundle, d, ctx);
+    if (d.name === 'pages/home/home') built.sfc = patchHomeLogo(built.sfc, report);
     write(`${d.name}.vue`, built.sfc);
     report.pages.push({ name: d.name, lines: built.templateLines, rules: built.rules });
     for (const w of built.warnings) report.warnings.push(`${d.name}: ${w}`);
@@ -921,7 +977,7 @@ function main() {
   //     plus the app's own global rules, which the components rely on)
   const globalCss = globalStylesheet(bundle);
   write('styles/global.css', globalCss.css + '\n');
-  write('styles/h5-adaptations.css', buildH5Adaptations());
+  write('styles/h5-adaptations.css', buildH5Adaptations({ uiScale: UI_SCALE }));
 
   // --- api + utils
   write('utils/native.js', buildNativeShim());

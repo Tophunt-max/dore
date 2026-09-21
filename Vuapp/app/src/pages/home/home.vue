@@ -1,6 +1,11 @@
 <template>
   <view class="home">
-    <navbar :isBack="false" :titleColor="titleColor" :background="navBg" :title="$t('common.orich')">
+    <navbar :isBack="false" :titleColor="titleColor" :background="navBg">
+      <template #center>
+        <view class="nav-logo">
+          <image src="/static/image/logo.png" mode="aspectFit" style="height: 84rpx; width: 84rpx" />
+        </view>
+      </template>
       <template #right>
         <view class="home-lang" slot="right">
           <view @click="showLang = true">
