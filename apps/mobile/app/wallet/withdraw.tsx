@@ -7,31 +7,34 @@ import { api } from '@/api/endpoints';
 import { GradientButton } from '@/components/GradientButton';
 import { QueryNotice } from '@/components/QueryNotice';
 import { Screen } from '@/components/Screen';
-import { StatusPill } from '@/components/StatusPill';
 import { TopBar } from '@/components/TopBar';
 import { useI18n } from '@/i18n';
+import { rpx } from '@/rpx';
 import { theme } from '@/theme';
 
+// ORich `pages/payment/cashOut` (scope dc9e8b92): a white card with a
+// destination selector, a big orange amount input over a hairline, a balance
+// row, then a wide submit button and a tips block.
 export default function WithdrawScreen() {
-  const { t, formatMoney, labelFor } = useI18n();
+  const { t, formatMoney } = useI18n();
   const wallet = useQuery({ queryKey: ['wallet'], queryFn: api.wallet });
   const beneficiaries = useQuery({
     queryKey: ['beneficiaries'],
     queryFn: api.beneficiaries,
   });
   const verified =
-    beneficiaries.data?.items.filter(
-      (item) => item.verificationStatus === 'verified',
-    ) ?? [];
+    beneficiaries.data?.items.filter((i) => i.verificationStatus === 'verified') ??
+    [];
   const [beneficiaryId, setBeneficiaryId] = useState<string | null>(null);
   const selected =
     beneficiaryId ??
-    verified.find((item) => item.isDefault)?.id ??
+    verified.find((i) => i.isDefault)?.id ??
     verified[0]?.id ??
     null;
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   async function submit() {
     const minor = Math.round(Number(amount) * 100);
     if (!selected) {
@@ -69,81 +72,91 @@ export default function WithdrawScreen() {
       setLoading(false);
     }
   }
+
   return (
     <Screen
       header={
         <TopBar
+          title={t('withdraw.title')}
+          white
           actionLabel={t('withdraw.records')}
           onAction={() => router.push('/wallet/withdrawals')}
-          title={t('withdraw.title')}
         />
       }
+      contentStyle={styles.page}
     >
-      <View style={styles.page}>
-        <QueryNotice
-          loading={wallet.isLoading || beneficiaries.isLoading}
-          error={wallet.error ?? beneficiaries.error}
-          onRetry={() => {
-            void wallet.refetch();
-            void beneficiaries.refetch();
-          }}
-        />
-        <View style={styles.card}>
-          <Text style={styles.label}>{t('withdraw.amount')}</Text>
-          <Text style={styles.available}>
-            {t('withdraw.available', {
-              amount: wallet.data
-                ? formatMoney(wallet.data.availableMinor, wallet.data.currency)
-                : '—',
-            })}
-          </Text>
-          <View style={styles.inputRow}>
-            <Text style={styles.currency}>₹</Text>
-            <TextInput
-              value={amount}
-              onChangeText={setAmount}
-              keyboardType="decimal-pad"
-              placeholder="0.00"
-              placeholderTextColor={theme.colors.textMuted}
-              style={styles.input}
-            />
+      <QueryNotice
+        loading={wallet.isLoading || beneficiaries.isLoading}
+        error={wallet.error ?? beneficiaries.error}
+        onRetry={() => {
+          void wallet.refetch();
+          void beneficiaries.refetch();
+        }}
+      />
+
+      <View style={styles.main}>
+        {/* destination selector */}
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>{t('withdraw.destination')}</Text>
+          <View style={styles.titleRight}>
+            {verified.length ? (
+              verified.map((item) => (
+                <Pressable
+                  key={item.id}
+                  onPress={() => setBeneficiaryId(item.id)}
+                  style={styles.destOption}
+                >
+                  <Text
+                    style={[
+                      styles.destName,
+                      selected === item.id && styles.destNameActive,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.label} · {item.maskedDestination}
+                  </Text>
+                </Pressable>
+              ))
+            ) : (
+              <Pressable onPress={() => router.push('/wallet/beneficiaries')}>
+                <Text style={styles.destNameActive}>
+                  {t('withdraw.addBeneficiary')}
+                </Text>
+              </Pressable>
+            )}
           </View>
         </View>
-        <View style={styles.card}>
-          <Text style={styles.label}>{t('withdraw.destination')}</Text>
-          {verified.map((item) => (
-            <Pressable
-              key={item.id}
-              onPress={() => setBeneficiaryId(item.id)}
-              style={[
-                styles.destination,
-                selected === item.id && styles.selected,
-              ]}
-            >
-              <View style={styles.destinationCopy}>
-                <Text style={styles.destinationTitle}>{item.label}</Text>
-                <Text style={styles.destinationDetail}>
-                  {item.maskedDestination}
-                </Text>
-              </View>
-              <StatusPill
-                label={
-                  selected === item.id
-                    ? t('common.selected')
-                    : t('common.verified')
-                }
-                tone="success"
-              />
-            </Pressable>
-          ))}
-          {!beneficiaries.isLoading && !verified.length ? (
-            <Pressable onPress={() => router.push('/wallet/beneficiaries')}>
-              <Text style={styles.add}>{t('withdraw.addBeneficiary')}</Text>
-            </Pressable>
-          ) : null}
+
+        {/* amount */}
+        <Text style={styles.amountLabel}>{t('withdraw.amount')}</Text>
+        <View style={styles.money}>
+          <Text style={styles.currency}>₹</Text>
+          <TextInput
+            value={amount}
+            onChangeText={setAmount}
+            keyboardType="decimal-pad"
+            placeholder="0"
+            placeholderTextColor="#f0c3b1"
+            style={styles.moneyInput}
+          />
         </View>
-        <Text style={styles.hint}>{t('withdraw.info')}</Text>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        {/* balance */}
+        <View style={styles.balance}>
+          <Text style={styles.balanceLeft}>
+            {t('withdraw.available', { amount: '' }).replace(/[:：]?\s*$/, '')}
+          </Text>
+          <Text style={styles.balanceRight}>
+            {wallet.data
+              ? formatMoney(wallet.data.availableMinor, wallet.data.currency)
+              : '—'}
+          </Text>
+        </View>
+      </View>
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      <View style={styles.btn}>
         <GradientButton
           disabled={!wallet.data || !selected}
           loading={loading}
@@ -152,60 +165,104 @@ export default function WithdrawScreen() {
           {t('withdraw.submit')}
         </GradientButton>
       </View>
+
+      <View style={styles.tip}>
+        <Text style={styles.tipText}>{t('withdraw.info')}</Text>
+      </View>
     </Screen>
   );
 }
+
 const styles = StyleSheet.create({
-  page: { padding: theme.spacing.lg, gap: theme.spacing.lg },
-  card: {
-    padding: theme.spacing.xl,
-    borderRadius: theme.radii.xl,
-    backgroundColor: theme.colors.surface,
+  // .cashout { background:#f8f8f8 }
+  page: { backgroundColor: '#f8f8f8', flexGrow: 1, paddingBottom: rpx(30) },
+  // .cashout_main { margin:24 30; padding:38 18 38 26; bg #fff; radius 16rpx }
+  main: {
+    marginTop: rpx(24),
+    marginHorizontal: rpx(30),
+    paddingVertical: rpx(38),
+    paddingLeft: rpx(26),
+    paddingRight: rpx(18),
+    backgroundColor: '#fff',
+    borderRadius: rpx(16),
   },
-  label: { color: theme.colors.ink, fontFamily: theme.typography.family.bold },
-  available: { marginTop: 6, color: theme.colors.textMuted },
-  inputRow: {
-    marginTop: 16,
+  // .cashout_main_title
+  titleRow: { flexDirection: 'row', alignItems: 'center' },
+  title: {
+    fontSize: rpx(32),
+    color: '#17273a',
+    fontFamily: theme.typography.family.regular,
+  },
+  titleRight: { flex: 1, marginLeft: rpx(40) },
+  destOption: { alignItems: 'flex-end' },
+  destName: {
+    fontSize: rpx(28),
+    color: '#b9b9b9',
+    fontFamily: theme.typography.family.regular,
+  },
+  destNameActive: {
+    fontSize: rpx(28),
+    color: '#ee5016',
+    fontFamily: theme.typography.family.medium,
+  },
+  // .cashout_main_amount { margin-top:28rpx }
+  amountLabel: {
+    marginTop: rpx(28),
+    marginBottom: rpx(20),
+    fontSize: rpx(32),
+    color: '#17273a',
+    fontFamily: theme.typography.family.regular,
+  },
+  // .cashout_main_money { 64rpx #ee5016; border-bottom }
+  money: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+    paddingBottom: rpx(28),
+    borderBottomWidth: rpx(1),
+    borderBottomColor: '#ececec',
   },
   currency: {
-    color: theme.colors.primary,
-    fontSize: 28,
+    fontSize: rpx(64),
+    color: '#ee5016',
     fontFamily: theme.typography.family.bold,
   },
-  input: {
+  moneyInput: {
     flex: 1,
-    minHeight: 64,
-    marginLeft: 8,
-    color: theme.colors.ink,
-    fontSize: 32,
+    marginLeft: rpx(10),
+    fontSize: rpx(64),
+    color: '#ee5016',
     fontFamily: theme.typography.family.bold,
   },
-  destination: {
-    marginTop: 12,
+  // .cashout_main_balance { margin-top:34rpx }
+  balance: {
+    marginTop: rpx(34),
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: 12,
+    justifyContent: 'space-between',
   },
-  selected: { borderColor: theme.colors.primary, backgroundColor: '#FFF7F2' },
-  destinationCopy: { flex: 1 },
-  destinationTitle: {
-    color: theme.colors.ink,
-    fontFamily: theme.typography.family.bold,
+  balanceLeft: {
+    fontSize: rpx(28),
+    color: '#b9b9b9',
+    fontFamily: theme.typography.family.regular,
   },
-  destinationDetail: { marginTop: 4, color: theme.colors.textMuted },
-  add: {
-    paddingVertical: 18,
+  balanceRight: {
+    fontSize: rpx(28),
+    color: '#ee5016',
+    fontFamily: theme.typography.family.regular,
+  },
+  error: {
+    marginTop: rpx(20),
     textAlign: 'center',
-    color: theme.colors.primary,
-    fontFamily: theme.typography.family.bold,
+    color: theme.colors.danger,
   },
-  hint: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 18 },
-  error: { textAlign: 'center', color: theme.colors.danger },
+  // .cashout_btn { width:600rpx; margin-top:100rpx; margin-left:74rpx }
+  btn: { marginTop: rpx(80), marginHorizontal: rpx(74) },
+  // .cashout_tip { margin:50rpx 30rpx 0 }
+  tip: { marginTop: rpx(50), marginHorizontal: rpx(30) },
+  tipText: {
+    fontSize: rpx(26),
+    color: '#b9b9b9',
+    lineHeight: rpx(40),
+    fontFamily: theme.typography.family.regular,
+  },
 });
