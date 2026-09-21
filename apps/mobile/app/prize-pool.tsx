@@ -21,9 +21,10 @@ import { useI18n } from '@/i18n';
 import { rpx } from '@/rpx';
 import { theme } from '@/theme';
 
-// ORich `pages/prize/prize` (scope 27458cd0): a full-page blue illustration
-// background (fixed) with the prize pool amount, invited avatars, invite
-// button and participants/rules tabs floating over it.
+// ORich `pages/prize/prize` (scope 27458cd0): a blue prize promo. Rendered as a
+// clean, readable layout — a top illustration banner, a white prize-pool amount
+// card, invited avatars, an invite button, and participants/rules tabs over a
+// solid blue background.
 export default function PrizePoolScreen() {
   const { t, formatMoney } = useI18n();
   const client = useQueryClient();
@@ -53,17 +54,19 @@ export default function PrizePoolScreen() {
 
   return (
     <View style={styles.root}>
-      <Image
-        source={assets.prizeBackground}
-        style={styles.bgFixed}
-        resizeMode="cover"
-      />
       <SafeAreaView edges={['top']} style={styles.safe}>
         <TopBar title={t('account.prizes')} transparent light />
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scroll}
         >
+          {/* top illustration banner */}
+          <Image
+            source={assets.prizeBackground}
+            style={styles.hero}
+            resizeMode="contain"
+          />
+
           <QueryNotice
             loading={activities.isLoading}
             error={activities.error}
@@ -79,8 +82,8 @@ export default function PrizePoolScreen() {
                 </Text>
               </View>
 
-              {/* amount */}
-              <View style={styles.amount}>
+              {/* amount card (readable, white) */}
+              <View style={styles.amountCard}>
                 <Text style={styles.amountTitle}>{t('prize.amountTitle')}</Text>
                 <Text style={styles.amountMoney}>
                   {formatMoney(activity.prizePoolMinor, activity.currency)}
@@ -93,27 +96,25 @@ export default function PrizePoolScreen() {
               </View>
 
               {/* invite */}
-              <View style={styles.invite}>
-                <View style={styles.avatars}>
-                  {[0, 1, 2, 3].map((i) => (
-                    <Image
-                      key={i}
-                      source={assets.avatars[i % assets.avatars.length]}
-                      style={styles.avatar}
-                    />
-                  ))}
-                </View>
-                <Text style={styles.inviteTip}>{t('prize.inviteTip')}</Text>
-                <View style={styles.inviteBtn}>
-                  <GradientButton
-                    loading={join.isPending}
-                    onPress={() =>
-                      activity.joined ? router.push('/referrals') : join.mutate()
-                    }
-                  >
-                    {t('prize.inviteBtn')}
-                  </GradientButton>
-                </View>
+              <View style={styles.avatars}>
+                {[0, 1, 2, 3].map((i) => (
+                  <Image
+                    key={i}
+                    source={assets.avatars[i % assets.avatars.length]}
+                    style={styles.avatar}
+                  />
+                ))}
+              </View>
+              <Text style={styles.inviteTip}>{t('prize.inviteTip')}</Text>
+              <View style={styles.inviteBtn}>
+                <GradientButton
+                  loading={join.isPending}
+                  onPress={() =>
+                    activity.joined ? router.push('/referrals') : join.mutate()
+                  }
+                >
+                  {t('prize.inviteBtn')}
+                </GradientButton>
               </View>
 
               {/* tabs */}
@@ -136,7 +137,7 @@ export default function PrizePoolScreen() {
                 )}
               </View>
 
-              {/* main */}
+              {/* content card (readable, white) */}
               <View style={styles.main}>
                 {tab === 0 ? (
                   <>
@@ -161,13 +162,14 @@ export default function PrizePoolScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#35a2ff' },
-  bgFixed: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
   safe: { flex: 1 },
-  scroll: { paddingBottom: rpx(40) },
+  scroll: { paddingBottom: rpx(60) },
+  // top illustration banner
+  hero: { width: '100%', height: rpx(340), marginTop: rpx(10) },
   // .prize_people pill
   peoplePill: {
     alignSelf: 'center',
-    marginTop: rpx(24),
+    marginTop: rpx(4),
     height: rpx(56),
     paddingHorizontal: rpx(40),
     borderRadius: rpx(200),
@@ -179,8 +181,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: theme.typography.family.regular,
   },
-  // .prize_amount
-  amount: { alignItems: 'center', marginTop: rpx(40) },
+  // white amount card
+  amountCard: {
+    marginTop: rpx(28),
+    marginHorizontal: rpx(40),
+    paddingVertical: rpx(36),
+    borderRadius: rpx(24),
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
   amountTitle: {
     fontSize: rpx(32),
     color: '#bb451e',
@@ -198,35 +207,38 @@ const styles = StyleSheet.create({
     color: '#ee5016',
     fontFamily: theme.typography.family.regular,
   },
-  // .prize_invite
-  invite: { alignItems: 'center', marginTop: rpx(40) },
-  avatars: { flexDirection: 'row' },
+  // invite
+  avatars: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: rpx(40),
+  },
   avatar: {
     width: rpx(96),
     height: rpx(96),
     borderRadius: rpx(48),
     borderWidth: rpx(2),
     borderColor: '#fff',
-    marginHorizontal: rpx(22),
+    marginHorizontal: rpx(16),
     backgroundColor: '#eee',
   },
   inviteTip: {
-    marginTop: rpx(40),
+    marginTop: rpx(30),
     fontSize: rpx(28),
-    color: '#ffdc93',
+    color: '#fff',
     textAlign: 'center',
     fontFamily: theme.typography.family.regular,
   },
-  inviteBtn: { marginTop: rpx(48), width: rpx(600) },
-  // .prize_tabs
+  inviteBtn: { marginTop: rpx(40), marginHorizontal: rpx(74) },
+  // tabs
   tabs: { flexDirection: 'row', justifyContent: 'center', marginTop: rpx(50) },
   tabItem: { alignItems: 'center', marginHorizontal: rpx(63) },
   tabText: {
     fontSize: rpx(32),
-    color: '#ffc84e',
+    color: 'rgba(255,255,255,0.7)',
     fontFamily: theme.typography.family.medium,
   },
-  tabActive: { fontFamily: theme.typography.family.bold },
+  tabActive: { color: '#fff', fontFamily: theme.typography.family.bold },
   tabBar: {
     marginTop: rpx(12),
     width: rpx(76),
@@ -234,24 +246,25 @@ const styles = StyleSheet.create({
     borderRadius: rpx(200),
     backgroundColor: '#ffc84e',
   },
-  // .prize_main
+  // white content card
   main: {
-    marginTop: rpx(30),
+    marginTop: rpx(24),
     marginHorizontal: rpx(30),
-    padding: rpx(28),
+    padding: rpx(30),
     borderRadius: rpx(20),
-    backgroundColor: 'rgba(255,200,78,0.2)',
+    backgroundColor: '#fff',
+    minHeight: rpx(200),
   },
   winnersLine: {
     fontSize: rpx(30),
-    color: '#fff',
+    color: '#ee5016',
     fontFamily: theme.typography.family.bold,
     marginBottom: rpx(16),
   },
   rulesText: {
     fontSize: rpx(26),
     lineHeight: rpx(42),
-    color: '#fff',
+    color: '#686868',
     fontFamily: theme.typography.family.regular,
   },
   empty: {
