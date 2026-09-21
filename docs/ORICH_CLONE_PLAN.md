@@ -52,7 +52,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 37 | prize/prize | `/prizes` | ⬜ |
 | 38 | finance/flist | `/finance` | ⬜ |
 | 39 | finance/fdetail | `/finance/[financeId]` | ✅ |
-| 40 | finance/order | `/finance/order` | ⬜ |
+| 40 | finance/order | `/finance/order` | ✅ |
 | 41 | task/task | `/(tabs)/tasks` | ⬜ |
 | 42 | task/member | `/(tabs)/member` | ⬜ |
 | 43 | game/game | `/game` | ✅ (ORich visual, non-monetary) |
