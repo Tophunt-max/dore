@@ -61,23 +61,18 @@ export default function ReferralsScreen() {
   ];
 
   return (
-    <ImageBackground
-      source={assets.inviteBackground}
-      resizeMode="cover"
-      style={styles.bg}
-    >
       <Screen
         header={
           <TopBar
             title={t('referrals.inviteFriends')}
             white
-            transparent
             actionLabel={t('invite.rules')}
             onAction={() => router.push({ pathname: '/rules', params: { type: '3' } })}
           />
         }
         contentStyle={styles.page}
       >
+        <Image source={assets.inviteBackground} style={styles.hero} />
         {/* invited card */}
         <View style={styles.invited}>
           <View style={styles.earn}>
@@ -164,16 +159,15 @@ export default function ReferralsScreen() {
           ) : null}
         </View>
       </Screen>
-    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  bg: { flex: 1, backgroundColor: '#fe5541' },
-  page: { paddingBottom: rpx(40) },
+  page: { backgroundColor: '#fe5541', paddingBottom: rpx(40) },
+  hero: { width: '100%', height: rpx(360), resizeMode: 'cover' },
   // .middle_invited { margin:20rpx; bg #fff; radius 16rpx }
   invited: {
-    marginTop: rpx(20),
+    marginTop: rpx(-40),
     marginHorizontal: rpx(20),
     paddingBottom: rpx(30),
     backgroundColor: '#fff',
