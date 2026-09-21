@@ -1,158 +1,272 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+// Faithful port of ORich pages/login/login (template + scoped CSS + logic).
+import { ref, watch } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
+import { Index, SendVerify, Login } from '@/api/orich';
+import { setTokens } from '@/api/request';
 import { useUserStore } from '@/store/user';
 
 const store = useUserStore();
-const phone = ref('');
+const uCode = ref<any>(null);
+const webname = ref('');
+const seconds = ref(60);
+const tips = ref('');
+const mobile = ref('');
 const code = ref('');
-const invite = ref('');
-const agree = ref(false);
-const sending = ref(false);
-const countdown = ref(0);
+const canNext = ref(false);
+const loading = ref(false);
 
-onLoad((q) => {
-  if (q?.invite) invite.value = q.invite;
+watch(code, () => {
+  canNext.value = code.value.length > 5;
 });
 
-async function sendCode() {
-  if (!/^\d{6,15}$/.test(phone.value)) return uni.showToast({ title: 'Enter valid phone', icon: 'none' });
-  sending.value = true;
-  const res = await store.sendOtp(phone.value);
-  sending.value = false;
-  if (res.ok) {
-    uni.showToast({ title: res.devCode ? `OTP: ${res.devCode}` : 'OTP sent', icon: 'none' });
-    countdown.value = 60;
-    const t = setInterval(() => {
-      countdown.value--;
-      if (countdown.value <= 0) clearInterval(t);
-    }, 1000);
+onLoad(() => {
+  Index().then((t: any) => {
+    webname.value = t.title;
+  });
+});
+
+function toRule() {
+  uni.navigateTo({ url: '../richtext/rule?type=1' });
+}
+function back() {
+  uni.navigateTo({ url: '/pages/home/home' });
+}
+function codeChange(t: string) {
+  tips.value = t;
+}
+function getCode() {
+  if (uCode.value && uCode.value.canGetCode) {
+    uni.showLoading({});
+    SendVerify({ mobile: mobile.value })
+      .then((r: any) => {
+        uni.hideLoading();
+        if (r.devCode) tips.value = `OTP ${r.devCode}`;
+        uni.showToast({ icon: 'none', title: r.devCode ? `OTP: ${r.devCode}` : '发送成功', mask: true });
+        uCode.value.start();
+      })
+      .catch(() => uni.hideLoading());
   } else {
-    uni.showToast({ title: res.error || 'Failed', icon: 'none' });
+    uni.showToast({ icon: 'none', title: 'Send it after the countdown is over!', mask: true });
   }
 }
-
-async function submit() {
-  if (!agree.value) return uni.showToast({ title: 'Please agree to terms', icon: 'none' });
-  if (!phone.value || !code.value) return uni.showToast({ title: 'Enter phone & OTP', icon: 'none' });
-  uni.showLoading({ title: '...' });
-  const res = await store.loginWithOtp(phone.value, code.value, invite.value || undefined);
-  uni.hideLoading();
-  if (res.ok) {
-    uni.reLaunch({ url: '/pages/home/home' });
-  } else {
-    uni.showToast({ title: res.error || 'Login failed', icon: 'none' });
-  }
+function end() {}
+function start() {}
+function submit() {
+  uni.showLoading({});
+  loading.value = true;
+  Login({
+    mobile: mobile.value,
+    code: code.value,
+    invitecode: uni.getStorageSync('icode') || '',
+    channel: uni.getStorageSync('channel') || '',
+    cid: '',
+  })
+    .then((e: any) => {
+      loading.value = false;
+      uni.hideLoading();
+      if (!e.ok) {
+        uni.showToast({ title: e.error || 'Login failed', icon: 'none' });
+        code.value = '';
+        return;
+      }
+      uni.setStorageSync('icode', '');
+      setTokens(e.access, e.refresh);
+      store.user = e.user;
+      uni.showToast({ title: 'Login success!', icon: 'none' });
+      uni.reLaunch({ url: '../home/home' });
+    })
+    .catch(() => {
+      loading.value = false;
+      code.value = '';
+    });
 }
 </script>
 
 <template>
   <view class="login">
-    <nav-bar :back="true" bg="transparent" />
-    <view class="head">
-      <image class="logo" src="/static/logo.png" mode="heightFix" />
-      <text class="welcome">Welcome to vuapp</text>
+    <u-icon class="backicon" name="arrow-left" color="#919191" size="32" @click="back" />
+    <view class="title">
+      {{ $t('login.titlefront') }}<text>{{ webname }}</text>
     </view>
-
-    <view class="form">
-      <view class="field">
-        <text class="cc">+91</text>
-        <input v-model="phone" class="inp" type="number" placeholder="Phone number" placeholder-class="ph" />
+    <view class="input-title">{{ $t('login.mphone') }}</view>
+    <view class="inputview">
+      <image src="/static/image/login/icon_iphone.png" mode="widthFix" />
+      <view class="inputview-num">+91</view>
+      <view class="inputview-op" />
+      <input class="inputview-input" v-model="mobile" type="number" :placeholder="$t('login.mphone_pla')" placeholder-class="pla" />
+    </view>
+    <view class="input-title">{{ $t('login.vcode') }}</view>
+    <view class="send">
+      <view class="send-input">
+        <input v-model="code" type="number" :placeholder="$t('login.vcode_pla')" placeholder-class="pla" />
       </view>
-      <view class="field">
-        <input v-model="code" class="inp" type="number" placeholder="OTP code" placeholder-class="ph" />
-        <text class="send" :class="{ disabled: countdown > 0 || sending }" @click="countdown > 0 || sending ? null : sendCode()">
-          {{ countdown > 0 ? countdown + 's' : 'Send Code' }}
-        </text>
+      <view class="wrap">
+        <u-verification-code
+          ref="uCode"
+          :seconds="seconds"
+          :start-text="$t('login.get')"
+          :end-text="$t('login.get')"
+          change-text="xs"
+          @end="end"
+          @start="start"
+          @change="codeChange"
+        />
+        <u-button @click="getCode">{{ tips }}</u-button>
       </view>
-      <view class="field">
-        <input v-model="invite" class="inp" placeholder="Invite code (optional)" placeholder-class="ph" />
+    </view>
+    <view class="nextbtn">
+      <overbtn
+        :canSubmit="!canNext"
+        :loading="loading"
+        :btnText="$t('login.submit')"
+        :fontSize="32"
+        :btnType="canNext ? 'submit' : 'disabled'"
+        @btnAction="submit"
+      />
+    </view>
+    <view class="user-rule">
+      <view class="user-rule-item">
+        {{ $t('login.rule_l') }}<text @click="toRule">{{ $t('login.rule_r') }}</text>
       </view>
-
-      <view class="agree" @click="agree = !agree">
-        <view class="cb" :class="{ on: agree }" />
-        <text class="agree-text">I agree to the Terms & Rules</text>
-      </view>
-
-      <view class="submit primary-btn" @click="submit">Login / Register</view>
     </view>
   </view>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
+/* Verbatim scoped CSS recovered from ORich pages/login/login (scope stripped) */
 .login {
+  width: 100%;
   min-height: 100vh;
-  background: linear-gradient(180deg, #ff7d4d 0%, #f6f6f6 40%);
+  padding: 0 30rpx;
+  background: url('/static/image/login/bg.png');
+  background-size: 100% auto;
 }
-.head {
+.login .backicon {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 60rpx 0 40rpx;
+  width: 100%;
+  height: 98rpx;
+  margin: 0 -14rpx;
 }
-.logo {
-  height: 96rpx;
-}
-.welcome {
-  margin-top: 24rpx;
-  font-size: 40rpx;
+.login .title {
+  margin-top: 120rpx;
+  padding: 0 20rpx;
+  font-size: 48rpx;
+  font-family: Roboto, Roboto-Medium;
   font-weight: 700;
-  color: #fff;
-}
-.form {
-  margin: 40rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 40rpx;
-}
-.field {
-  display: flex;
-  align-items: center;
-  height: 96rpx;
-  border-bottom: 2rpx solid #f0f0f0;
-}
-.cc {
-  font-size: 30rpx;
+  text-align: left;
   color: #17273a;
-  margin-right: 16rpx;
 }
-.inp {
-  flex: 1;
-  font-size: 30rpx;
+.login .title uni-text {
+  font-weight: 700;
 }
-.ph {
+.login .tips {
+  font-size: 36rpx;
+  font-family: Roboto, Roboto-Regular;
+  font-weight: 400;
+  text-align: left;
   color: #b9b9b9;
 }
-.send {
-  color: #ee5016;
-  font-size: 28rpx;
-}
-.send.disabled {
-  color: #b9b9b9;
-}
-.agree {
-  display: flex;
-  align-items: center;
-  margin: 40rpx 0;
-}
-.cb {
-  width: 34rpx;
-  height: 34rpx;
-  border-radius: 50%;
-  border: 2rpx solid #b9b9b9;
-  margin-right: 16rpx;
-}
-.cb.on {
-  background: #ee5016;
-  border-color: #ee5016;
-}
-.agree-text {
-  font-size: 26rpx;
-  color: #666;
-}
-.submit {
-  height: 92rpx;
-  line-height: 92rpx;
+.login .input-title {
+  padding: 0 20rpx;
+  margin-top: 104rpx;
+  margin-bottom: 16rpx;
   font-size: 32rpx;
+  font-family: Roboto, Roboto-Regular;
+  font-weight: 400;
+  text-align: left;
+  color: #17273a;
+}
+.login .inputview {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0;
+  margin: 0 20rpx;
+  border-bottom: 2rpx solid #ececec;
+}
+.login .inputview uni-image {
+  width: 40rpx;
+  margin-right: 10rpx;
+  margin-left: -4rpx;
+}
+.login .inputview .inputview-num {
+  font-size: 32rpx;
+  font-family: PingFang SC, PingFang SC-Medium;
+  text-align: left;
+  color: silver;
+}
+.login .inputview .inputview-op {
+  width: 2rpx;
+  height: 26rpx;
+  margin: 0 16rpx;
+  background-color: #b9b9b9;
+}
+.login .inputview .inputview-input {
+  flex: 1;
+  padding-left: 4rpx;
+  font-size: 32rpx;
+  font-family: PingFang SC, PingFang SC-Regular;
+  font-weight: 400;
+  text-align: left;
+  color: #17273a;
+}
+.login .pla {
+  color: silver;
+}
+.login .nextbtn {
+  width: 100%;
+  height: 92rpx;
+  margin-top: 134rpx;
+}
+.login .send {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  padding: 0 20rpx;
+}
+.login .send .send-input {
+  flex: 1;
+  padding: 10rpx 0 18rpx 0;
+  margin-right: 0rpx;
+  border-bottom: 2rpx solid #ececec;
+  font-size: 32rpx;
+  font-family: PingFang SC, PingFang SC-Regular;
+  font-weight: 400;
+  text-align: left;
+  color: #17273a;
+}
+.login .send .send-input uni-input {
+  font-size: 32rpx;
+  font-family: PingFang SC, PingFang SC-Regular;
+  font-weight: 400;
+}
+.login .send .wrap {
+  min-width: 140rpx;
+  padding: 8rpx 0 20rpx 0;
+  color: #ee5016;
+  font-size: 36rpx;
+  font-family: PingFang SC, PingFang SC-Bold !important;
+}
+.login .code {
+  width: 100%;
+  margin-top: 150rpx;
+}
+.user-rule {
+  font-size: 26rpx;
+  margin-top: 260rpx;
+}
+.user-rule .user-rule-item {
+  font-family: Roboto, Roboto-Regular;
+  font-weight: 400;
+  letter-spacing: 0rpx;
+  color: #b9b9b9;
+}
+.user-rule .user-rule-item uni-text {
+  color: #ee5016;
 }
 </style>

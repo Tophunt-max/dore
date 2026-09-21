@@ -2,7 +2,9 @@
   "easycom": {
     "autoscan": true,
     "custom": {
-      "^nav-bar$": "@/components/nav-bar.vue"
+      "^nav-bar$": "@/components/nav-bar.vue",
+      "^u-(.*)": "@/components/u/u-$1.vue",
+      "^(navbar|tabbar|overbtn|onepopup|sharepopup|cardlist|lineprogress|buystep|finance-list|navtabs|mescroll-body|game-record|game-order|game-popup)$": "@/components/$1.vue"
     }
   },
   "pages": [
