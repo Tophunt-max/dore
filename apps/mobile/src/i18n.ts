@@ -454,6 +454,18 @@ export const catalog = {
     zh: '暂时没有获奖公告。',
   },
   'home.seeAll': { en: 'See all', hi: 'सभी देखें', zh: '查看全部' },
+  'prize.people': { en: 'participating', hi: 'भाग ले रहे', zh: '人参与' },
+  'prize.amountTitle': { en: 'Prize pool', hi: 'पुरस्कार पूल', zh: '奖金池' },
+  'prize.drawin': { en: 'Draw in', hi: 'ड्रॉ में', zh: '开奖倒计时' },
+  'prize.inviteTip': {
+    en: 'Invite friends to unlock a bigger prize',
+    hi: 'बड़ा पुरस्कार अनलॉक करने के लिए मित्रों को आमंत्रित करें',
+    zh: '邀请好友解锁更大奖励',
+  },
+  'prize.inviteBtn': { en: 'Invite now', hi: 'अभी आमंत्रित करें', zh: '立即邀请' },
+  'prize.participants': { en: 'Participants', hi: 'प्रतिभागी', zh: '参与者' },
+  'prize.rulesTab': { en: 'Rules', hi: 'नियम', zh: '规则' },
+  'prize.winners': { en: '{count} winners', hi: '{count} विजेता', zh: '{count} 名中奖' },
   'pool.winnersPublished': {
     en: '{count} winners published.',
     hi: '{count} विजेता प्रकाशित।',
