@@ -817,6 +817,9 @@ export const catalog = {
   'intro.skip': { en: 'Skip', hi: 'छोड़ें', zh: '跳过' },
   'intro.explore': { en: 'Explore Oriva', hi: 'Oriva देखें', zh: '探索 Oriva' },
   'shares.title': { en: 'My shares', hi: 'मेरी साझा कहानियाँ', zh: '我的分享' },
+  'shares.toShareTab': { en: 'To share', hi: 'साझा करने हेतु', zh: '待分享' },
+  'shares.sharedTab': { en: 'Shared', hi: 'साझा किया', zh: '已分享' },
+  'shares.shareBtn': { en: 'Share', hi: 'साझा करें', zh: '分享' },
   'shares.published': {
     en: 'Published stories',
     hi: 'प्रकाशित कहानियाँ',
@@ -854,6 +857,7 @@ export const catalog = {
     hi: 'आपने सब देख लिया है।',
     zh: '您已查看全部通知。',
   },
+  'orders.all': { en: 'All', hi: 'सभी', zh: '全部' },
   'addresses.title': {
     en: 'Delivery addresses',
     hi: 'डिलीवरी पते',
@@ -1116,6 +1120,11 @@ export const catalog = {
     en: 'Please select the recharge amount:',
     hi: 'कृपया रिचार्ज राशि चुनें:',
     zh: '请选择充值金额：',
+  },
+  'wallet.enterAmount': {
+    en: 'Enter amount',
+    hi: 'राशि दर्ज करें',
+    zh: '输入金额',
   },
   'wallet.noTransactions': {
     en: 'No transactions',
