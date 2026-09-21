@@ -1,10 +1,15 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { assets } from '@/assets';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { useI18n } from '@/i18n';
+import { rpx } from '@/rpx';
 import { theme } from '@/theme';
+
+// ORich `pages/success/index` (scope 076f44e8): a white top block with a large
+// result image, orange tips line, and a Back-home / Confirm button pair.
 export default function ResultScreen() {
   const { title, message, reference, next, tone } = useLocalSearchParams<{
     title?: string;
@@ -14,30 +19,18 @@ export default function ResultScreen() {
     tone?: string;
   }>();
   const { t } = useI18n();
-  const scale = useRef(new Animated.Value(0.6)).current;
-  useEffect(() => {
-    Animated.spring(scale, {
-      toValue: 1,
-      useNativeDriver: true,
-      friction: 5,
-    }).start();
-  }, [scale]);
+  const failed = tone === 'danger';
+
   return (
-    <Screen scroll={false} header={<TopBar title={t('result.done')} />}>
-      <View style={styles.page}>
-        <Animated.View
-          style={[
-            styles.icon,
-            {
-              transform: [{ scale }],
-              backgroundColor: tone === 'danger' ? '#FFF0F0' : '#E8F5EE',
-            },
-          ]}
-        >
-          <Text style={styles.iconText}>{tone === 'danger' ? '!' : '✓'}</Text>
-        </Animated.View>
-        <Text style={styles.title}>{title ?? t('result.done')}</Text>
-        {message ? <Text style={styles.message}>{message}</Text> : null}
+    <Screen scroll={false} header={<TopBar title={title ?? t('result.done')} white />}>
+      <View style={styles.top}>
+        <Image
+          source={failed ? assets.paymentFailed : assets.success}
+          style={styles.topImg}
+          resizeMode="contain"
+        />
+        <Text style={styles.tips}>{message ?? t('result.done')}</Text>
+
         {reference ? (
           <View style={styles.reference}>
             <Text style={styles.referenceLabel}>{t('result.reference')}</Text>
@@ -46,75 +39,99 @@ export default function ResultScreen() {
             </Text>
           </View>
         ) : null}
-        <Pressable
-          onPress={() =>
-            next ? router.replace(next as '/') : router.replace('/')
-          }
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>
-            {next ? t('common.continue') : t('result.backHome')}
-          </Text>
-        </Pressable>
+
+        <View style={styles.btnRow}>
+          <Pressable
+            onPress={() => router.replace('/')}
+            style={[styles.btn, styles.btnPlain]}
+          >
+            <Text style={styles.btnPlainText}>{t('result.backHome')}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => (next ? router.replace(next as '/') : router.replace('/'))}
+            style={styles.btn}
+          >
+            <LinearGradient
+              colors={[theme.colors.accentStart, theme.colors.accentEnd]}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.btnFill}
+            >
+              <Text style={styles.btnFillText}>
+                {next ? t('common.continue') : t('result.done')}
+              </Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
       </View>
     </Screen>
   );
 }
+
 const styles = StyleSheet.create({
-  page: {
+  // .top { column; center; bg #fff; margin-bottom:24rpx }
+  top: {
+    alignItems: 'center',
+    paddingHorizontal: rpx(10),
+    paddingTop: rpx(40),
+    backgroundColor: theme.colors.surface,
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing.xl,
   },
-  icon: {
-    width: 100,
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 50,
-  },
-  iconText: {
-    color: theme.colors.primary,
-    fontFamily: theme.typography.family.bold,
-    fontSize: 46,
-  },
-  title: {
-    marginTop: 24,
+  // .top-img { height:380rpx }
+  topImg: { width: rpx(390), height: rpx(380) },
+  // .top-tips { width:530rpx; 28rpx; #ee5016 }
+  tips: {
+    width: rpx(530),
     textAlign: 'center',
-    color: theme.colors.ink,
-    fontFamily: theme.typography.family.bold,
-    fontSize: theme.typography.size.hero,
-  },
-  message: {
-    marginTop: 10,
-    textAlign: 'center',
-    color: theme.colors.textSecondary,
-    lineHeight: 21,
+    fontSize: rpx(28),
+    color: '#ee5016',
+    fontFamily: theme.typography.family.regular,
   },
   reference: {
-    width: '100%',
-    marginTop: 24,
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: theme.colors.surface,
+    width: '90%',
+    marginTop: rpx(40),
+    padding: rpx(28),
+    borderRadius: rpx(16),
+    backgroundColor: '#f7f8f9',
   },
-  referenceLabel: { color: theme.colors.textMuted },
+  referenceLabel: { color: theme.colors.textMuted, fontSize: rpx(26) },
   referenceValue: {
-    marginTop: 5,
+    marginTop: rpx(8),
     color: theme.colors.ink,
     fontFamily: theme.typography.family.bold,
   },
-  button: {
-    minWidth: 180,
-    marginTop: 24,
-    padding: 16,
+  // .top-btn { row; space-around; margin-top:42rpx }
+  btnRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 30,
-    backgroundColor: theme.colors.primary,
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: rpx(42),
+    paddingHorizontal: rpx(10),
   },
-  buttonText: {
-    color: theme.colors.surface,
+  // .top-btn-item { 286rpx x 78rpx }
+  btn: { width: rpx(286), height: rpx(78) },
+  btnPlain: {
+    borderWidth: rpx(2),
+    borderColor: theme.colors.primary,
+    borderRadius: rpx(9),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnPlainText: {
+    color: theme.colors.primary,
     fontFamily: theme.typography.family.bold,
+    fontSize: rpx(28),
+  },
+  btnFill: {
+    flex: 1,
+    borderRadius: rpx(9),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnFillText: {
+    color: '#ad6701',
+    fontFamily: theme.typography.family.bold,
+    fontSize: rpx(28),
   },
 });

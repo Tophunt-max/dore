@@ -996,6 +996,18 @@ export const catalog = {
   'team.copied': { en: 'Copied', hi: 'कॉपी हो गया', zh: '已复制' },
   'team.membersTab': { en: 'Team members', hi: 'टीम सदस्य', zh: '团队成员' },
   'team.consumptionTab': { en: 'Consumption', hi: 'खपत', zh: '消费' },
+  'team.detailTitle': { en: 'Team details', hi: 'टीम विवरण', zh: '团队明细' },
+  'team.reward': { en: 'Reward', hi: 'इनाम', zh: '奖励' },
+  'team.myContribution': {
+    en: 'My contribution',
+    hi: 'मेरा योगदान',
+    zh: '我的业绩',
+  },
+  'team.teamContribution': {
+    en: 'Team contribution',
+    hi: 'टीम योगदान',
+    zh: '团队业绩',
+  },
   'team.empty': {
     en: 'No invited members yet.',
     hi: 'अभी कोई आमंत्रित सदस्य नहीं है।',
