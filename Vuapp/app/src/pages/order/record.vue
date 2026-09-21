@@ -1,116 +1,205 @@
-<script setup lang="ts">
-// Faithful port of ORich pages/order/record.
-import { ref } from 'vue';
-import { onLoad, onShow } from '@dcloudio/uni-app';
-import { useI18n } from 'vue-i18n';
-import { userOrder } from '@/api/orich';
-
-const { t } = useI18n();
-const mescroll = ref<any>(null);
-const downOption = { use: true, auto: true };
-const upOption = { use: true, auto: true, page: { num: 0, size: 20 } };
-const list = [
-  { name: t('account.all'), status: 0 },
-  { name: t('account.waiting'), status: 1 },
-  { name: t('account.todelivery'), status: 3 },
-  { name: t('account.indelivery'), status: 4 },
-  { name: t('account.completed'), status: 5 },
-];
-const current = ref(0);
-const orderStatus = ref(0);
-const cardList = ref<any[]>([]);
-const showPopup = ref(false);
-const orderID = ref<any>('');
-const firstLoad = ref(true);
-const popup = ref<any>(null);
-
-onLoad((q: any) => {
-  if (q?.type) change(Number(q.type));
-});
-onShow(() => {
-  setTimeout(() => {
-    if (!firstLoad.value && mescroll.value) mescroll.value.resetUpScroll();
-  });
-});
-
-function mescrollInit(ms: any) {
-  mescroll.value = ms;
-}
-function downCallback() {
-  mescroll.value && mescroll.value.resetUpScroll();
-}
-function change(i: number) {
-  current.value = i;
-  orderStatus.value = list[i].status;
-  mescroll.value && mescroll.value.resetUpScroll();
-}
-function upCallback(page: any) {
-  const start = (page.num - 1) * page.size;
-  userOrder({ status: orderStatus.value, start, limit: page.size })
-    .then((s: any) => {
-      firstLoad.value = false;
-      const l = s.list || [];
-      if (page.num === 1) cardList.value = [];
-      cardList.value = cardList.value.concat(l);
-      mescroll.value && mescroll.value.endBySize(l.length, s.count);
-    })
-    .catch(() => mescroll.value && mescroll.value.endErr());
-}
-function toDetail(id: any) {
-  uni.navigateTo({ url: `/pages/order/detail?id=${id}` });
-}
-function toDiscount(code: number, id: any) {
-  if (code == 2) uni.navigateTo({ url: `/pages/order/discount?id=${id}` });
-  else toDetail(id);
-}
-function handleShare(item: any) {
-  orderID.value = item.dumid || item.id;
-  popup.value && popup.value.open();
-}
-function handleSkip(code: number, id: any) {
-  let url = '';
-  switch (+code) {
-    case 1:
-      url = `../goods/goods?id=${id}`;
-      break;
-    case 5:
-      url = `../bask/index?id=${id}`;
-      break;
-    default:
-      url = `../order/detail?id=${id}`;
-  }
-  uni.navigateTo({ url });
-}
-function handleBack() {
-  uni.switchTab({ url: '/pages/account/account' });
-}
-</script>
-
 <template>
   <view class="record">
-    <navbar :title="$t('order.records')" background="#ffffff" isComfirm @beforeBack="handleBack" />
-    <navtabs :list="list" :activeIndex="current" @active="change" />
-    <mescroll-body ref="mescrollRef" :down="downOption" :up="upOption" @init="mescrollInit" @down="downCallback" @up="upCallback">
+    <navbar :title="$t('order.records')" background="#ffffff" :isComfirm="true" @beforeBack="handleBack"></navbar>
+    <navtabs :list="list" :activeIndex="current" @active="change"></navtabs>
+    <mescroll-body
+      ref="mescrollRef"
+      :down="downOption"
+      :up="upOption"
+      @init="mescrollInit"
+      @down="downCallback"
+      @up="upCallback"
+    >
       <view class="record_main_card">
         <cardlist
           :cardList="cardList"
-          @navNext="toDetail"
+          @navNext="navNext"
           @navToDetail="toDetail"
           @share="handleShare"
           @handleSkip="handleSkip"
           @navToDiscount="toDiscount"
-        />
-        <view v-if="!cardList.length" class="nodata">{{ $t('common.nodata') }}</view>
+        ></cardlist>
       </view>
     </mescroll-body>
-    <sharepopup ref="popup" :showPopup="showPopup" shareType="2" :orderID="orderID" />
+    <sharepopup ref="popup" :showPopup="showPopup" shareType="2" :orderID="orderID"></sharepopup>
   </view>
 </template>
 
+<script>
+import { interopDefault as d_4df3 } from '@/utils/mescroll-mixin';
+import { userOrder } from '@/api/orich';
+import { countDown } from '@/utils/orich';
+
+export default {
+  mixins: [d_4df3],
+  data: function () {
+    return {
+      downOption: {
+        use: true,
+        auto: true
+      },
+      upOption: {
+        use: true,
+        auto: true,
+        page: {
+          num: 0,
+          size: 20
+        }
+      },
+      list: [{
+        name: this.$t('account.all'),
+        status: 0
+      }, {
+        name: this.$t('account.waiting'),
+        status: 1
+      }, {
+        name: this.$t('account.todelivery'),
+        status: 3
+      }, {
+        name: this.$t('account.indelivery'),
+        status: 4
+      }, {
+        name: this.$t('account.completed'),
+        status: 5
+      }],
+      current: 0,
+      orderStatus: 0,
+      cardList: [],
+      listTime: [],
+      loading: true,
+      showPopup: false,
+      orderID: '',
+      firstLoad: true
+    };
+  },
+  onShow: function () {
+    var t = this;
+    setTimeout(function () {
+      t.firstLoad || t.mescroll.resetUpScroll();
+    });
+  },
+  onLoad: function (t) {
+    t.type && this.change(t.type);
+  },
+  watch: {
+    orderStatus: function (t) {
+      this.mescroll.resetUpScroll();
+    }
+  },
+  methods: {
+    handleBack: function () {
+      uni.navigateTo({
+        url: '../account/account'
+      });
+    },
+    change: function (t) {
+      this.current = t;
+      this.orderStatus = this.list[t].status;
+    },
+    navNext: function (t) {
+      uni.navigateTo({
+        url: ('../../pages/order/detail?id=').concat(t)
+      });
+    },
+    toDetail: function (t) {
+      uni.navigateTo({
+        url: ('/pages/order/detail?id=').concat(t)
+      });
+    },
+    toDiscount: function (t, e) {
+      2 == t ? uni.navigateTo({
+        url: ('../../pages/order/discount?id=').concat(e)
+      }) : this.toDetail(e);
+    },
+    orderList: function () {
+      var t = this;
+      this.loading = true;
+      userOrder({
+        status: this.orderStatus
+      }).then(function (e) {
+        t.cardList = e.list;
+        t.loading = false;
+      }).catch(function () {
+        t.loading = false;
+      });
+    },
+    handleShare: function (e) {
+      console.log(e);
+      this.orderID = e.dumid;
+      this.$refs.popup.open();
+    },
+    upCallback: function (t) {
+      var e = this, s = (t.num - 1) * t.size, i = t.size;
+      userOrder({
+        status: this.orderStatus,
+        start: s,
+        limit: i
+      }).then(function (s) {
+        e.firstLoad = false;
+        var i = s.list, a = i.length, n = +s.count;
+        1 == t.num && (e.cardList = []);
+        e.cardList = e.cardList.concat(i);
+        e.clearTimer();
+        e.cardList.forEach(function (t, s) {
+          e.listTime[s] = '';
+          t.countdown = '';
+          3 == t.has_lottery && (e.listTime[s] = setInterval(function () {
+            t.nowtime++;
+            t.countdown = countDown(t.endendtimein, t.nowtime);
+            '00:00:00' == t.countdown && (clearInterval(e.listTime[s]), e.mescroll.resetUpScroll());
+            e.$forceUpdate();
+          }, 1e3), t.countdown = countDown(t.endendtimein, t.nowtime), '00:00:00' == t.countdown && clearInterval(e.listTime[s]), e.$forceUpdate());
+          2 == t.has_lottery && (e.listTime[s] = setInterval(function () {
+            t.nowtime++;
+            t.countdown = countDown(t.lottery_stamp, t.nowtime);
+            '00:00:00' == t.countdown && (clearInterval(e.listTime[s]), e.mescroll.resetUpScroll());
+            e.$forceUpdate();
+          }, 1e3), t.countdown = countDown(t.lottery_stamp, t.nowtime), '00:00:00' == t.countdown && clearInterval(e.listTime[s]), e.$forceUpdate());
+        });
+        e.mescroll.endBySize(a, n);
+      }).catch(function (t) {
+        e.mescroll.endErr();
+      });
+    },
+    clearTimer: function () {
+      this.listTime.forEach(function (t) {
+        return clearInterval(t);
+      });
+      this.listTime = [];
+    },
+    handleSkip: function (e, s) {
+      console.log(e, 'sss');
+      var i = '';
+      switch (+e) {
+        case 1:
+          uni.setStorageSync('page', 2);
+          i = ('../goods/goods?id=').concat(s);
+          break;
+        case 3:
+          i = ('../order/detail?id=').concat(s);
+          break;
+        case 5:
+          i = ('../bask/index?id=').concat(s);
+          break;
+        case 4:
+        case 6:
+          i = ('../order/detail?id=').concat(s);
+          break;
+      }
+      uni.navigateTo({
+        url: i
+      });
+    }
+  },
+  unmounted: function () {
+    this.clearTimer();
+  }
+};
+</script>
+
 <style scoped>
-/* Verbatim scoped CSS from ORich pages/order/record */
-.record { min-height: 100vh; background: #f9f9f9; }
-.record_loading { padding-top: 20rpx; text-align: center; background: #f9f9f9; }
-.record_main { background: #f9f9f9; }
-.record_main_card { background: #f9f9f9; padding: 16rpx 30rpx; }
+.record { min-height:100vh;background:#f9f9f9 }
+.record_loading { padding-top:20rpx;text-align:center;background:#f9f9f9 }
+.record_main { background:#f9f9f9 }
+.record_main_card { background:#f9f9f9;padding:16rpx 30rpx }
 </style>

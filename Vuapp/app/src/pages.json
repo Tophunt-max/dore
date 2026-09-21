@@ -2,98 +2,319 @@
   "easycom": {
     "autoscan": true,
     "custom": {
-      "^nav-bar$": "@/components/nav-bar.vue",
-      "^u-(.*)": "@/components/u/u-$1.vue",
-      "^(navbar|tabbar|overbtn|onepopup|sharepopup|cardlist|lineprogress|buystep|finance-list|navtabs|mescroll-body|game-record|game-order|game-popup)$": "@/components/$1.vue"
+      "^buystep$": "@/components/buystep.vue",
+      "^cardlist$": "@/components/cardlist.vue",
+      "^finance-list$": "@/components/finance-list.vue",
+      "^game-order$": "@/components/game-order.vue",
+      "^game-popup$": "@/components/game-popup.vue",
+      "^game-record$": "@/components/game-record.vue",
+      "^lineprogress$": "@/components/lineprogress.vue",
+      "^marquee$": "@/components/marquee.vue",
+      "^mescroll-body$": "@/components/mescroll-body.vue",
+      "^mescroll-empty$": "@/components/mescroll-empty.vue",
+      "^mescroll-top$": "@/components/mescroll-top.vue",
+      "^navbar$": "@/components/navbar.vue",
+      "^navtabs$": "@/components/navtabs.vue",
+      "^onepopup$": "@/components/onepopup.vue",
+      "^overbtn$": "@/components/overbtn.vue",
+      "^sharepopup$": "@/components/sharepopup.vue",
+      "^tabbar$": "@/components/tabbar.vue",
+      "^trees$": "@/components/trees.vue",
+      "^u-badge$": "@/components/u-badge.vue",
+      "^u-button$": "@/components/u-button.vue",
+      "^u-collapse$": "@/components/u-collapse.vue",
+      "^u-collapse-item$": "@/components/u-collapse-item.vue",
+      "^u-column-notice$": "@/components/u-column-notice.vue",
+      "^u-form$": "@/components/u-form.vue",
+      "^u-form-item$": "@/components/u-form-item.vue",
+      "^u-icon$": "@/components/u-icon.vue",
+      "^u-image$": "@/components/u-image.vue",
+      "^u-input$": "@/components/u-input.vue",
+      "^u-line-progress$": "@/components/u-line-progress.vue",
+      "^u-loading$": "@/components/u-loading.vue",
+      "^u-mask$": "@/components/u-mask.vue",
+      "^u-navbar$": "@/components/u-navbar.vue",
+      "^u-notice-bar$": "@/components/u-notice-bar.vue",
+      "^u-number-box$": "@/components/u-number-box.vue",
+      "^u-parse$": "@/components/u-parse.vue",
+      "^u-popup$": "@/components/u-popup.vue",
+      "^u-row-notice$": "@/components/u-row-notice.vue",
+      "^u-select$": "@/components/u-select.vue",
+      "^u-sticky$": "@/components/u-sticky.vue",
+      "^u-swiper$": "@/components/u-swiper.vue",
+      "^u-verification-code$": "@/components/u-verification-code.vue"
     }
   },
   "pages": [
-    { "path": "pages/home/home", "style": { "enablePullDownRefresh": true, "navigationStyle": "custom" } },
-    { "path": "pages/login/login", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/login/regist", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/intro", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/winner/winner", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/winner/myShare", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/task/task", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/task/member", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/account/account", "style": { "navigationBarTitleText": "Account" } },
-    { "path": "pages/account/setting", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/account/aboutus", "style": { "navigationBarTitleText": "About Us" } },
-    { "path": "pages/account/service", "style": { "navigationBarTitleText": "Support" } },
-    { "path": "pages/account/funding", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/account/username", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/account/team", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/account/teamDetail", "style": { "navigationBarTitleText": "Member" } },
-    { "path": "pages/address/address", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/address/add", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/goods/goods", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/goods/comfirm", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/goods/calculation", "style": { "navigationBarTitleText": "Calculation" } },
-    { "path": "pages/index/index", "style": { "navigationBarTitleText": "" } },
-    { "path": "pages/order/detail", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/order/record", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/order/discount", "style": { "navigationBarTitleText": "Ranking" } },
-    { "path": "pages/success/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/bask/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/payment/payment", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/payment/add", "style": { "navigationBarTitleText": "Add Beneficiary" } },
-    { "path": "pages/payment/recharge", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/payment/cashOut", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/payment/payrecord", "style": { "navigationBarTitleText": "Recharge Records" } },
-    { "path": "pages/payment/cashrecord", "style": { "navigationBarTitleText": "Withdrawal Records" } },
-    { "path": "pages/payform/payform", "style": { "navigationBarTitleText": "Payment" } },
-    { "path": "pages/richtext/rule", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/invitation/invitation", "style": { "navigationStyle": "custom", "enablePullDownRefresh": false } },
-    { "path": "pages/help/help", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/help/help_detail", "style": { "navigationBarTitleText": "Help" } },
-    { "path": "pages/prize/prize", "style": { "navigationStyle": "custom", "enablePullDownRefresh": true } },
-    { "path": "pages/finance/flist", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/finance/fdetail", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/finance/order", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/game/game", "style": { "navigationStyle": "custom" } }
+    {
+      "path": "pages/home/home",
+      "style": {
+        "enablePullDownRefresh": true,
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/address/address",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/address/add",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/goods/goods",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/goods/comfirm",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/goods/calculation",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/order/detail",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/order/record",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/order/discount",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/success/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/account/account",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/account/setting",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/account/aboutus",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/account/service",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/account/funding",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/account/username",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/account/team",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/account/teamDetail",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/bask/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/winner/winner",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/winner/myShare",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/payment/payment",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/payment/add",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/payment/recharge",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/payment/cashOut",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/richtext/rule",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/intro",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/invitation/invitation",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/help/help",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/help/help_detail",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/payment/payrecord",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/payment/cashrecord",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/payform/payform",
+      "style": {
+        "titleNView": {},
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/login/regist",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false,
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/prize/prize",
+      "style": {
+        "enablePullDownRefresh": true,
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/finance/flist",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/finance/fdetail",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/finance/order",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/task/task",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/task/member",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/game/game",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    }
   ],
   "globalStyle": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "vuapp",
+    "navigationBarTitleText": "ORich",
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
-  },
-  "tabBar": {
-    "color": "#17273a",
-    "selectedColor": "#de6436",
-    "borderStyle": "white",
-    "backgroundColor": "#ffffff",
-    "list": [
-      {
-        "pagePath": "pages/home/home",
-        "text": "Home",
-        "iconPath": "static/image/tab/icon_home_Nav_nor.png",
-        "selectedIconPath": "static/image/tab/icon_home_Nav_sel.png"
-      },
-      {
-        "pagePath": "pages/winner/winner",
-        "text": "Winners",
-        "iconPath": "static/image/tab/icon_Winner_Nav_nor.png",
-        "selectedIconPath": "static/image/tab/icon_Winner_Nav_sel.png"
-      },
-      {
-        "pagePath": "pages/task/task",
-        "text": "Tasks",
-        "iconPath": "static/image/tab/icon_task_nor.png",
-        "selectedIconPath": "static/image/tab/icon_task_sel.png"
-      },
-      {
-        "pagePath": "pages/task/member",
-        "text": "VIP",
-        "iconPath": "static/image/tab/icon_vip_Nav_nor.png",
-        "selectedIconPath": "static/image/tab/icon_vip_Nav_sel.png"
-      },
-      {
-        "pagePath": "pages/account/account",
-        "text": "Account",
-        "iconPath": "static/image/tab/icon_Account_Nav_nor.png",
-        "selectedIconPath": "static/image/tab/icon_Account_Nav_sel.png"
-      }
-    ]
   }
 }

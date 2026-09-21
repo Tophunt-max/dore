@@ -1,137 +1,294 @@
-<script setup lang="ts">
-// Faithful port of ORich pages/finance/fdetail (finance product detail + buy-in).
-import { ref, computed } from 'vue';
-import { onLoad, onShow } from '@dcloudio/uni-app';
-import { FinanceDetail, FinanceOrder, Wallet } from '@/api/orich';
-import { formatMinor, toMinor } from '@/utils/money';
-
-const product = ref<any>(null);
-const amount = ref('');
-const balanceMinor = ref(0);
-const loading = ref(false);
-const tab = ref(0);
-
-const rate = computed(() => (product.value ? (product.value.rate_bps / 100).toFixed(1) : '0.0'));
-const estIncome = computed(() => {
-  if (!product.value || !amount.value) return 0;
-  const p = toMinor(Number(amount.value));
-  return Math.round((p * product.value.rate_bps * product.value.term_days) / (10000 * 365));
-});
-
-onLoad((q: any) => {
-  FinanceDetail({ id: q?.id }).then((r: any) => {
-    if (r.ok) product.value = r.product;
-  });
-});
-onShow(async () => {
-  const w: any = await Wallet();
-  if (w.ok) balanceMinor.value = w.balance_minor;
-});
-
-async function buyin() {
-  if (!product.value) return;
-  const minor = toMinor(Number(amount.value));
-  if (!minor) {
-    uni.showToast({ title: 'Enter amount', icon: 'none' });
-    return;
-  }
-  loading.value = true;
-  const r: any = await FinanceOrder({ product_id: product.value.id, amount_minor: minor });
-  loading.value = false;
-  if (r.ok) uni.redirectTo({ url: './order' });
-  else uni.showToast({ title: r.error === 'insufficient_balance' ? 'Insufficient balance' : r.error || 'Failed', icon: 'none' });
-}
-</script>
-
 <template>
-  <view v-if="product" class="fdetail">
-    <navbar :title="$t('finance.htitle')" background="transparent" titleColor="#ffffff" backColor="#ffffff" />
-
-    <view class="fdetail_hero">
-      <view class="fdetail_hero_rate">{{ rate }}<text class="pct">%</text></view>
-      <view class="fdetail_hero_label">{{ $t('finance.rate') }}</view>
-      <view class="fdetail_hero_title">{{ product.title }}</view>
-      <view class="fdetail_hero_meta">
-        <view class="fdetail_hero_meta_item">
-          <view class="v">{{ product.term_days }}</view>
-          <view class="l">{{ $t('finance.day') }}</view>
+  <view v-if="Object.keys(detailList).length" class="fdetail">
+    <navbar backColor="#f5f5f5" titleColor="#f5f5f5">
+      <template #right>
+        <view class="bar_help" @click="openShare" slot="right">
+          <image src="/static/image/finance/icon_Share.png" />
         </view>
-        <view class="fdetail_hero_meta_item">
-          <view class="v">{{ formatMinor(product.min_minor) }}</view>
-          <view class="l">{{ $t('finance.buyin2') }}</view>
+      </template>
+    </navbar>
+    <view class="fdetail_info">
+      <view class="fdetail_info_img">
+        <image :src="detailList.img" />
+        <view v-if="countdown && '00:00:00' != countdown" class="fdetail_info_time">End in {{ countdown }}</view>
+        <view v-if="2 == detailList.status" class="fdetail_info_finish">
+          <image src="/static/image/finance/img_Soldout.png" />
+        </view>
+      </view>
+      <view class="fdetail_info_dd">
+        <view class="fdetail_info_dd_title">{{ detailList.name }}</view>
+        <view class="fdetail_info_dd_strip">
+          {{ $t('finance.rate') }}:
+          <text>{{ detailList.rate }} %</text>
+        </view>
+        <view class="fdetail_info_dd_strip">
+          {{ $t('finance.due') }}:
+          <text>{{ detailList.day }} {{ $t('finance.day') }}</text>
+        </view>
+        <view class="fdetail_info_dd_strip">
+          {{ $t('finance.amount') }}:
+          <text>₹ {{ detailList.amount }}</text>
         </view>
       </view>
     </view>
-
     <view class="fdetail_card">
-      <view class="fdetail_card_title">{{ $t('finance.amount') }}</view>
-      <view class="fdetail_input">
-        <text class="rs">₹</text>
-        <input v-model="amount" type="digit" :placeholder="(product.min_minor / 100).toFixed(0)" />
+      <view class="fdetail_card_item">
+        <view class="fdetail_card_item_title">{{ $t('finance.income') }}</view>
+        <view class="fdetail_card_item_main">{{ detailList.receive }}</view>
       </view>
-      <view class="fdetail_row">
-        <text class="l">{{ $t('finance.eTitle') }}</text>
-        <text class="v">{{ formatMinor(estIncome) }}</text>
+      <view class="fdetail_card_item">
+        <view class="fdetail_card_item_title">{{ $t('finance.uprice') }}</view>
+        <view class="fdetail_card_item_main price">₹ {{ detailList.price }}</view>
       </view>
-      <view class="fdetail_row">
-        <text class="l">{{ $t('finance.padni') }}</text>
-        <text class="v">{{ formatMinor(toMinor(Number(amount) || 0) + estIncome) }}</text>
+      <view class="fdetail_card_item">
+        <view class="fdetail_card_item_title">{{ $t('finance.remaing') }}</view>
+        <view class="fdetail_card_item_main">
+          {{ detailList.surplus }} {{ $t('finance.unit') }}
+          <text class="gray">(₹{{ detailList.surplus * detailList.price }})</text>
+        </view>
       </view>
-      <view class="fdetail_row">
-        <text class="l">Wallet</text>
-        <text class="v muted">{{ formatMinor(balanceMinor) }}</text>
+      <view class="fdetail_card_item">
+        <view class="fdetail_card_item_title">{{ $t('finance.quantity') }}</view>
+        <view class="fdetail_card_item_main">
+          <u-number-box
+            :max="buyMax"
+            :min="buyMin"
+            :disabled="!(buyMax > 0)"
+            @change="changNum"
+            v-model="buyNum"
+          ></u-number-box>
+        </view>
+      </view>
+      <view class="fdetail_card_item">
+        <view class="fdetail_card_item_title">{{ $t('finance.interest') }}</view>
+        <view class="fdetail_card_item_main">
+          ₹{{ (buyNum * detailList.price * (.01 * detailList.rate)).toFixed(2) }} x {{ detailList.day }} {{ $t('finance.day') }}
+        </view>
+      </view>
+      <view class="fdetail_card_item">
+        <view class="fdetail_card_item_title">{{ $t('finance.padni') }}</view>
+        <view class="fdetail_card_item_main">
+          ₹{{ (buyNum * detailList.price + buyNum * detailList.price * (.01 * detailList.rate) * detailList.day).toFixed(2) }}
+        </view>
       </view>
     </view>
-
-    <view class="fdetail_tabs">
-      <view class="fdetail_tab" :class="{ on: tab === 0 }" @click="tab = 0">{{ $t('finance.tab2') }}</view>
-      <view class="fdetail_tab" :class="{ on: tab === 1 }" @click="tab = 1">{{ $t('finance.income') }}</view>
-    </view>
-    <view class="fdetail_body">
-      <view v-if="tab === 0" class="fdetail_steps">
-        <view class="fdetail_step"><text class="n">1</text><text>{{ $t('finance.step1') }}</text></view>
-        <view class="fdetail_step"><text class="n">2</text><text>{{ $t('finance.step2') }}</text></view>
-        <view class="fdetail_step"><text class="n">3</text><text>{{ $t('finance.step3') }}</text></view>
+    <view class="fdetail_part">
+      <view class="fdetail_part_tab">
+        <view
+          v-for="(item, index) in tabList"
+          :key="index"
+          class="fdetail_part_tab_item"
+          @click="changeTab(item)"
+        >
+          <view class="tab_name" :class="{ active: tabIndex == item.type }">{{ item.name }}</view>
+          <image v-if="tabIndex == item.type" src="/static/image/icon_Select.png" />
+        </view>
       </view>
-      <view v-else class="fdetail_note">{{ $t('finance.paytips') }}</view>
+      <mescroll-body
+        v-if="1 == tabIndex"
+        ref="mescrollRef"
+        :down="downOption"
+        :up="upOption"
+        :height="400"
+        @init="mescrollInit"
+        @down="downCallback"
+        @up="upCallback"
+      >
+        <view class="fdetail_part_main">
+          <view v-for="(item, index) in historyList" :key="index" class="fdetail_part_main_item">
+            <view class="fdetail_part_main_item_avatar">
+              <image :src="item.user_headimg" />
+            </view>
+            <view class="fdetail_part_main_item_user">
+              <view class="fdetail_part_main_item_user_info">
+                <view class="name otw">{{ item.user_name }}</view>
+                <image :src="item.vip_img" />
+                <view class="time">{{ countDown(item.created) }}</view>
+              </view>
+              <view class="fdetail_part_main_item_user_buyin">
+                <text>
+                  {{ $t('finance.buyin2') }} ₹ {{ item.price }}｜{{ $t('finance.earn') }}
+                </text>
+                <text class="earn">₹{{ item.rate_income }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </mescroll-body>
+      <view v-else class="fdetail_part_html" v-html="detailList.description"></view>
     </view>
-
-    <view class="fdetail_btn">
-      <overbtn :loading="loading" :btnText="$t('finance.buyin')" :fontSize="30" btnType="submit" @btnAction="buyin" />
+    <view class="btn_buy">
+      <view class="btn_buy_price">
+        <view class="price">₹ {{ buyNum * detailList.price }}</view>
+        <view v-if="detailList.balance" class="balance">{{ $t('account.balance') }} ₹ {{ detailList.balance }}</view>
+      </view>
+      <view class="btn_buy_price_submin" :class="+buyNum ? 'btnactive' : 'btndisable'" @click="toBuy">{{ $t('finance.buyin') }}</view>
     </view>
+    <sharepopup ref="sharepop" :shareType="4" :financeID="finID"></sharepopup>
   </view>
 </template>
 
-<style>
-@import './fdetail.css';
-</style>
+<script>
+import { interopDefault as d_4df3 } from '@/utils/mescroll-mixin';
+import { countDown, parseTime } from '@/utils/orich';
+import { financeDetail, financeDetailHistory } from '@/api/orich';
+
+export default {
+  mixins: [d_4df3],
+  data: function () {
+    return {
+      tabIndex: 1,
+      tabList: [{
+        name: this.$t('finance.tab1'),
+        type: 1
+      }, {
+        name: this.$t('finance.tab2'),
+        type: 2
+      }],
+      finID: '',
+      detailList: {},
+      buyNum: 1,
+      buyMax: 1,
+      buyMin: 1,
+      downOption: {
+        use: true,
+        auto: true
+      },
+      upOption: {
+        use: true,
+        auto: true,
+        page: {
+          num: 0,
+          size: 20
+        }
+      },
+      historyList: [],
+      firstLoad: true,
+      showTime: null,
+      countdown: ''
+    };
+  },
+  onLoad: function (t) {
+    this.finID = t.id;
+  },
+  onShow: function () {
+    var t = this;
+    setTimeout(function () {
+      t.getDetail();
+      t.firstLoad || t.mescroll.resetUpScroll();
+    });
+  },
+  methods: {
+    openShare: function () {
+      this.$refs.sharepop.open();
+    },
+    countDown: function (t) {
+      return parseTime(t);
+    },
+    toBuy: function () {
+      +this.buyNum && uni.navigateTo({
+        url: ('../goods/comfirm?id=').concat(this.detailList.id, '&num=').concat(this.buyNum, '&gtype=2')
+      });
+    },
+    changNum: function (t) {
+      t.value <= this.buyMax ? this.buyNum = t.value : uni.showToast({
+        icon: 'none',
+        title: this.$t('common.maxTip'),
+        duration: 3e3
+      });
+    },
+    changeTab: function (t) {
+      this.tabIndex = t.type;
+    },
+    getDetail: function () {
+      var t = this;
+      clearInterval(this.showTime);
+      uni.showLoading({
+        mask: true
+      });
+      financeDetail({
+        id: this.finID
+      }).then(function (e) {
+        t.detailList = e;
+        e.user_max_buy <= 0 || e.surplus <= 0 ? (t.buyMax = 0, t.buyNum = 0, t.buyMin = 0) : (t.buyMin = 1, t.buyMax = +e.user_max_buy < +e.surplus ? +e.user_max_buy : +e.surplus);
+        t.showTime = setInterval(function () {
+          t.detailList.server_time++;
+          t.countdown = countDown(t.detailList.end_in, t.detailList.server_time);
+          t.$forceUpdate();
+          '00:00:00' == t.countdown && clearInterval(t.showTime);
+        }, 1e3);
+        uni.hideLoading();
+      }).catch(function () {
+        uni.hideLoading();
+      });
+    },
+    upCallback: function (t) {
+      var e = this, s = (t.num - 1) * t.size, a = t.size;
+      financeDetailHistory({
+        id: this.finID,
+        start: s,
+        limit: a
+      }).then(function (s) {
+        e.firstLoad = false;
+        var i = s.list, a = i.length, n = +s.count;
+        1 == t.num && (e.historyList = []);
+        e.historyList = e.historyList.concat(i);
+        e.mescroll.endBySize(a, n);
+      }).catch(function (t) {
+        e.mescroll.endErr();
+      });
+    }
+  },
+  unmounted: function () {
+    clearInterval(this.countdown);
+  }
+};
+</script>
 
 <style scoped>
-.fdetail { min-height: 100vh; background: #f9f9f9; padding-bottom: 200rpx; background-image: linear-gradient(180deg, #ff7d4d 0, #ee5016 430rpx, #f9f9f9 430rpx); }
-.fdetail_hero { padding: 20rpx 40rpx 40rpx; color: #fff; }
-.fdetail_hero_rate { font-size: 96rpx; font-weight: 900; line-height: 1; }
-.fdetail_hero_rate .pct { font-size: 40rpx; margin-left: 8rpx; }
-.fdetail_hero_label { margin-top: 10rpx; font-size: 26rpx; opacity: 0.9; }
-.fdetail_hero_title { margin-top: 24rpx; font-size: 34rpx; font-weight: 700; }
-.fdetail_hero_meta { display: flex; margin-top: 24rpx; }
-.fdetail_hero_meta_item { margin-right: 70rpx; }
-.fdetail_hero_meta_item .v { font-size: 32rpx; font-weight: 700; }
-.fdetail_hero_meta_item .l { margin-top: 6rpx; font-size: 22rpx; opacity: 0.85; }
-.fdetail_card { margin: 0 24rpx; padding: 30rpx; background: #fff; border-radius: 20rpx; }
-.fdetail_card_title { font-size: 30rpx; font-weight: 700; color: #17273a; }
-.fdetail_input { display: flex; align-items: center; border-bottom: 2rpx solid #eee; padding: 20rpx 0; margin-bottom: 10rpx; }
-.fdetail_input .rs { font-size: 40rpx; font-weight: 700; margin-right: 12rpx; }
-.fdetail_input input { flex: 1; font-size: 40rpx; }
-.fdetail_row { display: flex; align-items: center; justify-content: space-between; padding: 14rpx 0; }
-.fdetail_row .l { font-size: 26rpx; color: #b9b9b9; }
-.fdetail_row .v { font-size: 30rpx; font-weight: 700; color: #ee5016; }
-.fdetail_row .v.muted { color: #17273a; font-weight: 400; }
-.fdetail_tabs { display: flex; margin: 24rpx 24rpx 0; background: #fff; border-radius: 16rpx 16rpx 0 0; }
-.fdetail_tab { flex: 1; text-align: center; padding: 26rpx 0; font-size: 28rpx; color: #b9b9b9; }
-.fdetail_tab.on { color: #17273a; font-weight: 700; border-bottom: 4rpx solid #ee5016; }
-.fdetail_body { margin: 0 24rpx; padding: 26rpx 30rpx; background: #fff; border-radius: 0 0 16rpx 16rpx; }
-.fdetail_step { display: flex; align-items: center; padding: 14rpx 0; font-size: 28rpx; color: #17273a; }
-.fdetail_step .n { width: 44rpx; height: 44rpx; line-height: 44rpx; text-align: center; border-radius: 50%; background: #ee5016; color: #fff; margin-right: 16rpx; font-size: 24rpx; }
-.fdetail_note { font-size: 26rpx; color: #b9b9b9; line-height: 42rpx; }
-.fdetail_btn { position: fixed; left: 30rpx; right: 30rpx; bottom: 40rpx; height: 92rpx; }
+.fdetail { min-height:100vh;padding-bottom:100rpx;background-image:url('/static/image/finance/bg_list.png');background-size:100% 400rpx;background-repeat:no-repeat;background-color:#f9f9f9;position:relative }
+.fdetail .bar_help { position:absolute;right:34rpx;width:38rpx;height:38rpx }
+.fdetail .bar_help uni-image { width:100%;height:100% }
+.fdetail .fdetail_info { display:flex;align-items:flex-start;justify-content:flex-start;padding:0 22rpx }
+.fdetail .fdetail_info .fdetail_info_img { width:198rpx;height:198rpx;position:relative }
+.fdetail .fdetail_info .fdetail_info_img uni-image { width:100%;height:100% }
+.fdetail .fdetail_info .fdetail_info_finish { width:118rpx;height:132rpx;position:absolute;left:0;top:-28rpx }
+.fdetail .fdetail_info .fdetail_info_finish uni-image { width:100%;height:100% }
+.fdetail .fdetail_info .fdetail_info_time { width:100%;position:absolute;left:0;bottom:0;height:40rpx;line-height:40rpx;background:#90b9ff;border-radius:10rpx 10rpx 0rpx 0rpx;font-size:24rpx;font-family:Roboto,Roboto-Medium;font-weight:500;color:#fff;padding:0 6rpx;white-space:nowrap }
+.fdetail .fdetail_info .fdetail_info_dd { padding-left:28rpx }
+.fdetail .fdetail_info .fdetail_info_dd .fdetail_info_dd_title { font-size:32rpx;font-family:Roboto,Roboto-Bold;font-weight:700;color:#fff;letter-spacing:0rpx;margin-bottom:14rpx }
+.fdetail .fdetail_info .fdetail_info_dd .fdetail_info_dd_strip { font-size:28rpx;font-family:PingFang SC,PingFang SC-Bold;font-weight:700;color:#ffe2db;letter-spacing:0rpx;margin-top:6rpx }
+.fdetail .fdetail_info .fdetail_info_dd .fdetail_info_dd_strip uni-text { margin-left:6rpx }
+.fdetail .fdetail_card { width:710rpx;height:436rpx;background:#fff;border-radius:10rpx;margin-top:60rpx;margin-left:22rpx;padding:38rpx 36rpx }
+.fdetail .fdetail_card .fdetail_card_item { display:flex;align-items:center;justify-content:space-between;font-size:28rpx;font-family:Roboto,Roboto-Regular;font-weight:400 }
+.fdetail .fdetail_card .fdetail_card_item .fdetail_card_item_title { color:#b9b9b9 }
+.fdetail .fdetail_card .fdetail_card_item .fdetail_card_item_main { color:#17273a }
+.fdetail .fdetail_card .fdetail_card_item .price { color:#ff5c5c }
+.fdetail .fdetail_card .fdetail_card_item .gray { color:#b9b9b9 }
+.fdetail .fdetail_card .fdetail_card_item:nth-child(n+2) { margin-top:30rpx }
+.fdetail .fdetail_part { margin-top:20rpx;background:#fff }
+.fdetail .fdetail_part .fdetail_part_html { padding:0 22rpx }
+.fdetail .fdetail_part .fdetail_part_tab { padding:26rpx;display:flex;align-items:center;justify-content:space-around }
+.fdetail .fdetail_part .fdetail_part_tab .fdetail_part_tab_item { display:flex;flex-direction:column;align-items:center;justify-content:center }
+.fdetail .fdetail_part .fdetail_part_tab .fdetail_part_tab_item uni-image { margin-top:6rpx;width:28rpx;height:6rpx }
+.fdetail .fdetail_part .fdetail_part_tab .fdetail_part_tab_item .tab_name { font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:500;color:#b9b9b9;letter-spacing:0rpx }
+.fdetail .fdetail_part .fdetail_part_tab .fdetail_part_tab_item .active { font-size:32rpx;font-weight:500;color:#17273a;letter-spacing:0rpx }
+.fdetail .fdetail_part .fdetail_part_main { padding-bottom:20rpx }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item { display:flex;align-items:flex-start;justify-content:flex-start;padding:20rpx 54rpx }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_avatar { flex-shrink:0;width:96rpx;height:96rpx;border-radius:50%;overflow:hidden }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_avatar uni-image { width:100%;height:100% }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_user { width:100%;padding-left:34rpx }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_user .fdetail_part_main_item_user_info { display:flex;align-items:center;justify-content:space-between }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_user .fdetail_part_main_item_user_info .name { max-width:130rpx;font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:500;color:#17273a;letter-spacing:0rpx }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_user .fdetail_part_main_item_user_info .time { font-size:24rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9 }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_user .fdetail_part_main_item_user_info uni-image { width:100rpx;height:46rpx }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_user .fdetail_part_main_item_user_buyin { margin-top:12rpx;font-size:28rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9 }
+.fdetail .fdetail_part .fdetail_part_main .fdetail_part_main_item .fdetail_part_main_item_user .fdetail_part_main_item_user_buyin .earn { margin-left:6rpx;color:#ff5c5c }
+.fdetail .btn_buy { width:100%;height:98rpx;position:fixed;left:0;bottom:0;display:flex;align-items:center;justify-content:space-between;padding-left:60rpx;padding-right:30rpx;background:#fff;border-top:2rpx solid #f9f9f9 }
+.fdetail .btn_buy .btn_buy_price { font-family:Roboto,Roboto-Bold }
+.fdetail .btn_buy .btn_buy_price .price { font-size:32rpx;font-weight:700;color:#ff5c5c }
+.fdetail .btn_buy .btn_buy_price .balance { font-size:28rpx;font-weight:400;color:#b9b9b9;white-space:nowrap }
+.fdetail .btn_buy .btndisable { background:#dbdbdb }
+.fdetail .btn_buy .btnactive { background:#ee5016 }
+.fdetail .btn_buy .btn_buy_price_submin { width:404rpx;height:78rpx;border-radius:8rpx;line-height:78rpx;text-align:center;color:#fff }
 </style>

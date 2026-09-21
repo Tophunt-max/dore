@@ -1,37 +1,73 @@
-<script setup lang="ts">
-// Custom navigation bar used across ORich pages (navigationStyle: custom).
-import { computed } from 'vue';
-const props = defineProps<{
-  title?: string;
-  bgColor?: string;
-  color?: string;
-  back?: boolean;
-  isBack?: boolean;
-}>();
-const showBack = computed(() => props.back !== false && props.isBack !== false);
-const statusBarHeight = computed(() => (uni.getSystemInfoSync().statusBarHeight || 0) + 'px');
-function goBack() {
-  const pages = getCurrentPages();
-  if (pages.length > 1) uni.navigateBack();
-  else uni.switchTab({ url: '/pages/home/home' });
-}
-</script>
 <template>
-  <view class="navbar" :style="{ background: props.bgColor || '#F8F8F8' }">
-    <view class="status" :style="{ height: statusBarHeight }" />
-    <view class="bar">
-      <view class="side" @click="goBack">
-        <text v-if="showBack" class="arrow" :style="{ color: props.color || '#17273a' }">‹</text>
-      </view>
-      <text class="title" :style="{ color: props.color || '#17273a' }">{{ props.title }}</text>
-      <view class="side"><slot name="right" /></view>
-    </view>
-  </view>
+  <u-navbar>
+    <slot name="center"></slot>
+    <slot name="right"></slot>
+  </u-navbar>
 </template>
-<style scoped>
-.navbar { width: 100%; }
-.bar { height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 20rpx; }
-.side { width: 90rpx; display: flex; align-items: center; }
-.arrow { font-size: 60rpx; line-height: 60rpx; }
-.title { flex: 1; text-align: center; font-size: 34rpx; font-weight: 700; }
-</style>
+
+<script>
+export default {
+  inheritAttrs: false,
+  props: {
+    title: {
+      type: String,
+      default: ''
+    },
+    titleColor: {
+      type: String,
+      default: '#17273a'
+    },
+    titleSize: {
+      type: [String, Number],
+      default: 32
+    },
+    backIcon: {
+      type: String,
+      default: 'arrow-left'
+    },
+    backColor: {
+      type: String,
+      default: '#919191'
+    },
+    isBack: {
+      type: Boolean,
+      default: true
+    },
+    background: {
+      type: String,
+      default: 'transparent'
+    },
+    isComfirm: {
+      type: Boolean,
+      default: false
+    },
+    borderBottom: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    backgroundObj: function () {
+      return 'transparent' == this.background ? {
+        background: 'rgba(0,0,0,0)'
+      } : {
+        background: this.background
+      };
+    }
+  },
+  data: function () {
+    return {};
+  },
+  methods: {
+    back: function () {
+      if (this.isComfirm) this.$emit('beforeBack'); else {
+        var e = getCurrentPages();
+        console.log(e);
+        1 == e.length ? uni.navigateTo({
+          url: '/pages/home/home'
+        }) : uni.navigateBack({});
+      }
+    }
+  }
+};
+</script>

@@ -1,59 +1,91 @@
-<script setup lang="ts">
-// Faithful port of ORich pages/help/help (FAQ topics).
-import { ref } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
-import { HelpArticles } from '@/api/orich';
-
-const topics = ref<any[]>([]);
-
-onShow(async () => {
-  const r: any = await HelpArticles();
-  if (r.ok) {
-    const seen: Record<string, any> = {};
-    (r.articles || []).forEach((a: any) => {
-      if (!seen[a.topic]) seen[a.topic] = { topic: a.topic, items: [] };
-      seen[a.topic].items.push(a);
-    });
-    topics.value = Object.values(seen);
-  }
-});
-
-function open(topic: string) {
-  uni.navigateTo({ url: `./help_detail?topic=${topic}` });
-}
-</script>
-
 <template>
   <view class="help">
-    <navbar :title="$t('help.navtitle')" background="#ffffff" />
+    <navbar :title="$t('help.navtitle')" background="#ffffff"></navbar>
+    <view class="help_top"></view>
     <view class="help_main">
-      <view v-for="t in topics" :key="t.topic" class="help_group" @click="open(t.topic)">
-        <view class="help_group_left">
-          <image class="help_icon" src="/static/image/icon_faq.png" mode="aspectFit" />
-          <view class="help_group_title">{{ t.topic }}</view>
+      <view v-for="(item, index) in itemList" :key="index" class="help_main_item">
+        <view class="help_main_item_icon">
+          <view class="help_main_item_icon_url">
+            <image :src="item.image_url" />
+          </view>
+          <view class="help_main_item_icon_title">{{ item.category }}</view>
         </view>
-        <view class="help_group_right">
-          <text class="help_count">{{ t.items.length }}</text>
-          <u-icon name="arrow-right" color="#cccccc" size="14" />
+        <view class="help_main_item_content">
+          <u-collapse :arrow="false">
+            <u-collapse-item
+              v-for="(item2, index2) in item.chr"
+              :key="index2"
+              @change="clickCollapse(item2.que_id)"
+            >
+              <template #title>
+                <view class="iconb" slot="title">
+                  <view class="icon_qr"></view>
+                  {{ item2.title }}
+                </view>
+              </template>
+            </u-collapse-item>
+          </u-collapse>
         </view>
       </view>
-      <view v-if="!topics.length" class="nodata">{{ $t('common.nodata') }}</view>
     </view>
   </view>
 </template>
 
-<style>
-@import './help.css';
-</style>
+<script>
+import { getTitle } from '@/api/orich';
+
+export default {
+  data: function () {
+    return {
+      itemList: []
+    };
+  },
+  onLoad: function () {
+    this.questionList();
+  },
+  mounted: function () {},
+  methods: {
+    show: function (t) {
+      this.question[t].val = !this.question[t].val;
+    },
+    clickCollapse: function (t) {
+      uni.navigateTo({
+        url: ('./help_detail?id=').concat(t)
+      });
+    },
+    questionList: function () {
+      var t = this;
+      uni.showLoading({
+        mask: true
+      });
+      getTitle().then(function (e) {
+        t.itemList = e;
+        uni.hideLoading();
+      }).catch(function () {
+        uni.hideLoading();
+      });
+    }
+  }
+};
+</script>
 
 <style scoped>
-.help { min-height: 100vh; background: #f9f9f9; }
-.help_main { background: #fff; margin-top: 16rpx; padding: 0 30rpx; }
-.help_group { display: flex; align-items: center; justify-content: space-between; height: 110rpx; border-bottom: 2rpx solid #f5f5f5; }
-.help_group:last-child { border-bottom: none; }
-.help_group_left { display: flex; align-items: center; }
-.help_icon { width: 40rpx; height: 40rpx; margin-right: 20rpx; }
-.help_group_title { font-size: 30rpx; color: #17273a; text-transform: capitalize; }
-.help_group_right { display: flex; align-items: center; }
-.help_count { font-size: 24rpx; color: #b9b9b9; margin-right: 10rpx; }
+.iconb { display:flex;align-items:center }
+.icon_qr { display:inline-block;width:10rpx;height:10rpx;background:#a9a9a9;border-radius:50%;margin-right:8rpx;opacity:.4 }
+.u-collapse-item { border-bottom:2rpx solid #e9ecef }
+.u-collapse-item:last-child { border-bottom:none }
+.help { padding-bottom:30rpx;min-height:100vh }
+.help .help_top { width:748rpx;height:392rpx;background:url('/static/image/finance/bg_list.png');background-size:100% }
+.help .help_main { background:#fff;margin-top:-46rpx;border-radius:60rpx 60rpx 0rpx 0rpx;height:400rpx;width:100%;padding-top:40rpx }
+.help .help_main .help_main_title { width:100%;padding:30rpx 30rpx 20rpx 30rpx;display:flex;align-items:center;justify-content:space-between;border-bottom:2rpx solid #e9ecef }
+.help .help_main .help_main_title .help_main_title_name { font-weight:700;font-size:32rpx;height:20rpx }
+.help .help_main .help_main_title .help_main_title_url { font-size:24rpx;color:#dcdcdc }
+.help .help_main .help_main_item { display:flex;align-items:center;justify-content:flex-start;width:100%;border-bottom:2rpx solid #e9ecef;padding:20rpx }
+.help .help_main .help_main_item .help_main_item_icon { width:35%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20rpx }
+.help .help_main .help_main_item .help_main_item_icon .help_main_item_icon_url { width:60rpx;height:60rpx }
+.help .help_main .help_main_item .help_main_item_icon .help_main_item_icon_url uni-image { width:100%;height:100% }
+.help .help_main .help_main_item .help_main_item_icon .help_main_item_icon_title { text-align:center;color:#a9a9a9 }
+.help .help_main .help_main_item .help_main_item_content { width:65% }
+.help .mar_bottom { margin-bottom:50rpx }
+.help .help_top { width:748rpx;height:392rpx;background:url('/static/image/faq/bg_FAQ.png');background-size:100% }
 </style>

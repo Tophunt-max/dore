@@ -1,48 +1,178 @@
-<script setup lang="ts">
-// ORich shared confirm popup. Exposes open()/close(); emits confirm/cancel.
-import { ref } from 'vue';
-const props = defineProps<{
-  confirmText?: string;
-  cancelText?: string;
-  conetnt?: string; // original prop spelling
-  content?: string;
-  popType?: string;
-}>();
-const emit = defineEmits<{ (e: 'confirm'): void; (e: 'cancel'): void }>();
-const visible = ref(false);
-function open() {
-  visible.value = true;
-}
-function close() {
-  visible.value = false;
-}
-function onConfirm() {
-  emit('confirm');
-  close();
-}
-function onCancel() {
-  emit('cancel');
-  close();
-}
-defineExpose({ open, close });
-</script>
 <template>
-  <view v-if="visible" class="op-mask" @click="onCancel">
-    <view class="op-box" @click.stop>
-      <view class="op-content">{{ props.conetnt || props.content }}</view>
-      <view class="op-btns">
-        <view class="op-btn op-cancel" @click="onCancel">{{ props.cancelText || 'Cancel' }}</view>
-        <view class="op-btn op-confirm" @click="onConfirm">{{ props.confirmText || 'Confirm' }}</view>
+  <view class="onepopup">
+    <u-popup
+      mode="center"
+      border-radius="32"
+      :width="width"
+      :height="popHeight()"
+      :custom-style="customStyle"
+      @close="showPopup = false"
+      v-model="show"
+    >
+      <view class="main" :class="addrPop ? 'addr_padd' : 'main_padd'">
+        <template v-if="1 == popType">
+          <view class="content">{{ conetnt }}</view>
+          <view class="btnArr">
+            <view class="btn">
+              <overbtn :btnText="cancelText" :fontSize="28" btnType="plain" @btnAction="cancel"></overbtn>
+            </view>
+            <view class="btn">
+              <overbtn :btnText="confirmText" :fontSize="28" btnType="submit" @btnAction="confirm"></overbtn>
+            </view>
+          </view>
+        </template>
+        <template v-if="2 == popType">
+          <view v-if="2 == gtype" class="header"></view>
+          <view v-else class="header"></view>
+          <view class="btnArr">
+            <view class="btn">
+              <overbtn btnText="Leave" :fontSize="28" btnType="plain" @btnAction="back"></overbtn>
+            </view>
+            <view class="btn">
+              <overbtn btnText="Continue" :fontSize="28" btnType="submit" @btnAction="topay"></overbtn>
+            </view>
+          </view>
+        </template>
+        <template v-if="3 == popType">
+          <view class="icon">
+            <view class="icon_addr">
+              <image class="img" :src="'/static/image/goods/icon_MapPinLine.png'" />
+            </view>
+            <view class="line">
+              <image class="img" :src="'/static/image/goods/img_Dividingline.png'" />
+            </view>
+          </view>
+          <view v-if="list.name" class="info">
+            <view class="info_top">
+              <text class="info_top_name">{{ list.name }}</text>
+              <text class="info_top_phone">{{ list.mobile }}</text>
+            </view>
+            <view class="info_main">{{ list.address }}</view>
+          </view>
+          <view v-else class="tips">{{ list.address }}</view>
+          <view class="btnaddrArr">
+            <view class="btn">
+              <overbtn :btnText="cancelText" :fontSize="28" btnType="plain" @btnAction="addressEdit"></overbtn>
+            </view>
+            <view class="btn">
+              <overbtn :btnText="confirmText" :fontSize="28" btnType="submit" @btnAction="btnConfirm"></overbtn>
+            </view>
+          </view>
+        </template>
       </view>
-    </view>
+    </u-popup>
   </view>
 </template>
+
+<script>
+export default {
+  props: {
+    popType: {
+      type: String,
+      default: '1'
+    },
+    showPopup: {
+      type: Boolean,
+      default: false
+    },
+    width: {
+      type: [Number, String],
+      default: '552'
+    },
+    height: {
+      type: [Number, String],
+      default: '348'
+    },
+    conetnt: {
+      type: String,
+      default: 'content'
+    },
+    cancelText: {
+      type: String,
+      default: 'Cancel'
+    },
+    confirmText: {
+      type: String,
+      default: 'Confirm'
+    },
+    list: {
+      type: Object,
+      default: function () {
+        return {};
+      }
+    },
+    addrPop: {
+      type: Boolean,
+      default: false
+    },
+    gtype: {
+      type: [String, Number],
+      default: 1
+    }
+  },
+  watch: {
+    showPopup: function () {
+      this.show = this.showPopup;
+    }
+  },
+  data: function () {
+    return {
+      show: false,
+      customStyle: {}
+    };
+  },
+  mounted: function () {
+    this.$emit('poploading', true);
+  },
+  methods: {
+    popHeight: function () {
+      return 3 == this.popType ? '-' : this.height;
+    },
+    open: function () {
+      this.show = true;
+    },
+    close: function () {
+      this.show = false;
+    },
+    cancel: function () {
+      this.$emit('cancel');
+    },
+    confirm: function () {
+      this.$emit('confirm');
+    },
+    back: function () {
+      uni.navigateBack({});
+    },
+    topay: function () {
+      this.show = false;
+    },
+    addressEdit: function () {
+      this.$emit('addrEdit');
+    },
+    btnConfirm: function () {
+      this.$emit('confirmb');
+    }
+  }
+};
+</script>
+
 <style scoped>
-.op-mask { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.5); }
-.op-box { width: 560rpx; background: #fff; border-radius: 20rpx; padding: 48rpx 40rpx 30rpx; }
-.op-content { font-size: 30rpx; color: #17273a; text-align: center; line-height: 46rpx; margin-bottom: 40rpx; }
-.op-btns { display: flex; }
-.op-btn { flex: 1; height: 80rpx; line-height: 80rpx; text-align: center; border-radius: 44rpx; font-size: 28rpx; margin: 0 10rpx; }
-.op-cancel { border: 2rpx solid #b9b9b9; color: #666; }
-.op-confirm { background: #ee5016; color: #fff; }
+.onepopup .img { width:100%;height:100% }
+.onepopup .main_padd { padding:56rpx 44rpx }
+.onepopup .addr_padd { padding:11rpx 44rpx 40rpx 44rpx }
+.onepopup .main { display:flex;flex-direction:column;align-items:center;justify-content:space-between;width:100%;height:100%;background-color:#fff }
+.onepopup .main .header { font-size:32rpx;font-family:PingFang SC,PingFang SC-Medium;text-align:CENTER;color:#ee5016 }
+.onepopup .main .content { flex:1;display:flex;flex-direction:row;align-items:center;justify-content:center;font-size:32rpx;font-family:PingFang SC,PingFang SC-Medium;text-align:CENTER;color:#17273a }
+.onepopup .main .btnArr { display:flex;flex-direction:row;align-items:center;justify-content:space-between;width:100%;margin-top:20rpx }
+.onepopup .main .btnArr .btn { width:224rpx;height:72rpx }
+.onepopup .main .btnaddrArr { display:flex;flex-direction:row;align-items:center;justify-content:space-around;width:100%;margin-top:20rpx }
+.onepopup .main .btnaddrArr .btn { width:208rpx;height:78rpx }
+.onepopup .main .icon { width:100%;text-align:center;display:flex;align-items:center;flex-direction:column }
+.onepopup .main .icon .icon_addr { width:112rpx;height:112rpx;min-height:112rpx }
+.onepopup .main .line { width:115% }
+.onepopup .main .info { width:100%;margin-top:30rpx;margin-bottom:22rpx }
+.onepopup .main .info .info_top .info_top_name { font-size:32rpx;font-family:Roboto,Roboto-Medium;font-weight:700;color:#17273a;line-height:48rpx;margin-right:16rpx }
+.onepopup .main .info .info_top .info_top_phone { font-size:28rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9;line-height:48rpx }
+.onepopup .main .info .info_main { margin-top:6rpx;font-size:24rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9 }
+.onepopup .main .tips { margin-top:10rpx;font-size:28rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#17273a }
 </style>
