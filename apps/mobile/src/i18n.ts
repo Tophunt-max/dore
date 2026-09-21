@@ -968,6 +968,13 @@ export const catalog = {
     zh: '国家/地区代码',
   },
   'tasks.title': { en: 'Reward tasks', hi: 'रिवॉर्ड कार्य', zh: '奖励任务' },
+  'tasks.welfare': { en: 'Welfare', hi: 'लाभ', zh: '福利' },
+  'tasks.go': { en: 'Go', hi: 'जाएं', zh: '去' },
+  'tasks.recentWin': {
+    en: '{name} won a reward',
+    hi: '{name} ने इनाम जीता',
+    zh: '{name} 赢得奖励',
+  },
   'tasks.subtitle': {
     en: 'Available non-monetary account activities',
     hi: 'उपलब्ध गैर-मौद्रिक खाता गतिविधियाँ',
