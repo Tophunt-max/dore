@@ -6,11 +6,96 @@
 
 import { get, post, put, del, setTokens, clearTokens, readRefresh } from './request';
 
+// --- response adapters ----------------------------------------------------
+//
+// The Worker returns its own field names and integer minor units; the ported
+// screens read the reference's names and major-unit values. Convert here, never
+// in a screen, so the pages stay comparable with the reference.
+
+const major = (minor) => (minor == null ? 0 : Number(minor) / 100);
+const nowSec = () => Math.floor(Date.now() / 1000);
+
+/** A goods row -> the reference's group-buy item shape. */
+const goodsItem = (g) => {
+  const it = g || {};
+  return {
+    ...it,
+    id: it.id,
+    name: it.title,
+    iconurl: it.image,
+    imageurl: it.image,
+    unit_price: major(it.price_minor),
+    price: major(it.price_minor),
+    allprice: major(it.market_price_minor),
+    current_buy: it.filled_slots || 0,
+    max_buy: it.total_slots || 0,
+    issue: it.issue,
+    // the reference used 1 = joinable, 2 = drawn, 3 = counting down
+    has_lottery: it.status === 'active' ? 1 : 2,
+    lottery: it.end_at,
+    success: it.end_at,
+    nowtime: nowSec(),
+    countdown: '',
+    // participant avatars / count: the reference showed who had joined. No
+    // equivalent on the vuapp backend yet - empty arrays so the strip renders
+    // blank instead of the template reading a length off undefined.
+    userimgurl: [],
+    usernumber: 0,
+  };
+};
+
+/** A finance product row -> the reference's plan shape. */
+const financeItem = (p) => {
+  const it = p || {};
+  return {
+    ...it,
+    name: it.title,
+    iconurl: it.image,
+    imageurl: it.image,
+    rate: (it.rate_bps || 0) / 100,
+    day: it.term_days,
+    min: major(it.min_minor),
+    max: major(it.max_minor),
+  };
+};
+
+/** A winner row -> the reference's "latest winners" ticker shape. */
+const winnerItem = (w) => {
+  const it = w || {};
+  return {
+    ...it,
+    nickname: it.nickname || it.username || it.phone_masked || '',
+    headimgurl: it.avatar || it.image || '',
+    name: it.goods_title || it.title || '',
+  };
+};
+
+const listOf = (r, ...keys) => {
+  const res = r || {};
+  for (const k of keys) if (Array.isArray(res[k])) return res[k];
+  return Array.isArray(res) ? res : [];
+};
+
 /** POST /index/accountedit */
 export const AccountEdit = (d = {}) => put('/api/account/username', { username: d.name || d.username });
 
 /** POST /index/duobaoitemlistnew */
-export const ActiveList = (d = {}) => get('/api/goods', d);
+export const ActiveList = () =>
+    Promise.all([get('/api/home'), get('/api/winners').catch(() => ({}))]).then(([home, win]) => {
+      const newbie = listOf(home, 'newbie');
+      return {
+        // the newbie deal card
+        runoob: newbie.length ? goodsItem(newbie[0]) : {},
+        // "latest winners" ticker
+        new: { list: listOf(win, 'winners').map(winnerItem) },
+        // the "hot picks" strip
+        zhuanqu: { list: listOf(home, 'high').map(goodsItem) },
+        // the "upcoming" strip
+        upcoming: listOf(home, 'latest').map(goodsItem),
+        // the reference drove a banner countdown from this; no equivalent yet
+        activity: { time: 0, nowtime: nowSec() },
+      };
+    });
 
 /** POST /index/addressadd */
 export const AddAddress = (d = {}) => post('/api/addresses', d);
@@ -25,10 +110,15 @@ export const AddressList = () => get('/api/addresses');
 export const DelAddress = (d = {}) => (d.id ? del('/api/addresses/' + d.id) : Promise.resolve({}));
 
 /** POST /index/duobaoitem */
-export const DuobaoItem = (d = {}) => get('/api/goods', d);
+export const DuobaoItem = (d = {}) =>
+    get('/api/goods', { category: d.kind || d.category }).then((r) => {
+      const list = listOf(r, 'goods').map(goodsItem);
+      return { list, count: list.length };
+    });
 
 /** POST /index/duobaoitem1 */
-export const DuobaoSwiperItem = (d = {}) => get('/api/goods', d);
+export const DuobaoSwiperItem = () =>
+    get('/api/home').then((r) => listOf(r, 'latest', 'high', 'newbie').map(goodsItem));
 
 /** POST /index/addresschangedefault */
 export const EditAccount = (d = {}) => (d.id ? put('/api/addresses/' + d.id, { ...d, is_default: 1 }) : Promise.resolve({}));
@@ -37,7 +127,12 @@ export const EditAccount = (d = {}) => (d.id ? put('/api/addresses/' + d.id, { .
 export const EditAddress = (d = {}) => (d.id ? put('/api/addresses/' + d.id, d) : post('/api/addresses', d));
 
 /** POST /index/kind */
-export const GKind = () => get('/api/goods');
+export const GKind = () =>
+    get('/api/goods').then((r) => {
+      const cats = [];
+      for (const g of listOf(r, 'goods')) if (g.category && !cats.includes(g.category)) cats.push(g.category);
+      return cats.map((c) => ({ label: c.charAt(0).toUpperCase() + c.slice(1), value: c }));
+    });
 
 /** POST /index/duobaoitemlottery */
 export const GetLottery = (d = {}) => (d.id ? post('/api/goods/' + d.id + '/draw', d) : Promise.resolve({ list: [] }));
@@ -55,7 +150,11 @@ export const GoodsDetail = (d = {}) => (d.id ? get('/api/goods/' + d.id) : get('
 export const GoodsHisDetail = (d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'));
 
 /** POST /index/duobaoitemlist */
-export const GoodsList = (d = {}) => get('/api/goods', d);
+export const GoodsList = (d = {}) =>
+    get('/api/goods', { category: d.category }).then((r) => {
+      const list = listOf(r, 'goods').map(goodsItem);
+      return { list, count: list.length };
+    });
 
 /** POST /index/duobaoitemshare */
 export const GoodsShareDetail = (d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'));
@@ -119,7 +218,8 @@ export const UserInfo = () => get('/api/account');
 export const UserJoin = (d = {}) => get('/api/orders', d);
 
 /** POST /index/winnerlist */
-export const WinnerList = (d = {}) => get('/api/winners', d);
+export const WinnerList = (d = {}) =>
+    get('/api/winners', d).then((r) => ({ list: listOf(r, 'winners').map(winnerItem) }));
 
 /** POST /index/activitydetail */
 export const activityDetail = (d = {}) => get('/api/prizes', d);
@@ -152,7 +252,8 @@ export const financeDetail = (d = {}) => (d.id ? get('/api/finance/' + d.id) : g
 export const financeDetailHistory = (d = {}) => (d.id ? get('/api/finance/' + d.id) : get('/api/finance'));
 
 /** POST /index/financeList */
-export const financeList = () => get('/api/finance');
+export const financeList = () =>
+    get('/api/finance').then((r) => ({ list: listOf(r, 'products').map(financeItem) }));
 
 /** POST /index/financeOrderRecent */
 export const financeOrderRecent = () => get('/api/finance/orders/mine');
@@ -191,13 +292,15 @@ export const luckyNow = () => get('/api/prizes');
 export const luckyOrderList = () => get('/api/orders', { kind: 'lucky' });
 
 /** POST /index/myFinanceList */
-export const myFinanceList = () => get('/api/finance/orders/mine');
+export const myFinanceList = () =>
+    get('/api/finance/orders/mine').then((r) => ({ list: listOf(r, 'orders', 'products').map(financeItem) }));
 
 /** POST /index/myteam */
 export const myTeam = () => get('/api/team');
 
 /** POST /index/mywinner */
-export const myWinner = (d = {}) => get('/api/my-shares', d);
+export const myWinner = (d = {}) =>
+    get('/api/my-shares', d).then((r) => ({ list: listOf(r, 'shares', 'orders').map(goodsItem) }));
 
 /** POST /index/itemdetail */
 export const orderDetail = (d = {}) => (d.id ? get('/api/orders/' + d.id) : get('/api/orders'));
@@ -245,19 +348,19 @@ export const userWithdraw = (d = {}) => post('/api/withdraw', d);
 // Resolves to an empty object rather than null: the screens read
 // properties straight off the response, so `{}` degrades to empty
 // state while null would throw.
-const notImplemented = (name) => {
+const notImplemented = (name, shape) => {
   if (!notImplemented.warned) notImplemented.warned = {};
   if (!notImplemented.warned[name]) {
     notImplemented.warned[name] = true;
     console.warn('[api] ' + name + ' is not implemented on the vuapp backend');
   }
-  return Promise.resolve({});
+  return Promise.resolve(shape || {});
 };
 
 /** POST /index/getlotterytime (lottery countdown feed) */
-export const GetTime = () => notImplemented('GetTime');
+export const GetTime = () => notImplemented('GetTime', { time: [] });
 /** POST /index/getnumbermax (per-user slot cap) */
-export const NumberMax = () => notImplemented('NumberMax');
+export const NumberMax = () => notImplemented('NumberMax', { max: 0 });
 /** POST /index/addorderpay (order payment intent) */
 export const addOrderPay = () => notImplemented('addOrderPay');
 /** POST /index/bankedit (beneficiary edit) */
@@ -265,10 +368,10 @@ export const bankEdit = () => notImplemented('bankEdit');
 /** POST /index/editAfStatus (payment method toggle) */
 export const editAfStatus = () => notImplemented('editAfStatus');
 /** POST /index/price (price table) */
-export const gPrice = () => notImplemented('gPrice');
+export const gPrice = () => notImplemented('gPrice', { list: [] });
 /** POST /index/paystatus (payment status poll) */
 export const payStatus = () => notImplemented('payStatus');
 /** POST /index/vipBuy (vip purchase) */
 export const vipBuy = () => notImplemented('vipBuy');
 /** POST /index/vip (vip tiers) */
-export const vipLevel = () => notImplemented('vipLevel');
+export const vipLevel = () => notImplemented('vipLevel', { list: [], user_level: 0, count: 0 });

@@ -10,6 +10,85 @@
  */
 
 /**
+ * Response adapters.
+ *
+ * The Worker stores integer minor units and its own field names; the reference
+ * screens read major-unit strings and the reference's names. Adapting here keeps
+ * the generated screens byte-comparable with the reference.
+ */
+const SHAPE_HELPERS = `
+// --- response adapters ----------------------------------------------------
+//
+// The Worker returns its own field names and integer minor units; the ported
+// screens read the reference's names and major-unit values. Convert here, never
+// in a screen, so the pages stay comparable with the reference.
+
+const major = (minor) => (minor == null ? 0 : Number(minor) / 100);
+const nowSec = () => Math.floor(Date.now() / 1000);
+
+/** A goods row -> the reference's group-buy item shape. */
+const goodsItem = (g) => {
+  const it = g || {};
+  return {
+    ...it,
+    id: it.id,
+    name: it.title,
+    iconurl: it.image,
+    imageurl: it.image,
+    unit_price: major(it.price_minor),
+    price: major(it.price_minor),
+    allprice: major(it.market_price_minor),
+    current_buy: it.filled_slots || 0,
+    max_buy: it.total_slots || 0,
+    issue: it.issue,
+    // the reference used 1 = joinable, 2 = drawn, 3 = counting down
+    has_lottery: it.status === 'active' ? 1 : 2,
+    lottery: it.end_at,
+    success: it.end_at,
+    nowtime: nowSec(),
+    countdown: '',
+    // participant avatars / count: the reference showed who had joined. No
+    // equivalent on the vuapp backend yet - empty arrays so the strip renders
+    // blank instead of the template reading a length off undefined.
+    userimgurl: [],
+    usernumber: 0,
+  };
+};
+
+/** A finance product row -> the reference's plan shape. */
+const financeItem = (p) => {
+  const it = p || {};
+  return {
+    ...it,
+    name: it.title,
+    iconurl: it.image,
+    imageurl: it.image,
+    rate: (it.rate_bps || 0) / 100,
+    day: it.term_days,
+    min: major(it.min_minor),
+    max: major(it.max_minor),
+  };
+};
+
+/** A winner row -> the reference's "latest winners" ticker shape. */
+const winnerItem = (w) => {
+  const it = w || {};
+  return {
+    ...it,
+    nickname: it.nickname || it.username || it.phone_masked || '',
+    headimgurl: it.avatar || it.image || '',
+    name: it.goods_title || it.title || '',
+  };
+};
+
+const listOf = (r, ...keys) => {
+  const res = r || {};
+  for (const k of keys) if (Array.isArray(res[k])) return res[k];
+  return Array.isArray(res) ? res : [];
+};
+`;
+
+/**
  * ORich function name -> vuapp Worker endpoint.
  *
  * `args` receives the single payload object the reference app passed, and
@@ -87,11 +166,40 @@ const MAP = {
   itemDefaultAddr: `() => get('/api/addresses')`,
 
   // --- goods / lottery
-  GoodsList: `(d = {}) => get('/api/goods', d)`,
-  ActiveList: `(d = {}) => get('/api/goods', d)`,
-  DuobaoItem: `(d = {}) => get('/api/goods', d)`,
-  DuobaoSwiperItem: `(d = {}) => get('/api/goods', d)`,
-  GKind: `() => get('/api/goods')`,
+  GoodsList: `(d = {}) =>
+    get('/api/goods', { category: d.category }).then((r) => {
+      const list = listOf(r, 'goods').map(goodsItem);
+      return { list, count: list.length };
+    })`,
+  ActiveList: `() =>
+    Promise.all([get('/api/home'), get('/api/winners').catch(() => ({}))]).then(([home, win]) => {
+      const newbie = listOf(home, 'newbie');
+      return {
+        // the newbie deal card
+        runoob: newbie.length ? goodsItem(newbie[0]) : {},
+        // "latest winners" ticker
+        new: { list: listOf(win, 'winners').map(winnerItem) },
+        // the "hot picks" strip
+        zhuanqu: { list: listOf(home, 'high').map(goodsItem) },
+        // the "upcoming" strip
+        upcoming: listOf(home, 'latest').map(goodsItem),
+        // the reference drove a banner countdown from this; no equivalent yet
+        activity: { time: 0, nowtime: nowSec() },
+      };
+    })`,
+  DuobaoItem: `(d = {}) =>
+    get('/api/goods', { category: d.kind || d.category }).then((r) => {
+      const list = listOf(r, 'goods').map(goodsItem);
+      return { list, count: list.length };
+    })`,
+  DuobaoSwiperItem: `() =>
+    get('/api/home').then((r) => listOf(r, 'latest', 'high', 'newbie').map(goodsItem))`,
+  GKind: `() =>
+    get('/api/goods').then((r) => {
+      const cats = [];
+      for (const g of listOf(r, 'goods')) if (g.category && !cats.includes(g.category)) cats.push(g.category);
+      return cats.map((c) => ({ label: c.charAt(0).toUpperCase() + c.slice(1), value: c }));
+    })`,
   GoodsDetail: `(d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'))`,
   GoodsHisDetail: `(d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'))`,
   GoodsShareDetail: `(d = {}) => (d.id ? get('/api/goods/' + d.id) : get('/api/goods'))`,
@@ -106,15 +214,19 @@ const MAP = {
   UserJoin: `(d = {}) => get('/api/orders', d)`,
 
   // --- winners / shares
-  WinnerList: `(d = {}) => get('/api/winners', d)`,
-  myWinner: `(d = {}) => get('/api/my-shares', d)`,
+  WinnerList: `(d = {}) =>
+    get('/api/winners', d).then((r) => ({ list: listOf(r, 'winners').map(winnerItem) }))`,
+  myWinner: `(d = {}) =>
+    get('/api/my-shares', d).then((r) => ({ list: listOf(r, 'shares', 'orders').map(goodsItem) }))`,
   ItemShare: `(d = {}) => post('/api/orders', d)`,
   // --- finance
-  financeList: `() => get('/api/finance')`,
+  financeList: `() =>
+    get('/api/finance').then((r) => ({ list: listOf(r, 'products').map(financeItem) }))`,
   financeDetail: `(d = {}) => (d.id ? get('/api/finance/' + d.id) : get('/api/finance'))`,
   financeDetailHistory: `(d = {}) => (d.id ? get('/api/finance/' + d.id) : get('/api/finance'))`,
   financeBuy: `(d = {}) => post('/api/finance/order', d)`,
-  myFinanceList: `() => get('/api/finance/orders/mine')`,
+  myFinanceList: `() =>
+    get('/api/finance/orders/mine').then((r) => ({ list: listOf(r, 'orders', 'products').map(financeItem) }))`,
   financeOrderRecent: `() => get('/api/finance/orders/mine')`,
 
   // --- tasks / vip
@@ -148,6 +260,14 @@ const MAP = {
  * Reference endpoints with no counterpart on the vuapp backend. They resolve to
  * an empty result so the ported screens still render.
  */
+/** Stubs whose callers read a specific key off the response. */
+const STUB_SHAPES = {
+  GetTime: '{ time: [] }',
+  NumberMax: '{ max: 0 }',
+  gPrice: '{ list: [] }',
+  vipLevel: '{ list: [], user_level: 0, count: 0 }',
+};
+
 const UNMAPPED = {
   GetTime: 'lottery countdown feed',
   NumberMax: 'per-user slot cap',
@@ -280,7 +400,7 @@ function apiOrich(surface) {
     `// the original while the requests go to the vuapp API.`,
     ``,
     `import { get, post, put, del, setTokens, clearTokens, readRefresh } from './request';`,
-    ``,
+    SHAPE_HELPERS,
   ];
 
   const mapped = [];
@@ -305,20 +425,21 @@ function apiOrich(surface) {
     lines.push(`// Resolves to an empty object rather than null: the screens read`);
     lines.push(`// properties straight off the response, so \`{}\` degrades to empty`);
     lines.push(`// state while null would throw.`);
-    lines.push(`const notImplemented = (name) => {`);
+    lines.push(`const notImplemented = (name, shape) => {`);
     lines.push(`  if (!notImplemented.warned) notImplemented.warned = {};`);
     lines.push(`  if (!notImplemented.warned[name]) {`);
     lines.push(`    notImplemented.warned[name] = true;`);
     lines.push(`    console.warn('[api] ' + name + ' is not implemented on the vuapp backend');`);
     lines.push(`  }`);
-    lines.push(`  return Promise.resolve({});`);
+    lines.push(`  return Promise.resolve(shape || {});`);
     lines.push(`};`);
     lines.push('');
     for (const name of stubs) {
       const why = UNMAPPED[name] ? ` (${UNMAPPED[name]})` : '';
       const info = surface.get(name);
+      const shape = STUB_SHAPES[name] ? `, ${STUB_SHAPES[name]}` : '';
       lines.push(`/** ${info.method} ${info.path}${why} */`);
-      lines.push(`export const ${name} = () => notImplemented('${name}');`);
+      lines.push(`export const ${name} = () => notImplemented('${name}'${shape});`);
     }
     lines.push('');
   }
