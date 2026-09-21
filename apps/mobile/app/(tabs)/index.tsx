@@ -155,7 +155,7 @@ export default function HomeScreen() {
             centered in the 88rpx navbar, not a text wordmark. */}
         <View style={styles.navLogo}>
           <Image
-            source={assets.logo}
+            source={assets.homeLogo}
             style={styles.navLogoImg}
             resizeMode="contain"
           />

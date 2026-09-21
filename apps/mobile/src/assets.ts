@@ -4,6 +4,8 @@
 
 export const assets = {
   logo: require('../assets/orich/logo.png'),
+  // Home navbar logo — the fuller wordmark under image/logo.png.
+  homeLogo: require('../assets/orich/image/logo.png'),
   loginBackground: require('../assets/orich/image/login/bg.png'),
   loginPhone: require('../assets/orich/image/login/icon_iphone.png'),
   loginInvite: require('../assets/orich/image/login/icon_invitation.png'),
