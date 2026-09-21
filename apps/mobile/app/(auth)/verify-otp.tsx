@@ -1,128 +1,150 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Controller, useForm } from 'react-hook-form';
+import { useState } from 'react';
 import {
+  Image,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
-import { z } from 'zod';
-import { FormField } from '@/components/FormField';
+import { assets } from '@/assets';
 import { GradientButton } from '@/components/GradientButton';
-import { Screen } from '@/components/Screen';
-import { TopBar } from '@/components/TopBar';
 import { useI18n } from '@/i18n';
 import { useAuthStore } from '@/stores/auth';
+import { rpx } from '@/rpx';
 import { theme } from '@/theme';
-const schemaFor = (message: string) =>
-  z.object({
-    code: z.string().regex(/^\d{6}$/, message),
-    inviteCode: z.string().trim().max(32).optional(),
-  });
-type Values = z.infer<ReturnType<typeof schemaFor>>;
+
+// ORich `pages/login/regist` (scope 7838e254): same background + title as
+// login, with an OTP input row, an invitation-code row, and the confirm button.
 export default function VerifyOtpScreen() {
   const { t } = useI18n();
   const { phone = '' } = useLocalSearchParams<{ phone: string }>();
   const verifyOtp = useAuthStore((s) => s.verifyOtp);
-  const {
-    control,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = useForm<Values>({
-    resolver: zodResolver(schemaFor(t('auth.invalidCode'))),
-    defaultValues: { code: '', inviteCode: '' },
-  });
-  const submit = handleSubmit(async ({ code, inviteCode }) => {
-    try {
-      await verifyOtp(phone, code, inviteCode || undefined);
-      router.replace('/(tabs)');
-    } catch (error) {
-      setError('code', {
-        message: error instanceof Error ? error.message : t('common.error'),
-      });
+  const [code, setCode] = useState('');
+  const [invite, setInvite] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit() {
+    if (!/^\d{6}$/.test(code)) {
+      setError(t('auth.invalidCode'));
+      return;
     }
-  });
+    setBusy(true);
+    setError(null);
+    try {
+      await verifyOtp(phone, code, invite.trim() || undefined);
+      router.replace('/(tabs)');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <Screen scroll={false} header={<TopBar title={t('auth.verify')} />}>
+    <ImageBackground
+      source={assets.loginBackground}
+      resizeMode="cover"
+      style={styles.bg}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.page}
+        style={styles.flex}
       >
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>6</Text>
+        <Text style={styles.title}>{t('auth.verify')}</Text>
+        <Text style={styles.tips}>{t('auth.codePrompt', { phone })}</Text>
+
+        <Text style={styles.inputTitle}>{t('auth.codeLabel')}</Text>
+        <View style={styles.inputview}>
+          <TextInput
+            value={code}
+            onChangeText={setCode}
+            keyboardType="number-pad"
+            maxLength={6}
+            placeholder="000000"
+            placeholderTextColor="silver"
+            style={styles.input}
+          />
         </View>
-        <Text style={styles.title}>{t('auth.code')}</Text>
-        <Text style={styles.copy}>{t('auth.codePrompt', { phone })}</Text>
-        <Controller
-          control={control}
-          name="code"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <FormField
-              autoComplete="one-time-code"
-              error={errors.code?.message}
-              keyboardType="number-pad"
-              label={t('auth.codeLabel')}
-              maxLength={6}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder="000000"
-              value={value}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="inviteCode"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <FormField
-              autoCapitalize="characters"
-              error={errors.inviteCode?.message}
-              label={t('auth.invite')}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder=""
-              value={value}
-            />
-          )}
-        />
-        <GradientButton loading={isSubmitting} onPress={submit}>
-          {t('auth.submit')}
-        </GradientButton>
+
+        <Text style={styles.inputTitle}>{t('auth.invite')}</Text>
+        <View style={styles.inputview}>
+          <Image source={assets.loginInvite} style={styles.inviteIcon} />
+          <TextInput
+            value={invite}
+            onChangeText={setInvite}
+            autoCapitalize="characters"
+            placeholder=""
+            placeholderTextColor="silver"
+            style={styles.input}
+          />
+        </View>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <View style={styles.nextbtn}>
+          <GradientButton loading={busy} onPress={() => void submit()}>
+            {t('auth.submit')}
+          </GradientButton>
+        </View>
       </KeyboardAvoidingView>
-    </Screen>
+    </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
-  page: { flex: 1, padding: theme.spacing.xl, justifyContent: 'center' },
-  badge: {
-    width: 72,
-    height: 72,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 36,
-    backgroundColor: '#FFF3D1',
-  },
-  badgeText: {
-    color: theme.colors.primary,
-    fontFamily: theme.typography.family.bold,
-    fontSize: 32,
-  },
+  bg: { flex: 1, paddingHorizontal: rpx(30) },
+  flex: { flex: 1 },
   title: {
-    marginTop: theme.spacing.lg,
-    textAlign: 'center',
-    color: theme.colors.ink,
+    marginTop: rpx(200),
+    paddingHorizontal: rpx(20),
+    fontSize: rpx(48),
+    color: '#17273a',
     fontFamily: theme.typography.family.bold,
-    fontSize: theme.typography.size.title,
   },
-  copy: {
-    marginTop: theme.spacing.sm,
-    marginBottom: theme.spacing.xl,
-    textAlign: 'center',
-    color: theme.colors.textMuted,
+  tips: {
+    paddingHorizontal: rpx(20),
+    fontSize: rpx(36),
+    color: '#b9b9b9',
     fontFamily: theme.typography.family.regular,
   },
+  inputTitle: {
+    marginTop: rpx(64),
+    marginBottom: rpx(16),
+    paddingHorizontal: rpx(20),
+    fontSize: rpx(32),
+    color: '#17273a',
+    fontFamily: theme.typography.family.regular,
+  },
+  inputview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: rpx(20),
+    marginHorizontal: rpx(20),
+    borderBottomWidth: rpx(2),
+    borderBottomColor: '#ececec',
+  },
+  inviteIcon: {
+    width: rpx(40),
+    height: rpx(40),
+    marginRight: rpx(20),
+    resizeMode: 'contain',
+  },
+  input: {
+    flex: 1,
+    paddingLeft: rpx(4),
+    fontSize: rpx(32),
+    color: '#17273a',
+    fontFamily: theme.typography.family.regular,
+  },
+  error: {
+    marginTop: rpx(16),
+    paddingHorizontal: rpx(20),
+    color: theme.colors.danger,
+    fontSize: rpx(26),
+  },
+  nextbtn: { marginTop: rpx(120), paddingHorizontal: rpx(20) },
 });

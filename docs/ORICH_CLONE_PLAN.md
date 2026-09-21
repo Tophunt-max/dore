@@ -14,7 +14,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | # | ORich page | Oriva route | Status |
 |--:|------------|-------------|:------:|
 | 1 | home/home | `/(tabs)` | ✅ (prior) |
-| 2 | login/login | `/(auth)/login` | ⬜ |
+| 2 | login/login | `/(auth)/login` | ✅ |
 | 3 | address/address | `/addresses` | ✅ |
 | 4 | address/add | `/addresses/add` | ⬜ |
 | 5 | goods/goods | `/products/[id]` | ✅ (prior) |
@@ -36,7 +36,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 21 | bask/index | `/bask/share` | ✅ |
 | 22 | winner/winner | `/(tabs)/winners` | ✅ |
 | 23 | winner/myShare | `/my-shares` | ✅ |
-| 24 | payment/payment | `/payment-methods` | ⬜ |
+| 24 | payment/payment | `/wallet/beneficiaries` | ✅ |
 | 25 | payment/add | `/wallet/beneficiaries/add` | ⬜ |
 | 26 | payment/recharge | `/wallet/recharge` | ⬜ |
 | 27 | payment/cashOut | `/wallet/withdraw` | ⬜ |
@@ -48,7 +48,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 33 | payment/payrecord | `/payments` | ✅ |
 | 34 | payment/cashrecord | `/wallet/withdrawals` | ✅ |
 | 35 | payform/payform | in-app forms | ⭐ web-view orig |
-| 36 | login/regist | `/(auth)/verify-otp` | ⬜ |
+| 36 | login/regist | `/(auth)/verify-otp` | ✅ |
 | 37 | prize/prize | `/prizes` | ⬜ |
 | 38 | finance/flist | `/finance` | ⬜ |
 | 39 | finance/fdetail | `/finance/[financeId]` | ⬜ |
