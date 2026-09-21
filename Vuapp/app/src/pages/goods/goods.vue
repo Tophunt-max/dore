@@ -1,170 +1,180 @@
 <script setup lang="ts">
+// Faithful port of ORich pages/goods/goods (verbatim CSS in ./goods.css).
 import { ref, computed } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
-import { api } from '@/api/request';
+import { onLoad, onPageScroll } from '@dcloudio/uni-app';
+import { GoodsDetail } from '@/api/orich';
 import { formatMinor } from '@/utils/money';
 
-const goods = ref<any>(null);
+const G = '/static/image/goods';
+const id = ref<any>('');
+const navBg = ref('transparent');
+const titleColor = ref('transparent');
+const backBg = ref('#626262');
+const goodsData = ref<any>({ name: '', issue: '', total_slots: 1, filled_slots: 0 });
+const bannerList = ref<any[]>([]);
 const participants = ref<any[]>([]);
-const id = ref('');
+const ltabIndex = ref(0);
+const ltabs = ['Details', 'Participants', 'Winners'];
 
-onLoad(async (q) => {
+const percent = computed(() =>
+  Math.min(100, Math.round(((goodsData.value.filled_slots || 0) / (goodsData.value.total_slots || 1)) * 100)),
+);
+const needed = computed(() => Math.max(0, (goodsData.value.total_slots || 0) - (goodsData.value.filled_slots || 0)));
+
+onLoad((q: any) => {
   id.value = q?.id;
-  const res = await api.get(`/api/goods/${q?.id}`);
-  if (res.ok) {
-    goods.value = res.goods;
-    participants.value = res.participants || [];
-  }
+  getData();
+});
+onPageScroll((e: any) => {
+  const on = e.scrollTop > 200;
+  navBg.value = on ? '#ffffff' : 'transparent';
+  titleColor.value = on ? '#17273a' : 'transparent';
+  backBg.value = on ? '#626262' : '#626262';
 });
 
-const progress = computed(() =>
-  goods.value ? Math.min(100, Math.round((goods.value.filled_slots / goods.value.total_slots) * 100)) : 0,
-);
-
-function join() {
+function getData() {
+  GoodsDetail({ id: id.value }).then((r: any) => {
+    if (!r || r.ok === false) return;
+    goodsData.value = r.goods || {};
+    bannerList.value = goodsData.value.image ? [goodsData.value.image] : [];
+    participants.value = r.participants || [];
+  });
+}
+function beforeBack() {
+  const pages = getCurrentPages();
+  if (pages.length > 1) uni.navigateBack();
+  else uni.switchTab({ url: '/pages/home/home' });
+}
+function handleShare() {
+  uni.showToast({ title: 'Share', icon: 'none' });
+}
+function rankName(i: number) {
+  return i + 1;
+}
+function buyNow() {
   uni.navigateTo({ url: `/pages/goods/comfirm?id=${id.value}` });
 }
 </script>
 
 <template>
-  <view v-if="goods" class="page">
-    <nav-bar :title="goods.title" bg="#fff" back />
-    <image class="cover" :src="goods.image" mode="aspectFill" />
-    <view class="info card">
-      <view class="prow">
-        <text class="price">{{ formatMinor(goods.price_minor) }}</text>
-        <text class="market">{{ formatMinor(goods.market_price_minor) }}</text>
-        <text class="issue">Issue {{ goods.issue }}</text>
+  <view class="goods">
+    <navbar :backColor="backBg" :background="navBg" :title="goodsData.name" :titleColor="titleColor" @beforeBack="beforeBack" />
+
+    <view id="toTop" class="toTop">
+      <view class="banner">
+        <u-swiper height="541" :list="bannerList" img-mode="scaleToFill" />
+        <view v-if="goodsData.status === 'active'" class="banner-countdown">Draw when full</view>
       </view>
-      <text class="title">{{ goods.title }}</text>
-      <view class="prog">
-        <view class="prog-bar"><view class="prog-fill" :style="{ width: progress + '%' }" /></view>
-        <text class="prog-text">{{ goods.filled_slots }}/{{ goods.total_slots }} ({{ progress }}%)</text>
+
+      <view class="intro card">
+        <view class="intro-header">
+          <view class="intro-price">
+            <view class="intro-price-all otw">
+              {{ formatMinor(goodsData.price_minor) }}<text>{{ formatMinor(goodsData.market_price_minor) }}</text>
+            </view>
+          </view>
+          <view class="intro-title">{{ goodsData.name }}</view>
+          <view class="intro-text">{{ $t('goods.issue') }}{{ goodsData.issue }}</view>
+        </view>
+        <image :src="`${G}/icon_Share.png`" mode="aspectFit" @click="handleShare" />
+      </view>
+
+      <view class="people card">
+        <view class="people-view">
+          <view class="people-avatar">
+            <image
+              v-for="(p, i) in participants.slice(0, 6)"
+              :key="i"
+              :src="p.avatar || '/static/image/other.png'"
+              mode="aspectFill"
+            />
+          </view>
+          <view class="people-text">{{ participants.length }} {{ $t('home.gift') }}</view>
+        </view>
+        <view class="people-progress"><lineprogress :percent="percent" :height="16" /></view>
+        <view class="people-need">
+          <text>{{ $t('home.needed') }} {{ needed }}</text>
+          <text>{{ percent }}%</text>
+        </view>
+      </view>
+
+      <view class="prize card">
+        <view class="prize-title">
+          <view class="prize-name"><text class="prize-icon" />Ranking</view>
+        </view>
+        <view class="rank">
+          <view v-for="(p, i) in participants" :key="i" class="prize-rank">
+            <view class="prize-rank-box">
+              <view class="rank-iconnum"><text>{{ rankName(i) }}</text></view>
+              <view class="rank-name otw">{{ p.username }}</view>
+            </view>
+            <view class="rank-price">
+              <view class="rank-price-left otw">{{ p.slots }} slots</view>
+            </view>
+          </view>
+          <view v-if="!participants.length" class="nodata">{{ $t('common.nodata') }}</view>
+        </view>
+      </view>
+
+      <view class="main">
+        <view class="ltab">
+          <view
+            v-for="(t, i) in ltabs"
+            :key="i"
+            class="ltab-item"
+            :class="{ 'ltab-item-active': ltabIndex === i }"
+            @click="ltabIndex = i"
+          >
+            <view class="ltab-item-text">{{ t }}</view>
+          </view>
+        </view>
+
+        <view v-show="ltabIndex === 0" class="parse">
+          <u-parse :content="goodsData.description || ''" />
+        </view>
+
+        <view v-show="ltabIndex === 1" class="participation">
+          <view v-for="(p, i) in participants" :key="i" class="item">
+            <image class="avatar" :src="p.avatar || '/static/image/other.png'" mode="aspectFill" />
+            <view class="detail">
+              <view class="header">
+                <view class="header-top">
+                  <view class="header-name otw">{{ p.username }}</view>
+                  <view class="header-time">{{ p.created_at ? new Date(p.created_at * 1000).toLocaleDateString() : '' }}</view>
+                </view>
+                <view class="header-bottom">{{ p.slots }} slots</view>
+              </view>
+            </view>
+          </view>
+          <view v-if="!participants.length" class="nodata">{{ $t('common.nodata') }}</view>
+        </view>
+
+        <view v-show="ltabIndex === 2" class="winner">
+          <view class="nodata">{{ $t('home.newDraw') }}</view>
+        </view>
       </view>
     </view>
 
-    <view class="desc card">
-      <text class="dh">Description</text>
-      <text class="dt">{{ goods.description }}</text>
-    </view>
-
-    <view class="parts card">
-      <text class="dh">Recent Participants</text>
-      <view v-for="(p, i) in participants" :key="i" class="part">
-        <image class="pav" :src="p.avatar || '/static/image/other.png'" mode="aspectFill" />
-        <text class="pn">{{ p.username }}</text>
-        <text class="ps muted">{{ p.slots }} slots</text>
+    <view class="btn">
+      <view class="btn-buy">
+        <view class="btn-price">
+          <view class="btn-price-new">{{ formatMinor(goodsData.price_minor) }}</view>
+          <view class="btn-price-old">{{ formatMinor(goodsData.market_price_minor) }}</view>
+        </view>
+        <view class="btn-btn">
+          <overbtn :btnText="$t('home.snatch')" :fontSize="28" btnType="submit" @btnAction="buyNow" />
+        </view>
       </view>
-      <view v-if="!participants.length" class="nodata">Be the first to join!</view>
-    </view>
-
-    <view class="footer">
-      <view class="join-btn brand-btn" @click="join">Join Now · {{ formatMinor(goods.price_minor) }}</view>
     </view>
   </view>
 </template>
 
+<style>
+@import './goods.css';
+</style>
+
 <style scoped>
-.page {
-  min-height: 100vh;
-  padding-bottom: 140rpx;
-  background: #f6f6f6;
-}
-.cover {
-  width: 100%;
-  height: 600rpx;
-}
-.info {
-  margin: 20rpx;
-  padding: 30rpx;
-}
-.prow {
-  display: flex;
-  align-items: baseline;
-}
-.price {
-  font-size: 48rpx;
-}
-.market {
-  margin-left: 20rpx;
-  color: #b9b9b9;
-  text-decoration: line-through;
-}
-.issue {
-  margin-left: auto;
-  font-size: 24rpx;
-  color: #b9b9b9;
-}
-.title {
-  display: block;
-  margin: 20rpx 0;
-  font-size: 34rpx;
-  font-weight: 700;
-}
-.prog {
-  display: flex;
-  align-items: center;
-}
-.prog-bar {
-  flex: 1;
-  height: 16rpx;
-  background: #f0f0f0;
-  border-radius: 16rpx;
-  overflow: hidden;
-}
-.prog-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ffe44b, #fea326);
-}
-.prog-text {
-  margin-left: 16rpx;
-  font-size: 24rpx;
-  color: #b9b9b9;
-}
-.desc,
-.parts {
-  margin: 20rpx;
-  padding: 30rpx;
-}
-.dh {
-  font-size: 30rpx;
-  font-weight: 700;
-}
-.dt {
-  display: block;
-  margin-top: 16rpx;
-  font-size: 28rpx;
-  color: #666;
-  line-height: 44rpx;
-}
-.part {
-  display: flex;
-  align-items: center;
-  padding: 16rpx 0;
-}
-.pav {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 50%;
-  margin-right: 16rpx;
-}
-.pn {
-  flex: 1;
-  font-size: 28rpx;
-}
-.footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20rpx 30rpx;
-  background: #fff;
-  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
-}
-.join-btn {
-  height: 88rpx;
-  line-height: 88rpx;
-  font-size: 32rpx;
-  font-weight: 700;
-}
+.goods { padding-bottom: 120rpx; }
+.people-progress { width: 100%; margin: 12rpx 0; }
+.btn .btn-btn { width: 283rpx; height: 78rpx; }
 </style>
