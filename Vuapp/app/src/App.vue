@@ -65,4 +65,13 @@ image {
   padding: 80rpx 0;
   font-size: 28rpx;
 }
+/* shared helpers used by ported ORich templates */
+.otw {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.u-m-r-20 {
+  margin-right: 20rpx;
+}
 </style>

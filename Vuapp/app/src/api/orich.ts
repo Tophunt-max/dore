@@ -72,3 +72,51 @@ export const HelpArticles = () => api.get('/api/help');
 export const HelpDetail = (topic: string) => api.get(`/api/help/${topic}`);
 export const PageContent = (slug: string) => api.get(`/api/pages/${slug}`);
 export const uploadUrl = `${api.base}/api/index/upload`;
+
+
+// --- adapters mapping vuapp backend responses to the shapes ORich pages expect ---
+
+// Winner list: { list:[{userheadimgurl,username,time,content,imagesurl,iconurl,delname,issue,dumid}], count }
+export const WinnerList = (_d: { start: number; limit: number }) =>
+  api.get('/api/winners').then((r: any) => {
+    const list = (r.winners || []).map((w: any) => ({
+      userheadimgurl: w.avatar || '/static/image/other.png',
+      username: w.username || 'Lucky user',
+      time: w.drawn_at ? new Date(w.drawn_at * 1000).toLocaleString() : '',
+      content: `Won ${w.title} · No. ${w.winning_no || ''}`,
+      imagesurl: w.image ? [w.image] : [],
+      iconurl: w.image,
+      delname: w.title,
+      issue: 'Issue ' + (w.issue || ''),
+      dumid: w.goods_id || w.id,
+    }));
+    return { list, count: list.length };
+  });
+
+// Account: maps /api/account -> ORich userInfo fields
+export const AccountData = () =>
+  api.get('/api/account').then((r: any) => {
+    const u = r.user || {};
+    const c = r.counts || {};
+    return {
+      status: 1,
+      nickname: u.username || '-',
+      mobile: u.phone || '-',
+      headimgurl: u.avatar || '',
+      money: ((u.balance_minor || 0) / 100).toFixed(2),
+      money_bad: 0,
+      finance_day_income: 0,
+      finance_all_income: '0.00',
+      finance_all_price: '0.00',
+      today_cost: 0,
+      return_rate: 0,
+      return_amount: 0,
+      return_income: 0,
+      return_cap: 0,
+      vip_img: '',
+      wait: 0,
+      confirm: 0,
+      delivery: 0,
+      receive: c.wins || 0,
+    };
+  });

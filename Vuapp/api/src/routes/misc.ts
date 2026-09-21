@@ -9,7 +9,7 @@ const misc = new Hono<{ Bindings: Env }>();
 // ---------- Winners (public) ----------
 misc.get('/winners', async (c) => {
   const { results } = await c.env.DB.prepare(
-    `SELECT d.id, d.issue, d.winning_no, d.drawn_at, g.title, g.image, u.username, u.avatar
+    `SELECT d.id, d.goods_id, d.issue, d.winning_no, d.drawn_at, g.title, g.image, u.username, u.avatar
      FROM draws d JOIN goods g ON g.id = d.goods_id LEFT JOIN users u ON u.id = d.winner_user
      ORDER BY d.drawn_at DESC LIMIT 50`,
   ).all();
