@@ -1,49 +1,79 @@
-<script setup lang="ts">
-// Faithful port of ORich pages/account/username (edit nickname).
-import { ref } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
-import { AccountData, SetUsername } from '@/api/orich';
-
-const username = ref('');
-
-onShow(async () => {
-  const r: any = await AccountData();
-  if (r && r.ok !== false) username.value = r.nickname === '-' ? '' : r.nickname;
-});
-
-async function save() {
-  const v = username.value.trim();
-  if (!v) {
-    uni.showToast({ title: 'Please enter a name', icon: 'none' });
-    return;
-  }
-  if (v.length > 24) {
-    uni.showToast({ title: 'The number of nickname characters exceeds the limit.', icon: 'none' });
-    return;
-  }
-  const r: any = await SetUsername({ username: v });
-  if (r.ok) {
-    uni.showToast({ title: 'Edit success!', icon: 'none' });
-    setTimeout(() => uni.navigateBack(), 600);
-  } else uni.showToast({ title: 'Edit fail', icon: 'none' });
-}
-</script>
-
 <template>
   <view class="username">
-    <navbar :title="$t('common.name')" background="#ffffff" />
-    <view class="username_main">
-      <input v-model="username" class="username_input" :placeholder="$t('common.name')" maxlength="24" />
+    <navbar :title="$t('account.editname')" background="#ffffff"></navbar>
+    <view class="list">
+      <view class="item">
+        <view class="item-key">{{ $t('account.name') }}</view>
+        <input v-model="userName" class="item-name" type="text" />
+      </view>
     </view>
-    <view class="username_btn">
-      <overbtn :btnText="$t('common.confirm')" :fontSize="30" btnType="submit" @btnAction="save" />
+    <view class="logout">
+      <overbtn
+        :btnText="$t('account.confirm')"
+        :fontSize="28"
+        btnType="submit"
+        :loading="loading"
+        @btnAction="confirm"
+      ></overbtn>
     </view>
   </view>
 </template>
 
+<script>
+import { AccountEdit, userAccount } from '@/api/orich';
+
+export default {
+  data: function () {
+    return {
+      userName: '',
+      loading: false
+    };
+  },
+  mounted: function () {
+    this.userData();
+  },
+  methods: {
+    userData: function () {
+      var t = this;
+      userAccount().then(function (e) {
+        t.userName = e.nickname;
+      });
+    },
+    confirm: function () {
+      var t = this;
+      if (this.userName.length > 16) return (uni.showToast({
+        icon: 'none',
+        title: this.$t('account.nametip')
+      }), false);
+      this.loading = true;
+      AccountEdit({
+        name: this.userName
+      }).then(function (e) {
+        t.loading = false;
+        uni.showToast({
+          icon: 'none',
+          title: t.$t('account.editS')
+        });
+        uni.redirectTo({
+          url: './setting'
+        });
+      }).catch(function () {
+        t.loading = false;
+        uni.showToast({
+          icon: 'none',
+          title: t.$t('account.editF')
+        });
+      });
+    }
+  }
+};
+</script>
+
 <style scoped>
-.username { min-height: 100vh; background: #f9f9f9; }
-.username_main { background: #fff; margin-top: 16rpx; padding: 0 30rpx; }
-.username_input { height: 110rpx; font-size: 32rpx; color: #17273a; }
-.username_btn { margin: 40rpx 30rpx; height: 92rpx; }
+.username { position:relative;min-height:100vh;background:#f8f8f8 }
+.username .list { width:100%;padding:14rpx 30rpx;background:#fff }
+.username .list .item { display:flex;flex-direction:row;align-items:center;justify-content:center;width:100% }
+.username .list .item .item-key { width:136rpx;text-align:left;font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#444 }
+.username .list .item .item-name { flex:1;height:84rpx;padding:0 20rpx;border:1rpx solid #e0dfdf;border-radius:7rpx }
+.username .logout { position:fixed;bottom:38rpx;left:74rpx;width:600rpx;height:90rpx }
 </style>

@@ -1,142 +1,189 @@
-<script setup lang="ts">
-// Faithful port of ORich pages/account/setting.
-// Rows mirror the original: Avatar, Name, Phone, Address, Bank Account + Log Out.
-import { ref } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
-import { AccountData, Logout, SetAvatar } from '@/api/orich';
-import { clearTokens, api } from '@/api/request';
-import { LOCALES, setLocale, currentLocale } from '@/locale';
-
-const info = ref<any>({ nickname: '-', mobile: '-', headimgurl: '' });
-const showLang = ref(false);
-const langLabel = () => LOCALES.find((l) => l.code === currentLocale())?.label || 'English';
-
-onShow(async () => {
-  const r: any = await AccountData();
-  if (r && r.ok !== false) info.value = r;
-});
-
-function go(url: string) {
-  uni.navigateTo({ url });
-}
-function pickAvatar() {
-  uni.chooseImage({
-    count: 1,
-    success: (res) => {
-      uni.uploadFile({
-        url: `${api.base}/api/upload`,
-        filePath: res.tempFilePaths[0],
-        name: 'file',
-        header: { Authorization: `Bearer ${uni.getStorageSync('access_token')}`, 'Content-Type': 'image/jpeg' },
-        success: async (up) => {
-          try {
-            const d = JSON.parse(up.data);
-            if (d.ok) {
-              await SetAvatar({ avatar: d.key });
-              uni.showToast({ title: 'Edit success!', icon: 'none' });
-            }
-          } catch {
-            uni.showToast({ title: 'Edit fail', icon: 'none' });
-          }
-        },
-      });
-    },
-  });
-}
-function pickLang(code: string) {
-  setLocale(code);
-  showLang.value = false;
-}
-function logout() {
-  uni.showModal({
-    title: '',
-    content: 'Log out of vuapp?',
-    success: (r) => {
-      if (r.confirm) {
-        Logout().catch(() => {});
-        clearTokens();
-        uni.reLaunch({ url: '../login/login' });
-      }
-    },
-  });
-}
-</script>
-
 <template>
   <view class="setting">
-    <navbar :title="$t('account.settitle')" background="#ffffff" />
-
-    <view class="setting_main">
-      <view class="setting_item" @click="pickAvatar">
-        <view class="setting_item_left">{{ $t('common.avatar') }}</view>
-        <view class="setting_item_right">
-          <image class="setting_avatar" :src="info.headimgurl || '/static/image/other.png'" mode="aspectFill" />
-          <u-icon name="arrow-right" color="#cccccc" size="14" />
-        </view>
+    <navbar :title="$t('account.settitle')" background="#ffffff" :isComfirm="true" @beforeBack="handleBack"></navbar>
+    <view class="middle">
+      <view class="avatar" @click="changeHead">
+        <span class="avatar_title">{{ $t('common.avatar') }}</span>
+        <span class="avatar_img">
+          <image class="img" :src="headImg" />
+        </span>
+        <u-icon class="avatar_icon" name="arrow-right" color="#B9B9B9" size="30"></u-icon>
       </view>
-
-      <view class="setting_item" @click="go('./username')">
-        <view class="setting_item_left">{{ $t('common.name') }}</view>
-        <view class="setting_item_right">
-          <text class="setting_item_value">{{ info.nickname }}</text>
-          <u-icon name="arrow-right" color="#cccccc" size="14" />
-        </view>
+      <view class="name" @click="toUser">
+        <span class="name_title">{{ $t('common.name') }}</span>
+        <span class="name_info">{{ userName }}</span>
+        <u-icon class="name_icon" name="arrow-right" color="#B9B9B9" size="30"></u-icon>
       </view>
-
-      <view class="setting_item">
-        <view class="setting_item_left">{{ $t('common.phone') }}</view>
-        <view class="setting_item_right">
-          <text class="setting_item_value">{{ info.mobile }}</text>
-        </view>
+      <view class="phone">
+        <span class="phone_name">{{ $t('common.phone') }}</span>
+        <span class="phone_number">{{ numDeal }}</span>
       </view>
-
-      <view class="setting_item" @click="go('../address/address')">
-        <view class="setting_item_left">{{ $t('common.address') }}</view>
-        <u-icon name="arrow-right" color="#cccccc" size="14" />
+      <view class="check" @click="toAddress">
+        <span class="check_updates">{{ $t('common.address') }}</span>
+        <u-icon class="check_icon" name="arrow-right" color="#B9B9B9" size="30"></u-icon>
       </view>
-
-      <view class="setting_item" @click="go('../payment/payment')">
-        <view class="setting_item_left">{{ $t('account.bank') }}</view>
-        <u-icon name="arrow-right" color="#cccccc" size="14" />
-      </view>
-
-      <view class="setting_item" @click="showLang = true">
-        <view class="setting_item_left">Language</view>
-        <view class="setting_item_right">
-          <text class="setting_item_value">{{ langLabel() }}</text>
-          <u-icon name="arrow-right" color="#cccccc" size="14" />
-        </view>
+      <view class="user" @click="toBank">
+        <span class="user_updates">{{ $t('account.bank') }}</span>
+        <u-icon class="user_icon" name="arrow-right" color="#B9B9B9" size="30"></u-icon>
       </view>
     </view>
-
-    <view class="setting_logout" @click="logout">{{ $t('account.logout') }}</view>
-
-    <view v-if="showLang" class="lang_mask" @click="showLang = false">
-      <view class="lang_sheet" @click.stop>
-        <view v-for="l in LOCALES" :key="l.code" class="lang_item" :class="{ on: currentLocale() === l.code }" @click="pickLang(l.code)">
-          {{ l.label }}
-        </view>
-      </view>
+    <view class="logout">
+      <overbtn
+        :btnText="$t('account.logout')"
+        :fontSize="28"
+        btnType="submit"
+        :loading="loading"
+        @btnAction="logout"
+      ></overbtn>
     </view>
   </view>
 </template>
 
-<style>
-@import './setting.css';
-</style>
+<script>
+import { AccountEdit, Logout, userAccount } from '@/api/orich';
+
+export default {
+  onLoad: function (t) {},
+  computed: {},
+  data: function () {
+    return {
+      headImg: '',
+      phoneNumber: '101****500',
+      userName: '',
+      loading: false
+    };
+  },
+  mounted: function () {
+    this.userData();
+  },
+  computed: {
+    numDeal: function () {
+      if (void 0 != this.phoneNumber) {
+        var t = /(\d{2})\d*(\d{3})/;
+        return this.phoneNumber.replace(t, '$1****$2');
+      }
+      return '';
+    }
+  },
+  methods: {
+    handleBack: function () {
+      uni.navigateTo({
+        url: '../account/account'
+      });
+    },
+    userData: function () {
+      var t = this;
+      userAccount().then(function (e) {
+        t.headImg = e.headimgurl;
+        t.phoneNumber = e.mobile;
+        t.userName = e.nickname;
+      });
+    },
+    toUser: function () {
+      uni.navigateTo({
+        url: './username'
+      });
+    },
+    toAddress: function () {
+      uni.navigateTo({
+        url: '../address/address'
+      });
+    },
+    toBank: function () {
+      uni.navigateTo({
+        url: '../payment/payment'
+      });
+    },
+    changeHead: function () {
+      var e = this;
+      uni.chooseImage({
+        count: 1,
+        success: function (t) {
+          var s = t.tempFilePaths;
+          uni.showLoading({
+            mask: true,
+            title: e.$t('common.loading')
+          });
+          uni.uploadFile({
+            url: e.$apiAddr + '/api/index/upload',
+            name: 'file',
+            filePath: s[0],
+            success: function (t) {
+              var s = JSON.parse(t.data), i = s.data.path;
+              AccountEdit({
+                headimg: i
+              }).then(function (t) {
+                uni.hideLoading();
+                uni.showToast({
+                  icon: 'none',
+                  title: e.$t('account.editS')
+                });
+                e.userData();
+              }).catch(function () {
+                uni.showToast({
+                  icon: 'none',
+                  title: e.$t('account.editF')
+                });
+                uni.hideLoading();
+              });
+            },
+            fail: function () {
+              uni.hideLoading();
+            }
+          });
+        },
+        fail: function () {
+          uni.hideLoading();
+        },
+        complete: function () {
+          console.log(123132);
+        }
+      });
+    },
+    logout: function () {
+      var t = this;
+      this.logout = true;
+      Logout().then(function (e) {
+        t.$store.dispatch('removeToken');
+        t.logout = false;
+        uni.reLaunch({
+          url: '/pages/login/login'
+        });
+      }).catch(function () {
+        t.logout = false;
+      });
+    }
+  }
+};
+</script>
 
 <style scoped>
-.setting { min-height: 100vh; background: #f9f9f9; }
-.setting_main { background: #fff; margin-top: 16rpx; padding: 0 30rpx; }
-.setting_item { display: flex; align-items: center; justify-content: space-between; height: 110rpx; border-bottom: 2rpx solid #f5f5f5; }
-.setting_item:last-child { border-bottom: none; }
-.setting_item_left { font-size: 30rpx; color: #17273a; }
-.setting_item_right { display: flex; align-items: center; }
-.setting_item_value { font-size: 26rpx; color: #b9b9b9; margin-right: 10rpx; }
-.setting_avatar { width: 68rpx; height: 68rpx; border-radius: 50%; margin-right: 12rpx; }
-.setting_logout { margin: 40rpx 30rpx; height: 92rpx; line-height: 92rpx; text-align: center; background: #fff; border-radius: 16rpx; color: #ff5c5c; font-size: 30rpx; }
-.lang_mask { position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-end; }
-.lang_sheet { width: 100%; background: #fff; border-radius: 24rpx 24rpx 0 0; padding: 20rpx 0 40rpx; }
-.lang_item { padding: 30rpx; text-align: center; font-size: 30rpx; border-bottom: 2rpx solid #f5f5f5; }
-.lang_item.on { color: #ee5016; font-weight: 700; }
+.setting { position:relative;min-height:100vh;background-color:#f8f8f8 }
+.img { width:100%;height:100% }
+.top { padding-bottom:20rpx;margin-top:112rpx;background-color:#fff }
+.top .title_top { display:inline-block;margin-left:258rpx;font-size:32rpx;font-family:Roboto,Roboto-Bold;font-weight:700;color:#000 }
+.top .icon_top { margin-left:30rpx;vertical-align:bottom }
+.middle { border-top:2rpx solid #f8f8f8;background-color:#fff }
+.avatar { display:flex;align-items:center;position:relative;padding:20rpx 0 20rpx 30rpx }
+.avatar .avatar_title { font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#444;display:block }
+.avatar .avatar_img { margin-left:452rpx;font-size:32rpx;width:90rpx;height:90rpx;display:inline-block;border-radius:50%;overflow:hidden }
+.avatar .avatar_icon { position:absolute;right:33rpx }
+.name { position:relative;margin:0 28rpx 0 30rpx;padding:33rpx 0 34rpx 0;border-top:2rpx solid #ececec }
+.name .name_title { font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#444 }
+.name .name_info { float:right;margin-right:60rpx;font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9;letter-spacing:0rpx }
+.name .name_icon { position:absolute;top:40rpx;right:5rpx }
+.phone { position:relative;margin:0 28rpx 0 30rpx;padding:33rpx 0 34rpx 0;border-top:2rpx solid #ececec }
+.phone .phone_name { font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#444 }
+.phone .phone_number { position:absolute;top:40rpx;right:5rpx;font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9;letter-spacing:0rpx }
+.phone .phone_icon { position:absolute;top:40rpx;right:5rpx }
+.check { position:relative;margin:0 28rpx 0 30rpx;padding:33rpx 0 34rpx 0;border-top:2rpx solid #ececec }
+.check .check_updates { padding-top:33rpx;font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;text-align:CENTER;color:#444;letter-spacing:0rpx }
+.check .check_icon { position:absolute;top:40rpx;right:5rpx }
+.user { position:relative;margin:0 28rpx 0 30rpx;padding:33rpx 0 34rpx 0;border-top:2rpx solid #ececec }
+.user .user_updates { padding-top:33rpx;font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;text-align:CENTER;color:#444;letter-spacing:0rpx }
+.user .user_icon { position:absolute;top:40rpx;right:5rpx }
+.about { position:relative;margin:0 28rpx 0 30rpx;padding:33rpx 0 34rpx 0;border-top:2rpx solid #ececec }
+.about .about_updates { padding-top:33rpx;font-size:32rpx;font-family:PingFang SC,PingFang SC-Medium;font-weight:700;text-align:CENTER;color:#444;letter-spacing:0rpx }
+.about .about_icon { position:absolute;top:40rpx;right:5rpx }
+.logout { position:fixed;bottom:38rpx;left:74rpx;width:600rpx;height:90rpx }
 </style>

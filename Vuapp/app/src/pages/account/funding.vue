@@ -1,62 +1,104 @@
-<script setup lang="ts">
-// Faithful port of ORich pages/account/funding (wallet ledger).
-import { ref } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
-import { Funding } from '@/api/orich';
-import { formatMinor } from '@/utils/money';
-
-const list = ref<any[]>([]);
-const labels: Record<string, string> = {
-  recharge: 'Recharge',
-  withdraw: 'Withdrawal',
-  order: 'Order',
-  refund: 'Refund',
-  reward: 'Reward',
-  task: 'Task reward',
-  referral: 'Referral',
-  finance: 'Finance',
-  game: 'Game',
-};
-
-onShow(async () => {
-  const r: any = await Funding();
-  if (r.ok) list.value = r.transactions || [];
-});
-</script>
-
 <template>
   <view class="funding">
-    <navbar :title="$t('account.fundingrecords')" background="#ffffff" />
-    <view class="funding_main">
-      <view v-for="t in list" :key="t.id" class="funding_item">
-        <view class="funding_item_left">
-          <view class="funding_item_title">{{ labels[t.type] || t.type }}</view>
-          <view class="funding_item_time">{{ new Date(t.created_at * 1000).toLocaleString() }}</view>
-        </view>
-        <view class="funding_item_right">
-          <view class="funding_item_amount" :class="{ neg: t.amount_minor < 0 }">
-            {{ t.amount_minor >= 0 ? '+' : '' }}{{ formatMinor(t.amount_minor) }}
+    <navbar :title="$t('account.editname')" background="#ffffff"></navbar>
+    <mescroll-body
+      ref="mescrollRef"
+      :down="downOption"
+      :up="upOption"
+      @init="mescrollInit"
+      @down="downCallback"
+      @up="upCallback"
+    >
+      <view class="list">
+        <view v-for="(item, index) in dataList" :key="index" class="item">
+          <view class="item-menu">
+            <view class="item-key">{{ item.typeshow }}</view>
+            <view class="item-value">{{ item.price.slice(0, 1) }}₹ {{ item.price.slice(1) }}</view>
           </view>
-          <view class="funding_item_balance">{{ formatMinor(t.balance_after) }}</view>
+          <view class="item-menu">
+            <view class="item-text">{{ item.time }}</view>
+            <view v-if="3 == item.type" class="item-text">{{ item.balance }}</view>
+            <view v-else class="item-text">{{ item.balance }}</view>
+          </view>
         </view>
       </view>
-      <view v-if="!list.length" class="nodata">{{ $t('common.nodata') }}</view>
-    </view>
+    </mescroll-body>
   </view>
 </template>
 
-<style>
-@import './funding.css';
-</style>
+<script>
+import { interopDefault as d_4df3 } from '@/utils/mescroll-mixin';
+import { UserBalance } from '@/api/orich';
+
+export default {
+  mixins: [d_4df3],
+  data: function () {
+    return {
+      downOption: {
+        use: true,
+        auto: true
+      },
+      upOption: {
+        use: true,
+        auto: true,
+        page: {
+          num: 0,
+          size: 20
+        }
+      },
+      dataList: []
+    };
+  },
+  mounted: function () {},
+  methods: {
+    upCallback: function (t) {
+      var e = this, s = (t.num - 1) * t.size, i = t.size;
+      UserBalance({
+        start: s,
+        limit: i
+      }).then(function (s) {
+        var i = s.list, a = i.length, n = +s.count;
+        1 == t.num && (e.dataList = []);
+        e.dataList = e.dataList.concat(i);
+        e.dataList.forEach(function (t) {
+          switch (+t.type) {
+            case 1:
+              t.typename = e.$t('account.recharge');
+              break;
+            case 2:
+              t.typename = e.$t('account.treasure');
+              break;
+            case 3:
+              t.typename = e.$t('account.treasure');
+              break;
+            case 4:
+              t.typename = e.$t('account.withdraw');
+              break;
+            case 5:
+              t.typename = e.$t('account.wreturn');
+              break;
+            case 6:
+              t.typename = e.$t('account.operation');
+              break;
+          }
+        });
+        e.mescroll.endBySize(a, n);
+      }).catch(function (t) {
+        e.mescroll.endErr();
+      });
+    }
+  }
+};
+</script>
 
 <style scoped>
-.funding { min-height: 100vh; background: #f9f9f9; }
-.funding_main { background: #fff; margin-top: 16rpx; padding: 0 30rpx; }
-.funding_item { display: flex; align-items: center; justify-content: space-between; padding: 26rpx 0; border-bottom: 2rpx solid #f5f5f5; }
-.funding_item_title { font-size: 30rpx; color: #17273a; font-weight: 700; }
-.funding_item_time { margin-top: 8rpx; font-size: 24rpx; color: #b9b9b9; }
-.funding_item_right { text-align: right; }
-.funding_item_amount { font-size: 30rpx; font-weight: 700; color: #2bbf6a; }
-.funding_item_amount.neg { color: #ff5c5c; }
-.funding_item_balance { margin-top: 8rpx; font-size: 24rpx; color: #b9b9b9; }
+.funding { position:relative;background:#f8f8f8 }
+.funding .list { background:#fff;padding:0 30rpx }
+.funding .list .item { padding:20rpx 0 }
+.funding .list .item .item-menu { display:flex;flex-direction:row;align-items:center;justify-content:space-between;width:100% }
+.funding .list .item .item-key { width:400rpx;font-size:32rpx;font-family:Roboto,Roboto-Medium;font-weight:700;color:#444 }
+.funding .list .item .item-value { font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#ff5c5c;letter-spacing:0rpx }
+.funding .list .item .item-text { font-size:32rpx;font-family:Roboto,Roboto-Regular;color:#ee5016 }
+.funding .list .item .item-text { margin-top:10rpx;font-size:26rpx;font-family:Roboto,Roboto-Regular;color:#b9b9b9 }
+.funding .list .item:not(:last-child) { border-bottom:1rpx solid #ececec }
 </style>

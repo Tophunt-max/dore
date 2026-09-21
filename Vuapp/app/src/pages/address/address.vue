@@ -1,83 +1,187 @@
-<script setup lang="ts">
-// Faithful port of ORich pages/address/address.
-import { ref } from 'vue';
-import { onShow, onLoad } from '@dcloudio/uni-app';
-import { AddressList, AddressUpdate, AddressDelete } from '@/api/orich';
-
-const list = ref<any[]>([]);
-const pickMode = ref(false);
-
-onLoad((q: any) => {
-  pickMode.value = !!q?.pick;
-});
-onShow(load);
-
-async function load() {
-  const r: any = await AddressList();
-  if (r.ok) list.value = r.addresses || [];
-}
-function add() {
-  uni.navigateTo({ url: './add' });
-}
-function edit(a: any) {
-  uni.navigateTo({ url: `./add?id=${a.id}` });
-}
-async function setDefault(a: any) {
-  await AddressUpdate(a.id, { ...a, is_default: 1 });
-  load();
-}
-function del(a: any) {
-  uni.showModal({
-    title: '',
-    content: 'Remove this address?',
-    success: async (r) => {
-      if (r.confirm) {
-        await AddressDelete(a.id);
-        load();
-      }
-    },
-  });
-}
-function pick(a: any) {
-  if (!pickMode.value) return;
-  uni.setStorageSync('picked_address', a);
-  uni.navigateBack();
-}
-</script>
-
 <template>
   <view class="address">
-    <navbar :title="$t('address.title')" background="#ffffff" />
-    <view v-for="a in list" :key="a.id" class="content" @click="pick(a)">
-      <view class="top">
-        <view class="top_name">{{ a.name }}</view>
-        <view class="top_number">{{ a.phone }}</view>
-        <image src="/static/image/account/icon_leftarrow.png" mode="aspectFit" @click.stop="edit(a)" />
-      </view>
-      <view class="middle">
-        <view class="middle_content">{{ a.line }}{{ a.city ? ', ' + a.city : '' }}{{ a.state ? ', ' + a.state : '' }} - {{ a.pincode }}</view>
-      </view>
-      <view class="bottom">
-        <view :class="a.is_default ? 'bottom-select' : 'bottom-radio'" @click.stop="setDefault(a)">
-          <view class="bottom-circle" />
+    <navbar :title="$t('address.title')" background="#ffffff" :isComfirm="true" @beforeBack="handleBack"></navbar>
+    <mescroll-body
+      ref="mescrollRef"
+      :down="downOption"
+      :up="upOption"
+      @init="mescrollInit"
+      @down="downCallback"
+      @up="upCallback"
+    >
+      <view v-for="(item, index) in addressList" :key="index" class="content" @click="toAction(item)">
+        <view class="top">
+          <span class="top_name">{{ item.name }}</span>
+          <span class="top_number">{{ item.mobile }}</span>
+          <image :src="'/static/image/address/icon_Editing.png'" @click.stop="toEdit(item)" mode="widthFix" />
         </view>
-        <view class="round">{{ $t('address.round') }}</view>
-        <view class="delete" @click.stop="del(a)">{{ $t('address.deletes') }}</view>
+        <view class="middle">
+          <view class="middle_content">{{ item.address }}</view>
+        </view>
+        <view class="bottom">
+          <view
+            class="bottom-radio"
+            :class="1 == item.isdefault ? 'bottom-select' : ''"
+            @click="setDefault(item)"
+          >
+            <view class="bottom-circle"></view>
+            <view>{{ $t('address.round') }}</view>
+          </view>
+          <view class="delete" @click.stop="del(item.id)">{{ $t('address.deletes') }}</view>
+        </view>
       </view>
-    </view>
-    <view v-if="!list.length" class="nodata">{{ $t('common.nodata') }}</view>
+    </mescroll-body>
     <view class="addbtn">
-      <overbtn :btnText="$t('address.btntitle')" :fontSize="30" btnType="submit" @btnAction="add" />
+      <overbtn :btnText="$t('address.btntitle')" @btnAction="btnAdd"></overbtn>
     </view>
+    <onepopup
+      ref="onepopup"
+      popType="1"
+      :conetnt="contentText"
+      confirmText="Delete"
+      @cancel="closePopup"
+      @confirm="confirm"
+    ></onepopup>
   </view>
 </template>
 
-<style>
-@import './address.css';
-</style>
+<script>
+import m_0765 from '@/vendor/0765';
+import * as ns_9fda from '@/api/orich';
+import { interopDefault as d_4df3 } from '@/utils/mescroll-mixin';
+
+// Helpers the reference bundle hoisted out of the component.
+var n = (m_0765, ns_9fda);
+
+export default {
+  mixins: [d_4df3],
+  onLoad: function (t) {
+    this.fromType = t.type;
+    this.orderId = t.id;
+  },
+  onShow: function () {
+    this.mescroll.resetUpScroll();
+  },
+  computed: {
+    contentText: function () {
+      return this.$t('address.deltip');
+    }
+  },
+  data: function () {
+    return {
+      downOption: {
+        use: true,
+        auto: true
+      },
+      upOption: {
+        use: true,
+        auto: true,
+        page: {
+          num: 0,
+          size: 20
+        }
+      },
+      fromType: 1,
+      loading: false,
+      addressList: [],
+      delId: '',
+      orderId: ''
+    };
+  },
+  mounted: function () {},
+  methods: {
+    handleBack: function () {
+      2 == this.fromType ? uni.navigateTo({
+        url: ('../order/detail?id=').concat(this.orderId)
+      }) : uni.navigateTo({
+        url: '../account/setting'
+      });
+    },
+    btnAdd: function () {
+      uni.navigateTo({
+        url: './add'
+      });
+    },
+    closePopup: function () {
+      this.$refs.onepopup.close();
+    },
+    del: function (t) {
+      this.delId = t;
+      this.$refs.onepopup.open();
+    },
+    confirm: function () {
+      var t = this;
+      (0, n.DelAddress)({
+        id: this.delId
+      }).then(function (e) {
+        t.$refs.onepopup.close();
+        uni.showToast({
+          icon: 'none',
+          mask: true,
+          title: t.$t('address.successD')
+        });
+        t.mescroll.resetUpScroll();
+      });
+    },
+    toEdit: function (t) {
+      uni.setStorageSync('OneAddress', JSON.stringify(t));
+      uni.navigateTo({
+        url: ('./add?id=').concat(t.id)
+      });
+    },
+    setDefault: function (t) {
+      var e = this;
+      1 != t.isdefault && (0, n.EditAccount)({
+        id: t.id
+      }).then(function (t) {
+        uni.showToast({
+          icon: 'none',
+          mask: true,
+          title: e.$t('address.successS')
+        });
+        e.mescroll.resetUpScroll();
+      });
+    },
+    toAction: function (e) {
+      console.log(e);
+      2 == this.fromType && uni.navigateTo({
+        url: ('../order/detail?id=').concat(this.orderId, '&addrId=').concat(e.id)
+      });
+    },
+    upCallback: function (t) {
+      var e = this, s = (t.num - 1) * t.size, i = t.size;
+      (0, n.AddressList)({
+        start: s,
+        limit: i
+      }).then(function (s) {
+        var i = s.list, a = i.length, n = +s.count;
+        1 == t.num && (e.addressList = []);
+        e.addressList = e.addressList.concat(i);
+        e.mescroll.endBySize(a, n);
+      }).catch(function (t) {
+        e.mescroll.endErr();
+      });
+    }
+  }
+};
+</script>
 
 <style scoped>
-.address { min-height: 100vh; background: #f9f9f9; padding-bottom: 180rpx; }
-.round { margin-left: 12rpx; font-size: 26rpx; color: #17273a; }
-.addbtn { position: fixed; left: 30rpx; right: 30rpx; bottom: 40rpx; height: 92rpx; }
+.address { min-height:100vh;padding-bottom:150rpx;background-color:#f8f8f8 }
+.address_title { margin-top:112rpx;padding-left:38rpx;background-color:#fff }
+.address_title .title-right { display:inline-block;margin-left:226rpx;margin-bottom:20rpx;vertical-align:middle;color:#000;font-family:Roboto,Roboto-Bold;font-weight:700;font-size:32rpx;line-height:48rpx }
+.content { box-sizing:border-box;margin:22rpx 28rpx 16rpx 30rpx;width:690rpx;padding:0 0 20rpx 0;background:#fff;border-radius:16rpx }
+.top { position:relative;padding:24rpx 30rpx 0 34rpx }
+.top .top_name { width:90rpx;height:48rpx;font-size:32rpx;font-family:Roboto,Roboto-Medium;font-weight:700;text-align:CENTER;color:#17273a;line-height:48rpx }
+.top .top_number { margin-left:16rpx;margin-bottom:6rpx;width:190rpx;height:48rpx;font-size:28rpx;font-family:Roboto,Roboto-Regular;font-weight:400;text-align:CENTER;color:#b9b9b9;line-height:48rpx }
+.top uni-image { position:absolute;right:29rpx;width:40rpx }
+.middle { margin:6rpx 30rpx 0 34rpx;margin-bottom:34rpx }
+.middle .middle_content { width:610rpx;font-size:24rpx;font-family:Roboto,Roboto-Regular;font-weight:400;text-align:left;color:#b9b9b9 }
+.bottom { display:flex;flex-direction:row;align-items:center;justify-content:space-between;padding:0 34rpx;padding-top:20rpx;border-top:1rpx solid #ececec }
+.bottom-radio { display:flex;flex-direction:row;align-items:center;justify-content:flex-start;font-size:28rpx;font-family:Roboto,Roboto-Regular;color:#b9b9b9 }
+.bottom-radio .bottom-circle { width:34rpx;height:34rpx;margin-right:12rpx;border:2rpx solid #b9b9b9;border-radius:50% }
+.bottom-select { color:#ee5016 }
+.bottom-select .bottom-circle { background:#ee5016;border:2rpx solid #ee5016;border-radius:50% }
+.delete { font-size:28rpx;font-weight:400;color:#17273a }
+.addbtn { position:fixed;bottom:40rpx;left:50%;-webkit-transform:translate(-50%);transform:translate(-50%);width:600rpx;height:90rpx }
 </style>

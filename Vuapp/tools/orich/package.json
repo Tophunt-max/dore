@@ -1,0 +1,14 @@
+{
+  "name": "orich-clone-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Read-only generator that rebuilds the vuapp user app from the decompiled ORich reference bundle. Development tooling only - nothing here ships in the app.",
+  "scripts": {
+    "gen": "node generate.js"
+  },
+  "dependencies": {
+    "acorn": "^8.14.0",
+    "astring": "^1.9.0"
+  }
+}

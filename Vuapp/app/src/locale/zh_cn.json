@@ -1,0 +1,8 @@
+{
+  "tabBar": {
+    "home": "首页",
+    "investment": "交易",
+    "team": "社区",
+    "mine": "我的"
+  }
+}
