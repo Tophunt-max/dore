@@ -1,0 +1,29 @@
+name = "vuapp-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 database (create with: wrangler d1 create vuapp-db, then paste database_id)
+[[d1_databases]]
+binding = "DB"
+database_name = "vuapp-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# R2 bucket for private uploads (create with: wrangler r2 bucket create vuapp-uploads)
+[[r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "vuapp-uploads"
+
+# KV for OTP + short-lived session data (create with: wrangler kv namespace create VUAPP_KV)
+[[kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+APP_NAME = "vuapp"
+# CORS allowlist (comma separated). Set your Pages URLs here in production.
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:8080,https://vuapp-user.pages.dev,https://vuapp-admin.pages.dev"
+
+# Secrets (set via: wrangler secret put <NAME>)
+#   JWT_SECRET       - signing secret for access/refresh tokens
+#   ADMIN_BOOTSTRAP  - bootstrap admin password (first admin login)

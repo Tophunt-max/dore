@@ -1,0 +1,28 @@
+{
+  "name": "vuapp",
+  "appid": "",
+  "description": "vuapp group-buy and rewards app",
+  "versionName": "1.0.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "app-plus": {
+    "usingComponents": true,
+    "nvueStyleCompiler": "uni-app",
+    "compilerVersion": 3,
+    "splashscreen": { "alwaysShowBeforeRender": true, "waiting": true, "autoclose": true, "delay": 0 },
+    "modules": {},
+    "distribute": {
+      "android": { "permissions": [] },
+      "ios": {},
+      "sdkConfigs": {}
+    }
+  },
+  "quickapp": {},
+  "mp-weixin": { "appid": "", "setting": { "urlCheck": false }, "usingComponents": true },
+  "h5": {
+    "title": "vuapp",
+    "router": { "mode": "hash", "base": "/" },
+    "async": { "loading": "AsyncLoading", "delay": 200, "timeout": 60000 }
+  },
+  "vueVersion": "3"
+}
