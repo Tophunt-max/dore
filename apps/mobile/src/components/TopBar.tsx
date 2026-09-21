@@ -13,6 +13,8 @@ interface TopBarProps {
    * to the page background (#F8F8F8) to preserve existing screens.
    */
   white?: boolean;
+  /** White title/back/action for use over a coloured hero (ORich transparent navbar). */
+  light?: boolean;
   onBack?: () => void;
 }
 
@@ -23,6 +25,7 @@ export function TopBar({
   onAction,
   transparent = false,
   white = false,
+  light = false,
   onBack,
 }: TopBarProps) {
   return (
@@ -39,17 +42,19 @@ export function TopBar({
             hitSlop={12}
             onPress={() => (onBack ? onBack() : router.back())}
           >
-            <Text style={styles.back}>‹</Text>
+            <Text style={[styles.back, light && styles.lightText]}>‹</Text>
           </Pressable>
         ) : null}
       </View>
-      <Text numberOfLines={1} style={styles.title}>
+      <Text numberOfLines={1} style={[styles.title, light && styles.lightText]}>
         {title}
       </Text>
       <View style={[styles.side, styles.right]}>
         {actionLabel ? (
           <Pressable hitSlop={10} onPress={onAction}>
-            <Text style={styles.action}>{actionLabel}</Text>
+            <Text style={[styles.action, light && styles.lightText]}>
+              {actionLabel}
+            </Text>
           </Pressable>
         ) : null}
       </View>
@@ -95,4 +100,5 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.family.medium,
     fontSize: theme.typography.size.body,
   },
+  lightText: { color: '#fff' },
 });
