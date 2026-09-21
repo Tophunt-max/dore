@@ -1,0 +1,20 @@
+.add{min-height:100vh;background-color:#f8f8f8;padding-bottom:180rpx}
+.add .title{position:relative;padding-left:38rpx;margin-top:112rpx;background-color:#fff}
+.add .title uni-image{position:absolute;top:6rpx;right:34rpx;width:34rpx;height:35rpx}
+.add .title_content{display:inline-block;margin-left:200rpx;margin-bottom:20rpx;vertical-align:middle;color:#000;font-family:Roboto,Roboto-Bold;font-weight:700;font-size:32rpx}
+.add .content{border-top:1rpx solid #ececec;background:#fff;padding:0 20rpx}
+.add .receiver{margin:0 30rpx;border-bottom:1rpx solid #ececec}
+.add .receiver .input .uni-input-input{font-size:32rpx!important;font-family:Roboto,Roboto-Regular!important;font-weight:400!important}
+.add .receiver_left{font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#444}
+.add .receiver_left_pla{font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#b9b9b9}
+.add .reces{margin-right:55rpx}
+.add .phone{margin-right:85rpx}
+.add .city{margin-right:122rpx}
+.add .address{margin-right:59rpx}
+.add .bottom_address{margin:0 30rpx}
+.add .bottom_address .input .uni-input-input{font-size:32rpx!important;font-family:Roboto,Roboto-Regular!important;font-weight:400!important;color:#7b7b7b!important}
+.add .popup_edit{position:relative;width:552rpx;height:270rpx}
+.add .popup_edit .popup_title{position:absolute;top:10rpx;left:90rpx;width:374rpx;font-size:32rpx;font-family:PingFang SC,PingFang SC-Medium;font-weight:700;text-align:center;color:#17273a}
+.add .popup_edit .del_btn{position:absolute;bottom:48rpx;right:58rpx;width:186rpx;height:72rpx}
+.add .popup_edit .cancel_btn{position:absolute;bottom:48rpx;left:60rpx;width:186rpx;height:72rpx}
+.add .addbtn{position:fixed;bottom:36rpx;left:50%;-webkit-transform:translate(-50%);transform:translate(-50%);width:600rpx;height:90rpx;z-index:999}
