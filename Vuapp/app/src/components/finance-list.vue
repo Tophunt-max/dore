@@ -8,7 +8,7 @@
         <view class="list_item_left_avatar">
           <image v-for="(item2, index2) in item.userimgurl" :key="index2" :src="item2" />
         </view>
-        <view v-if="item.countdown && '00:00:00' != item.countdown" class="list_item_left_time">{{ item.countdown }}</view>
+        <view v-if="item.countdown && '00:00:00' != item.countdown" class="list_item_left_time">End in {{ item.countdown }}</view>
       </view>
       <view class="list_item_right">
         <view class="list_item_right_title">{{ item.name }}</view>
@@ -16,36 +16,36 @@
           <view class="list_item_right_linepro_gress">
             <lineprogress :percent="100 * item.progress"></lineprogress>
           </view>
-          <view class="list_item_right_linepro_num">{{ item.all_buy_num }}{{ item.max_buy }}</view>
+          <view class="list_item_right_linepro_num">{{ item.all_buy_num }}/{{ item.max_buy }}</view>
         </view>
         <view class="list_item_right_content m_top20">
           <view class="list_item_right_content_total">
-            <text class="c_title">{{ $t('finance.amount') }}</text>
-            <text class="c_main">{{ item.amount }}</text>
+            <text class="c_title">{{ $t('finance.amount') }}:</text>
+            <text class="c_main">₹ {{ item.amount }}</text>
           </view>
           <view class="list_item_right_content_total">
-            <text class="c_title">{{ $t('finance.uprice') }}</text>
-            <text class="c_main">{{ item.price }}</text>
+            <text class="c_title">{{ $t('finance.uprice') }}:</text>
+            <text class="c_main">₹ {{ item.price }}</text>
           </view>
         </view>
         <view class="list_item_right_content">
           <view class="list_item_right_content_total">
-            <text class="c_title">{{ $t('finance.rate') }}</text>
-            <text class="c_main">{{ item.rate }}</text>
+            <text class="c_title">{{ $t('finance.rate') }}:</text>
+            <text class="c_main">{{ item.rate }} %</text>
           </view>
           <view class="list_item_right_content_total">
-            <text class="c_title">{{ $t('finance.due') }}</text>
-            <text class="c_main">{{ item.day }}{{ $t('finance.day') }}</text>
+            <text class="c_title">{{ $t('finance.due') }}:</text>
+            <text class="c_main">{{ item.day }} {{ $t('finance.day') }}</text>
           </view>
         </view>
-        <view class="list_item_right_joined">{{ item.usernumber }}{{ $t('finance.joined') }}</view>
+        <view class="list_item_right_joined">{{ item.usernumber }} {{ $t('finance.joined') }}</view>
       </view>
       <view class="list_item_btn" @click="toBuy(item)">
         <text>{{ $t('home.snatch') }}</text>
-        <image />
+        <image src="/static/image/home/icon_RightArrow.png" />
       </view>
       <view v-if="2 == item.status" class="list_item_finish">
-        <image />
+        <image src="/static/image/finance/img_Soldout.png" />
       </view>
     </view>
   </view>

@@ -25,6 +25,7 @@
     @opensetting="opensetting"
     @launchapp="launchapp"
     @click.stop="click($event)"
+    send-message-path="sendMessagePath"
   >
     <slot></slot>
     <view

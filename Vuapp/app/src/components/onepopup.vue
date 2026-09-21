@@ -39,7 +39,7 @@
               <image class="img" :src="'/static/image/goods/icon_MapPinLine.png'" />
             </view>
             <view class="line">
-              <image class="img" :src="'/static/image/goods/img_Dividingline.png'" />
+              <image class="img" :src="'/static/image/goods/img_Dividingline.png'" mode="widthFix" />
             </view>
           </view>
           <view v-if="list.name" class="info">

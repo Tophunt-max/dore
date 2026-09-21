@@ -9,8 +9,18 @@
     >
       <view class="cardlist_item_info">
         <view v-if="shareValue" class="cardlist_item_lefttop">
-          <image v-if="1 === +item.dumstatus" class="img" :src="'/static/image/record/img_Finish.png'" />
-          <image v-if="2 === +item.dumstatus" class="img" :src="'/static/image/record/img_YouWon.png'" />
+          <image
+            v-if="1 === +item.dumstatus"
+            class="img"
+            :src="'/static/image/record/img_Finish.png'"
+            mode="widthFix"
+           />
+          <image
+            v-if="2 === +item.dumstatus"
+            class="img"
+            :src="'/static/image/record/img_YouWon.png'"
+            mode="widthFix"
+           />
         </view>
         <view class="cardlist_item_left" :class="shareValue ? 'imgorder_padd' : 'imgdetail_padd'">
           <view
@@ -19,10 +29,20 @@
             @click="imgToDetail(item.dumid)"
           >
             <view v-if="!shareValue" class="cardlist_item_left_mask">
-              <image v-if="1 === +item.dumstatus" class="img" :src="'/static/image/record/img_Finish.png'" />
-              <image v-if="2 === +item.dumstatus" class="img" :src="'/static/image/record/img_YouWon.png'" />
+              <image
+                v-if="1 === +item.dumstatus"
+                class="img"
+                :src="'/static/image/record/img_Finish.png'"
+                mode="widthFix"
+               />
+              <image
+                v-if="2 === +item.dumstatus"
+                class="img"
+                :src="'/static/image/record/img_YouWon.png'"
+                mode="widthFix"
+               />
             </view>
-            <image class="img" :src="item.iconurl" />
+            <image class="img" :src="item.iconurl" mode="aspectFit" />
           </view>
         </view>
         <view class="cardlist_item_right">
@@ -35,7 +55,7 @@
               {{ item.dealname }}
             </view>
             <view v-if="shareValue" class="cardlist_item_right_top_share" @click.stop="handleShare(item)">
-              <image class="img" :src="shareIcon" />
+              <image class="img" :src="shareIcon" mode="widthFix" />
             </view>
           </view>
           <view class="cardlist_item_right_main">
@@ -76,7 +96,7 @@
             >
               <view v-if="2 == item.dumnormal" class="items gray">
                 {{ $t('card.youwon') }}
-                <text class="red">{{ item.word }}{{ item.getprice }}</text>
+                <text class="red">{{ item.word }} | ₹ {{ item.getprice }}</text>
               </view>
               <view class="items gray">
                 {{ $t('card.winner') }}
@@ -86,7 +106,9 @@
                 {{ $t('card.code') }}
                 <text class="red">{{ item.winnerdetail.winnercode }}</text>
               </view>
-              <view class="items gray">{{ $t('card.drawtime') }}{{ item.winnerdetail.winnertime }}</view>
+              <view class="items gray">
+                {{ $t('card.drawtime') }} {{ item.winnerdetail.winnertime }}
+              </view>
             </view>
           </view>
         </view>
@@ -101,7 +123,7 @@
               @click.stop="handleNav(item.status, item.dumid)"
             >
               <view>{{ btnTitle(item.status) }}</view>
-              <image class="img" :src="'/static/image/icon_RightArrow.png'" />
+              <image class="img" :src="'/static/image/icon_RightArrow.png'" mode="widthFix" />
             </view>
           </view>
         </template>
@@ -112,22 +134,22 @@
       >
         <view class="cardlist_item_loser_strip">
           <view class="title">
-            {{ $t('card.principal') }}
-            <text class="u-m-l-6">{{ item.return_amount }}</text>
+            {{ $t('card.principal') }}:
+            <text class="u-m-l-6">₹{{ item.return_amount }}</text>
           </view>
           <view class="title">
-            {{ $t('card.ratio') }}
-            <text class="u-m-l-6">{{ item.return_rate }}</text>
+            {{ $t('card.ratio') }}:
+            <text class="u-m-l-6">{{ item.return_rate }}%</text>
           </view>
         </view>
         <view class="cardlist_item_loser_strip">
           <view class="title">
-            {{ $t('card.interest') }}
-            <text class="u-m-l-6">{{ item.return_income }}</text>
+            {{ $t('card.interest') }}:
+            <text class="u-m-l-6">₹{{ item.return_income }}</text>
           </view>
         </view>
         <view class="cardlist_item_loser_strip">
-          <view class="title">{{ $t('card.ltime') }}{{ item.return_time }}</view>
+          <view class="title">{{ $t('card.ltime') }}: {{ item.return_time }}</view>
         </view>
       </view>
     </view>

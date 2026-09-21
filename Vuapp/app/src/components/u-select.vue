@@ -17,6 +17,8 @@
             class="u-select__header__cancel u-select__header__btn"
             :style="{ color: cancelColor }"
             @click="getResult('cancel')"
+            hover-class="u-hover-class"
+            :hover-stay-time="150"
           >
             {{ cancelText }}
           </view>
@@ -26,6 +28,8 @@
             :style="{ color: moving ? cancelColor : confirmColor }"
             @touchmove="stopPropagation()"
             @click.stop="getResult('confirm')"
+            hover-class="u-hover-class"
+            :hover-stay-time="150"
           >
             {{ confirmText }}
           </view>

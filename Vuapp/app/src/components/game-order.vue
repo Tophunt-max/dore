@@ -6,7 +6,7 @@
           <text></text>
           <text class="price">{{ item.price }}</text>
         </view>
-        <view class="order_item_strip_title">{{ $t('game.createtime') }}{{ item.created }}</view>
+        <view class="order_item_strip_title">{{ $t('game.createtime') }} {{ item.created }}</view>
       </view>
       <view class="order_item_strip">
         <view class="order_item_strip_ntr">{{ $t('game.contr') }}</view>

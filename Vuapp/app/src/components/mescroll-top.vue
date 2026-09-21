@@ -6,6 +6,7 @@
     :style="{ 'z-index': mOption.zIndex, left: left, right: right, bottom: addUnit(mOption.bottom), width: addUnit(mOption.width), 'border-radius': addUnit(mOption.radius) }"
     :src="mOption.src"
     @click="toTopClick"
+    mode="widthFix"
    />
 </template>
 
