@@ -2,26 +2,27 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import {
   Image,
-  ImageBackground,
   Pressable,
+  ScrollView,
   Share,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '@/api/endpoints';
 import { assets } from '@/assets';
 import { GradientButton } from '@/components/GradientButton';
-import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { useI18n } from '@/i18n';
 import { useAuthStore } from '@/stores/auth';
 import { rpx } from '@/rpx';
 import { theme } from '@/theme';
 
-// ORich `pages/invitation/invitation` (scope 13d087ed): a red hero with a rule
-// pill, a white "invited" card (counts + link + copy + INVITE button), a
-// three-step how-it-works card, and a ranked friends list.
+// ORich `pages/invitation/invitation` (scope 13d087ed): a full-page red
+// illustration background (fixed) with a rules pill in the navbar, a white
+// "invited" card, a three-step how-it-works card, and a ranked friends list
+// floating over the illustration.
 const RANK_COLORS = ['#F5B301', '#B8C0CC', '#D98C5F'];
 
 export default function ReferralsScreen() {
@@ -61,113 +62,125 @@ export default function ReferralsScreen() {
   ];
 
   return (
-      <Screen
-        header={
-          <TopBar
-            title={t('referrals.inviteFriends')}
-            white
-            actionLabel={t('invite.rules')}
-            onAction={() => router.push({ pathname: '/rules', params: { type: '3' } })}
-          />
-        }
-        contentStyle={styles.page}
-      >
-        <Image source={assets.inviteBackground} style={styles.hero} />
-        {/* invited card */}
-        <View style={styles.invited}>
-          <View style={styles.earn}>
-            <View style={styles.earnCol}>
-              <Text style={styles.earnLabel}>{t('invite.invited')}</Text>
-              <View style={styles.earnRow}>
-                <Text style={styles.earnNum}>{s?.totalInvited ?? 0}</Text>
-                <Text style={styles.earnUnit}>{t('invite.people')}</Text>
-              </View>
-            </View>
-            <View style={styles.earnCol}>
-              <Text style={styles.earnLabel}>{t('invite.reward')}</Text>
-              <Text style={styles.earnNum}>
-                {s ? formatMoney(s.rewardMinor, s.currency) : '—'}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.mylink}>
-            <Text style={styles.my}>{t('invite.myLink')}</Text>
-            <View style={styles.linkBox}>
-              <Text style={styles.msg} numberOfLines={1}>
-                {link || '—'}
-              </Text>
-              <Pressable onPress={() => void share()}>
-                <Text style={styles.copy}>{t('invite.copy')}</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          <View style={styles.inviteBtn}>
-            <GradientButton onPress={() => void share()}>
-              {t('invite.now')}
-            </GradientButton>
-          </View>
-        </View>
-
-        {/* three-step card */}
-        <View style={styles.reg}>
-          {steps.map((step, i) => (
-            <View key={step.label} style={styles.stepRow}>
-              <View style={styles.stepItem}>
-                <View style={styles.stepIconWrap}>
-                  <Image source={step.icon} style={styles.stepIcon} />
-                </View>
-                <Text style={styles.stepText}>{step.label}</Text>
-              </View>
-              {i < steps.length - 1 ? <View style={styles.stepDash} /> : null}
-            </View>
-          ))}
-        </View>
-
-        {/* friends list */}
-        <View style={styles.bottom}>
-          <View style={styles.tabItem}>
-            <Text style={styles.tabRec}>{t('invite.friends')}</Text>
-          </View>
-          {members.map((m, index) => (
-            <View key={m.id} style={styles.tabs}>
-              <View style={styles.tabsRank}>
-                <View
-                  style={[
-                    styles.rankNum,
-                    { backgroundColor: RANK_COLORS[index] ?? '#ffe6e2' },
-                  ]}
-                >
-                  <Text style={[styles.rankText, index < 3 && styles.rankTop]}>
-                    {index + 1}
-                  </Text>
-                </View>
-                <View style={styles.tabsLeft}>
-                  <Text style={styles.tabsUser} numberOfLines={1}>
-                    {m.displayName ?? m.phoneMasked}
-                  </Text>
-                  <Text style={styles.tabsTime}>
-                    {formatDate(m.createdAt)}
-                  </Text>
+    <View style={styles.root}>
+      {/* fixed full-page illustration behind everything */}
+      <Image
+        source={assets.inviteBackground}
+        style={styles.bgFixed}
+        resizeMode="cover"
+      />
+      <SafeAreaView edges={['top']} style={styles.safe}>
+        <TopBar
+          title={t('referrals.inviteFriends')}
+          transparent
+          light
+          actionLabel={t('invite.rules')}
+          onAction={() =>
+            router.push({ pathname: '/rules', params: { type: '3' } })
+          }
+        />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scroll}
+        >
+          {/* invited card */}
+          <View style={styles.invited}>
+            <View style={styles.earn}>
+              <View style={styles.earnCol}>
+                <Text style={styles.earnLabel}>{t('invite.invited')}</Text>
+                <View style={styles.earnRow}>
+                  <Text style={styles.earnNum}>{s?.totalInvited ?? 0}</Text>
+                  <Text style={styles.earnUnit}>{t('invite.people')}</Text>
                 </View>
               </View>
+              <View style={styles.earnCol}>
+                <Text style={styles.earnLabel}>{t('invite.reward')}</Text>
+                <Text style={styles.earnNum}>
+                  {s ? formatMoney(s.rewardMinor, s.currency) : '—'}
+                </Text>
+              </View>
             </View>
-          ))}
-          {user && !team.isLoading && !members.length ? (
-            <Text style={styles.empty}>{t('team.empty')}</Text>
-          ) : null}
-        </View>
-      </Screen>
+
+            <View style={styles.mylink}>
+              <Text style={styles.my}>{t('invite.myLink')}</Text>
+              <View style={styles.linkBox}>
+                <Text style={styles.msg} numberOfLines={1}>
+                  {link || '—'}
+                </Text>
+                <Pressable onPress={() => void share()}>
+                  <Text style={styles.copy}>{t('invite.copy')}</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={styles.inviteBtn}>
+              <GradientButton onPress={() => void share()}>
+                {t('invite.now')}
+              </GradientButton>
+            </View>
+          </View>
+
+          {/* three-step card */}
+          <View style={styles.reg}>
+            {steps.map((step, i) => (
+              <View key={step.label} style={styles.stepRow}>
+                <View style={styles.stepItem}>
+                  <View style={styles.stepIconWrap}>
+                    <Image source={step.icon} style={styles.stepIcon} />
+                  </View>
+                  <Text style={styles.stepText}>{step.label}</Text>
+                </View>
+                {i < steps.length - 1 ? <View style={styles.stepDash} /> : null}
+              </View>
+            ))}
+          </View>
+
+          {/* friends list */}
+          <View style={styles.bottom}>
+            <View style={styles.tabItem}>
+              <Text style={styles.tabRec}>{t('invite.friends')}</Text>
+            </View>
+            {members.map((m, index) => (
+              <View key={m.id} style={styles.tabs}>
+                <View style={styles.tabsRank}>
+                  <View
+                    style={[
+                      styles.rankNum,
+                      { backgroundColor: RANK_COLORS[index] ?? '#ffe6e2' },
+                    ]}
+                  >
+                    <Text style={[styles.rankText, index < 3 && styles.rankTop]}>
+                      {index + 1}
+                    </Text>
+                  </View>
+                  <View style={styles.tabsLeft}>
+                    <Text style={styles.tabsUser} numberOfLines={1}>
+                      {m.displayName ?? m.phoneMasked}
+                    </Text>
+                    <Text style={styles.tabsTime}>{formatDate(m.createdAt)}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+            {user && !team.isLoading && !members.length ? (
+              <Text style={styles.empty}>{t('team.empty')}</Text>
+            ) : null}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { backgroundColor: '#fe5541', paddingBottom: rpx(40) },
-  hero: { width: '100%', height: rpx(360), resizeMode: 'cover' },
-  // .middle_invited { margin:20rpx; bg #fff; radius 16rpx }
+  root: { flex: 1, backgroundColor: '#fe5541' },
+  // fixed full-screen illustration behind the scrolling content
+  bgFixed: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+  safe: { flex: 1 },
+  // leave the top region showing the illustration hero, then the cards
+  scroll: { paddingTop: rpx(300), paddingBottom: rpx(40) },
+  // .middle_invited { bg #fff; radius 16rpx }
   invited: {
-    marginTop: rpx(-40),
     marginHorizontal: rpx(20),
     paddingBottom: rpx(30),
     backgroundColor: '#fff',
@@ -192,7 +205,6 @@ const styles = StyleSheet.create({
     color: '#b9b9b9',
     fontFamily: theme.typography.family.regular,
   },
-  // .mylink { margin-top:44rpx }
   mylink: {
     marginTop: rpx(44),
     flexDirection: 'row',
@@ -205,7 +217,6 @@ const styles = StyleSheet.create({
     color: '#17273a',
     fontFamily: theme.typography.family.regular,
   },
-  // .bg { padding:22 26; width:450rpx; bg #f5f5f5; radius 16rpx }
   linkBox: {
     flex: 1,
     flexDirection: 'row',
@@ -228,9 +239,8 @@ const styles = StyleSheet.create({
     color: '#649dff',
     fontFamily: theme.typography.family.regular,
   },
-  // .invite_btn { margin-top:38rpx; margin-left:52rpx; width:600rpx }
   inviteBtn: { marginTop: rpx(38), marginHorizontal: rpx(40) },
-  // .middle_reg { margin-top:18rpx; bg #fff; radius 16rpx }
+  // .middle_reg
   reg: {
     marginTop: rpx(18),
     marginHorizontal: rpx(20),
@@ -243,7 +253,6 @@ const styles = StyleSheet.create({
   },
   stepRow: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   stepItem: { flex: 1, alignItems: 'center' },
-  // .link_img { 80rpx; bg #ffe6e2; radius 50% }
   stepIconWrap: {
     width: rpx(80),
     height: rpx(80),
@@ -253,14 +262,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepIcon: { width: rpx(48), height: rpx(48), resizeMode: 'contain' },
-  // .link_text { 26rpx; #566c82 }
   stepText: {
     marginTop: rpx(14),
     fontSize: rpx(26),
     color: '#566c82',
     fontFamily: theme.typography.family.regular,
   },
-  // .point dashed connector
   stepDash: {
     width: rpx(40),
     height: rpx(2),
@@ -270,7 +277,7 @@ const styles = StyleSheet.create({
     borderColor: '#de6436',
     opacity: 0.3,
   },
-  // .bottom { margin:16rpx 20rpx; bg #fff; radius 16rpx }
+  // .bottom
   bottom: {
     marginTop: rpx(16),
     marginHorizontal: rpx(20),
@@ -284,7 +291,6 @@ const styles = StyleSheet.create({
     color: '#17273a',
     fontFamily: theme.typography.family.medium,
   },
-  // .tabs { margin:14 26; padding-bottom:22rpx; border-bottom #ececec }
   tabs: {
     marginHorizontal: rpx(26),
     paddingBottom: rpx(22),

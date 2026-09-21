@@ -5,24 +5,25 @@ import {
   Alert,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '@/api/endpoints';
 import { assets } from '@/assets';
 import { GradientButton } from '@/components/GradientButton';
 import { QueryNotice } from '@/components/QueryNotice';
-import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { countDown, COUNTDOWN_ZERO } from '@/countdown';
 import { useI18n } from '@/i18n';
 import { rpx } from '@/rpx';
 import { theme } from '@/theme';
 
-// ORich `pages/prize/prize` (scope 27458cd0): a blue promo activity — a prize
-// pool hero, a participants pill, invited avatars, an invite button, and
-// participants / rules tabs. Wired to the Oriva prize activities.
+// ORich `pages/prize/prize` (scope 27458cd0): a full-page blue illustration
+// background (fixed) with the prize pool amount, invited avatars, invite
+// button and participants/rules tabs floating over it.
 export default function PrizePoolScreen() {
   const { t, formatMoney } = useI18n();
   const client = useQueryClient();
@@ -33,8 +34,9 @@ export default function PrizePoolScreen() {
   const [tab, setTab] = useState(0);
   const now = Date.now();
 
-  const activity = activities.data?.items.find((a) => a.status === 'active')
-    ?? activities.data?.items[0];
+  const activity =
+    activities.data?.items.find((a) => a.status === 'active') ??
+    activities.data?.items[0];
 
   const join = useMutation({
     mutationFn: () => api.joinPrizeActivity(activity!.id),
@@ -45,116 +47,127 @@ export default function PrizePoolScreen() {
     onError: (e) => Alert.alert(t('game.unable'), e.message),
   });
 
-  const remaining =
-    activity?.endsAt
-      ? countDown(new Date(activity.endsAt).getTime(), now)
-      : COUNTDOWN_ZERO;
+  const remaining = activity?.endsAt
+    ? countDown(new Date(activity.endsAt).getTime(), now)
+    : COUNTDOWN_ZERO;
 
   return (
-      <Screen
-        header={<TopBar title={t('account.prizes')} white />}
-        contentStyle={styles.page}
-        refreshing={activities.isRefetching}
-        onRefresh={() => void activities.refetch()}
-      >
-        <Image source={assets.prizeBackground} style={styles.hero} />
-        <QueryNotice
-          loading={activities.isLoading}
-          error={activities.error}
-          onRetry={() => void activities.refetch()}
-        />
+    <View style={styles.root}>
+      <Image
+        source={assets.prizeBackground}
+        style={styles.bgFixed}
+        resizeMode="cover"
+      />
+      <SafeAreaView edges={['top']} style={styles.safe}>
+        <TopBar title={t('account.prizes')} transparent light />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scroll}
+        >
+          <QueryNotice
+            loading={activities.isLoading}
+            error={activities.error}
+            onRetry={() => void activities.refetch()}
+          />
 
-        {activity ? (
-          <>
-            {/* people pill */}
-            <View style={styles.peoplePill}>
-              <Text style={styles.peopleText}>
-                {activity.participantCount} {t('prize.people')}
-              </Text>
-            </View>
-
-            {/* amount */}
-            <View style={styles.amount}>
-              <Text style={styles.amountTitle}>{t('prize.amountTitle')}</Text>
-              <Text style={styles.amountMoney}>
-                {formatMoney(activity.prizePoolMinor, activity.currency)}
-              </Text>
-              {remaining !== COUNTDOWN_ZERO ? (
-                <Text style={styles.amountTime}>
-                  {t('prize.drawin')} {remaining}
+          {activity ? (
+            <>
+              {/* people pill */}
+              <View style={styles.peoplePill}>
+                <Text style={styles.peopleText}>
+                  {activity.participantCount} {t('prize.people')}
                 </Text>
-              ) : null}
-            </View>
-
-            {/* invite */}
-            <View style={styles.invite}>
-              <View style={styles.avatars}>
-                {[0, 1, 2, 3].map((i) => (
-                  <Image
-                    key={i}
-                    source={assets.avatars[i % assets.avatars.length]}
-                    style={styles.avatar}
-                  />
-                ))}
               </View>
-              <Text style={styles.inviteTip}>{t('prize.inviteTip')}</Text>
-              <View style={styles.inviteBtn}>
-                <GradientButton
-                  loading={join.isPending}
-                  onPress={() =>
-                    activity.joined ? router.push('/referrals') : join.mutate()
-                  }
-                >
-                  {t('prize.inviteBtn')}
-                </GradientButton>
+
+              {/* amount */}
+              <View style={styles.amount}>
+                <Text style={styles.amountTitle}>{t('prize.amountTitle')}</Text>
+                <Text style={styles.amountMoney}>
+                  {formatMoney(activity.prizePoolMinor, activity.currency)}
+                </Text>
+                {remaining !== COUNTDOWN_ZERO ? (
+                  <Text style={styles.amountTime}>
+                    {t('prize.drawin')} {remaining}
+                  </Text>
+                ) : null}
               </View>
-            </View>
 
-            {/* tabs */}
-            <View style={styles.tabs}>
-              {[t('prize.participants'), t('prize.rulesTab')].map((label, i) => (
-                <Pressable
-                  key={label}
-                  onPress={() => setTab(i)}
-                  style={styles.tabItem}
-                >
-                  <Text style={[styles.tabText, tab === i && styles.tabActive]}>
-                    {label}
-                  </Text>
-                  {tab === i ? <View style={styles.tabBar} /> : null}
-                </Pressable>
-              ))}
-            </View>
+              {/* invite */}
+              <View style={styles.invite}>
+                <View style={styles.avatars}>
+                  {[0, 1, 2, 3].map((i) => (
+                    <Image
+                      key={i}
+                      source={assets.avatars[i % assets.avatars.length]}
+                      style={styles.avatar}
+                    />
+                  ))}
+                </View>
+                <Text style={styles.inviteTip}>{t('prize.inviteTip')}</Text>
+                <View style={styles.inviteBtn}>
+                  <GradientButton
+                    loading={join.isPending}
+                    onPress={() =>
+                      activity.joined ? router.push('/referrals') : join.mutate()
+                    }
+                  >
+                    {t('prize.inviteBtn')}
+                  </GradientButton>
+                </View>
+              </View>
 
-            {/* main */}
-            <View style={styles.main}>
-              {tab === 0 ? (
-                <>
-                  <Text style={styles.winnersLine}>
-                    {t('prize.winners', { count: activity.winnersCount })}
-                  </Text>
-                  <Text style={styles.rulesText}>{activity.description}</Text>
-                </>
-              ) : (
-                <Text style={styles.rulesText}>{activity.rules}</Text>
-              )}
-            </View>
-          </>
-        ) : !activities.isLoading ? (
-          <Text style={styles.empty}>{t('finance.empty')}</Text>
-        ) : null}
-      </Screen>
+              {/* tabs */}
+              <View style={styles.tabs}>
+                {[t('prize.participants'), t('prize.rulesTab')].map(
+                  (label, i) => (
+                    <Pressable
+                      key={label}
+                      onPress={() => setTab(i)}
+                      style={styles.tabItem}
+                    >
+                      <Text
+                        style={[styles.tabText, tab === i && styles.tabActive]}
+                      >
+                        {label}
+                      </Text>
+                      {tab === i ? <View style={styles.tabBar} /> : null}
+                    </Pressable>
+                  ),
+                )}
+              </View>
+
+              {/* main */}
+              <View style={styles.main}>
+                {tab === 0 ? (
+                  <>
+                    <Text style={styles.winnersLine}>
+                      {t('prize.winners', { count: activity.winnersCount })}
+                    </Text>
+                    <Text style={styles.rulesText}>{activity.description}</Text>
+                  </>
+                ) : (
+                  <Text style={styles.rulesText}>{activity.rules}</Text>
+                )}
+              </View>
+            </>
+          ) : !activities.isLoading ? (
+            <Text style={styles.empty}>{t('finance.empty')}</Text>
+          ) : null}
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // .prize { background:#35a2ff }
-  page: { backgroundColor: '#35a2ff', paddingBottom: rpx(40) },
-  hero: { width: '100%', height: rpx(360), resizeMode: 'cover' },
-  // .prize_people { pill; rgba black .2 }
+  root: { flex: 1, backgroundColor: '#35a2ff' },
+  bgFixed: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+  safe: { flex: 1 },
+  scroll: { paddingBottom: rpx(40) },
+  // .prize_people pill
   peoplePill: {
     alignSelf: 'center',
-    marginTop: rpx(30),
+    marginTop: rpx(24),
     height: rpx(56),
     paddingHorizontal: rpx(40),
     borderRadius: rpx(200),
@@ -206,11 +219,7 @@ const styles = StyleSheet.create({
   },
   inviteBtn: { marginTop: rpx(48), width: rpx(600) },
   // .prize_tabs
-  tabs: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: rpx(50),
-  },
+  tabs: { flexDirection: 'row', justifyContent: 'center', marginTop: rpx(50) },
   tabItem: { alignItems: 'center', marginHorizontal: rpx(63) },
   tabText: {
     fontSize: rpx(32),
