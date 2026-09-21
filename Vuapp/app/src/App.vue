@@ -53,4 +53,6 @@ export default {
 <style>
 /* The reference app's global stylesheet (uView base + app-wide rules). */
 @import './styles/global.css';
+/* Deliberate changes for running in a browser rather than a webview. */
+@import './styles/h5-adaptations.css';
 </style>
