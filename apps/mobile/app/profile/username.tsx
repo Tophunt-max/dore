@@ -1,14 +1,18 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { api } from '@/api/endpoints';
-import { FormField } from '@/components/FormField';
 import { GradientButton } from '@/components/GradientButton';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { useI18n } from '@/i18n';
 import { useAuthStore } from '@/stores/auth';
+import { rpx } from '@/rpx';
 import { theme } from '@/theme';
+
+// ORich `pages/account/username` (scope fefffb8c): a single white "list" block
+// with one labelled input row (136rpx key + bordered field) and a fixed-bottom
+// confirm button. Deliberately minimal, matching the original.
 export default function UsernameScreen() {
   const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
@@ -16,16 +20,16 @@ export default function UsernameScreen() {
   const [name, setName] = useState(user?.displayName ?? '');
   const [busy, setBusy] = useState(false);
   const normalized = name.trim();
-  const error =
-    normalized.length > 0 && normalized.length < 2
-      ? t('profile.nameError')
-      : undefined;
+
   async function save() {
     if (!user) {
       router.push('/login');
       return;
     }
-    if (!normalized || error) return;
+    if (normalized.length < 2 || normalized.length > 16) {
+      Alert.alert(t('profile.nameError'));
+      return;
+    }
     setBusy(true);
     try {
       const result = await api.updateMe({ displayName: normalized });
@@ -38,64 +42,68 @@ export default function UsernameScreen() {
       setBusy(false);
     }
   }
+
   return (
-    <Screen header={<TopBar title={t('settings.displayName')} />}>
-      <View style={styles.page}>
-        <View style={styles.preview}>
-          <Text style={styles.initial}>
-            {normalized.slice(0, 1).toUpperCase() || 'O'}
-          </Text>
+    <Screen
+      header={<TopBar title={t('settings.displayName')} white />}
+      contentStyle={styles.page}
+    >
+      {/* .list { padding:14rpx 30rpx; background:#fff } */}
+      <View style={styles.list}>
+        <View style={styles.item}>
+          <Text style={styles.itemKey}>{t('settings.displayName')}</Text>
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            maxLength={16}
+            placeholder={t('profile.namePlaceholder')}
+            placeholderTextColor={theme.colors.disabled}
+            style={styles.itemName}
+          />
         </View>
-        <Text style={styles.title}>{t('profile.greeting')}</Text>
-        <Text style={styles.copy}>{t('profile.copy')}</Text>
-        <FormField
-          autoCapitalize="words"
-          error={error}
-          label={t('settings.displayName')}
-          maxLength={40}
-          onChangeText={setName}
-          placeholder={t('profile.namePlaceholder')}
-          value={name}
-        />
-        <GradientButton
-          disabled={!normalized || Boolean(error)}
-          loading={busy}
-          onPress={() => void save()}
-        >
+      </View>
+
+      {/* .logout { position:fixed; bottom:38rpx; left:74rpx; width:600rpx } */}
+      <View style={styles.confirm}>
+        <GradientButton loading={busy} onPress={() => void save()}>
           {t('profile.saveName')}
         </GradientButton>
       </View>
     </Screen>
   );
 }
+
 const styles = StyleSheet.create({
-  page: { padding: theme.spacing.xl },
-  preview: {
-    width: 82,
-    height: 82,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 41,
-    backgroundColor: '#FFF1EA',
+  page: { backgroundColor: theme.colors.background, flexGrow: 1 },
+  list: {
+    paddingVertical: rpx(14),
+    paddingHorizontal: rpx(30),
+    backgroundColor: theme.colors.surface,
   },
-  initial: {
-    color: theme.colors.primary,
-    fontFamily: theme.typography.family.bold,
-    fontSize: 32,
+  item: { flexDirection: 'row', alignItems: 'center' },
+  // .item-key { width:136rpx; font-size:32rpx; color:#444 }
+  itemKey: {
+    width: rpx(136),
+    fontSize: rpx(32),
+    color: '#444',
+    fontFamily: theme.typography.family.regular,
   },
-  title: {
-    marginTop: 24,
-    textAlign: 'center',
+  // .item-name { flex:1; height:84rpx; padding:0 20rpx; border:1rpx #e0dfdf; radius:7rpx }
+  itemName: {
+    flex: 1,
+    height: rpx(84),
+    paddingHorizontal: rpx(20),
+    borderWidth: rpx(1),
+    borderColor: '#e0dfdf',
+    borderRadius: rpx(7),
+    fontSize: rpx(30),
     color: theme.colors.ink,
-    fontFamily: theme.typography.family.bold,
-    fontSize: theme.typography.size.title,
+    fontFamily: theme.typography.family.regular,
   },
-  copy: {
-    marginTop: 8,
-    marginBottom: 24,
-    textAlign: 'center',
-    color: theme.colors.textMuted,
-    lineHeight: 20,
+  confirm: {
+    position: 'absolute',
+    left: rpx(74),
+    right: rpx(74),
+    bottom: rpx(38),
   },
 });

@@ -1,0 +1,377 @@
+# pages/bask/index
+
+- page module: `3ea1`
+- render module: `fe47`
+- options module: `0b60`
+- css scope: `data-v-0de9bf71`
+
+## Scoped CSS (17 rules)
+
+```css
+.bask[data-v-0de9bf71]{position:relative;min-height:100vh;background-color:#f9f9f9;padding-bottom:200rpx}
+.content_middle[data-v-0de9bf71]{width:100%;padding:0 30rpx;padding-top:40rpx;padding-bottom:36rpx;background-color:#fff}
+.goods[data-v-0de9bf71]{display:flex;flex-direction:row;align-items:center;justify-content:center}
+.goods .shop_img[data-v-0de9bf71]{width:180rpx;height:180rpx;margin-right:30rpx;background:#f5f5f5;border-radius:8rpx}
+.goods .shop_img uni-image[data-v-0de9bf71]{width:100%;height:100%;border-radius:8rpx}
+.goods .shop_title[data-v-0de9bf71]{flex:1;font-size:28rpx;font-family:Roboto,Roboto-Medium;font-weight:700;text-align:LEFT;color:#17273a}
+.content .content-title[data-v-0de9bf71]{display:flex;flex-direction:row;align-items:center;justify-content:center;width:690rpx;height:84rpx;padding:0 46rpx;margin-top:42rpx;border:1rpx solid #b9b9b9;border-radius:9rpx}
+.content .content-main[data-v-0de9bf71]{display:flex;flex-direction:row;align-items:flex-start;justify-content:center;width:690rpx;height:154rpx;padding:0 46rpx;margin-top:16rpx;border:1rpx solid #b9b9b9;border-radius:9rpx}
+.tips[data-v-0de9bf71]{margin-top:26rpx;font-size:28rpx;font-family:Roboto,Roboto-Regular;font-weight:400;text-align:LEFT;color:#b9b9b9}
+.tips uni-text[data-v-0de9bf71]{padding:0 10rpx;color:#ff5c5c}
+.upload_file[data-v-0de9bf71]{display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-top:36rpx}
+.upload_file .upload-item[data-v-0de9bf71]{position:relative;width:192rpx;height:192rpx;margin-bottom:20rpx;opacity:1;background:hsla(0,0%,76.9%,.15);border:1rpx solid #b9b9b9;border-radius:17rpx}
+.upload_file .upload-item uni-image[data-v-0de9bf71]{width:100%;height:100%;border-radius:17rpx}
+.upload_file .upload-item .del[data-v-0de9bf71]{position:absolute;right:-20rpx;top:-20rpx;z-index:999;width:52rpx;height:52rpx;opacity:.8}
+.upload_file .upload-op[data-v-0de9bf71]{width:192rpx;height:192rpx;background:#fff}
+.upload_file .btn[data-v-0de9bf71]{display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;width:192rpx;height:192rpx;margin-bottom:20rpx;background:hsla(0,0%,76.9%,.15);border:1rpx dashed #b9b9b9;border-radius:17rpx;font-size:26rpx;font-family:PingFang SC,PingFang SC-Medium;font-weight:700;color:#b9b9b9}
+.success_btn[data-v-0de9bf71]{position:fixed;left:74rpx;bottom:46rpx;width:600rpx;height:90rpx}
+```
+
+## Compiled template (literal classes/text)
+
+```js
+function(
+){var t=this,
+e=t.$createElement,
+i=t._self._c||e;return i(
+  "view",
+  {staticClass:t._$s(
+    0,
+    "sc",
+    "bask"
+  ),
+  attrs:{_i:0}},
+  [
+    i(
+      "navbar",
+      {attrs:{title:t.$t(
+        "bask.basktitle"
+      ),
+      background:"#ffffff",
+      _i:1}}
+    ),
+    i(
+      "view",
+      {staticClass:t._$s(
+        2,
+        "sc",
+        "content_middle"
+      ),
+      attrs:{_i:2}},
+      [
+        i(
+          "view",
+          {staticClass:t._$s(
+            3,
+            "sc",
+            "goods"
+          ),
+          attrs:{_i:3}},
+          [
+            i(
+              "view",
+              {staticClass:t._$s(
+                4,
+                "sc",
+                "shop_img"
+              ),
+              attrs:{_i:4}},
+              [
+                i(
+                  "image",
+                  {attrs:{src:t._$s(
+                    5,
+                    "a-src",
+                    t.goodsData.iconurl
+                  ),
+                  _i:5}}
+                )
+              ]
+            ),
+            i(
+              "view",
+              {staticClass:t._$s(
+                6,
+                "sc",
+                "shop_title"
+              ),
+              attrs:{_i:6}},
+              [
+                t._v(
+                  t._$s(
+                    6,
+                    "t0-0",
+                    t._s(
+                      t.goodsData.name
+                    )
+                  )
+                )
+              ]
+            )
+          ]
+        ),
+        i(
+          "view",
+          {staticClass:t._$s(
+            7,
+            "sc",
+            "content"
+          ),
+          attrs:{_i:7}},
+          [
+            i(
+              "view",
+              {staticClass:t._$s(
+                8,
+                "sc",
+                "content-main"
+              ),
+              attrs:{_i:8}},
+              [
+                i(
+                  "u-input",
+                  {attrs:{type:"textarea",
+                  height:"150",
+                  placeholder:t.$t(
+                    "bask.share"
+                  ),
+                  _i:9},
+                  model:{value:t._$s(
+                    9,
+                    "v-model",
+                    t.form.content
+                  ),
+                  callback:function(
+                    e
+                  ){t.$set(
+                    t.form,
+                    "content",
+                    e
+                  )},
+                  expression:"form.content"}}
+                )
+              ],
+              1
+            )
+          ]
+        ),
+        t._$s(
+          10,
+          "i",
+          t.cLength
+        )?i(
+          "view",
+          {staticClass:t._$s(
+            10,
+            "sc",
+            "tips"
+          ),
+          attrs:{_i:10}},
+          [
+            t._v(
+              t._$s(
+                10,
+                "t0-0",
+                t._s(
+                  t.$t(
+                    "bask.write"
+                  )
+                )
+              )
+            ),
+            i(
+              "text",
+              [
+                t._v(
+                  t._$s(
+                    11,
+                    "t0-0",
+                    t._s(
+                      t.cLength
+                    )
+                  )
+                )
+              ]
+            ),
+            t._v(
+              t._$s(
+                10,
+                "t2-0",
+                t._s(
+                  t.$t(
+                    "bask.chance"
+                  )
+                )
+              )
+            )
+          ]
+        ):t._e(
+        ),
+        i(
+          "view",
+          {staticClass:t._$s(
+            12,
+            "sc",
+            "upload_file"
+          ),
+          attrs:{_i:12}},
+          [
+            t._l(
+              t._$s(
+                13,
+                "f",
+                {forItems:t.imgList}
+              ),
+              (
+                function(
+                  e,
+                  a,
+                  n,
+                  r
+                ){return i(
+                  "view",
+                  {key:t._$s(
+                    13,
+                    "f",
+                    {forIndex:n,
+                    key:a}
+                  ),
+                  staticClass:t._$s(
+                    "13-"+r,
+                    "sc",
+                    "upload-item"
+                  ),
+                  attrs:{_i:"13-"+r}},
+                  [
+                    i(
+                      "image",
+                      {attrs:{src:t._$s(
+                        "14-"+r,
+                        "a-src",
+                        e
+                      ),
+                      _i:"14-"+r}}
+                    ),
+                    i(
+                      "image",
+                      {staticClass:t._$s(
+                        "15-"+r,
+                        "sc",
+                        "del"
+                      ),
+                      attrs:{src:t._$s(
+                        "15-"+r,
+                        "a-src",
+                        s(
+                          "a0b3"
+                        )
+                      ),
+                      _i:"15-"+r},
+                      on:{click:function(
+                        e
+                      ){return t.delImg(
+                        a
+                      )}}}
+                    )
+                  ]
+                )}
+              )
+            ),
+            t._$s(
+              16,
+              "i",
+              t.imgList.length<6
+            )?i(
+              "view",
+              {staticClass:t._$s(
+                16,
+                "sc",
+                "btn"
+              ),
+              attrs:{_i:16},
+              on:{click:t.pickImg}},
+              [
+                i(
+                  "u-icon",
+                  {staticClass:t._$s(
+                    17,
+                    "sc",
+                    "btn_icon"
+                  ),
+                  attrs:{name:"plus",
+                  color:"#B9B9B9",
+                  size:"50",
+                  _i:17}}
+                ),
+                i(
+                  "view",
+                  [
+                    t._v(
+                      t._$s(
+                        18,
+                        "t0-0",
+                        t._s(
+                          t.$t(
+                            "bask.upload"
+                          )
+                        )
+                      )
+                    )
+                  ]
+                )
+              ],
+              1
+            ):t._e(
+            ),
+            t._$s(
+              19,
+              "i",
+              1==t.imgList.length||4==t.imgList.length
+            )?i(
+              "view",
+              {staticClass:t._$s(
+                19,
+                "sc",
+                "upload-op"
+              ),
+              attrs:{_i:19}}
+            ):t._e(
+            )
+          ],
+          2
+        )
+      ]
+    ),
+    i(
+      "view",
+      {staticClass:t._$s(
+        20,
+        "sc",
+        "success_btn"
+      ),
+      attrs:{_i:20}},
+      [
+        i(
+          "overbtn",
+          {attrs:{btnText:t.$t(
+            "bask.submit"
+          ),
+          fontSize:28,
+          btnType:"submit",
+          loading:t.loading,
+          _i:21},
+          on:{btnAction:t.confirm}}
+        )
+      ],
+      1
+    )
+  ],
+  1
+)}
+```
+
+## Component options (data / methods)
+
+```js
+{"use strict";Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0;var i=s("f78c"),a=s("9fda"),n=(s("2f62"),{onLoad:function(t){var e=this;this.form.id=t.id,(0,i.GoodsDetail)({id:t.id}).then((function(t){e.goodsData=t}))},watch:{"form.content":function(){var t=this.form.content.length;this.cLength=t<20?20-t:0}},computed:{},data:function(){return{cLength:"20",goodsData:{},form:{id:"",title:"",content:"",images:""},imgList:[],fileList:[],actionUpload:"",loading:!1,uploadLoading:!1}},methods:{pickImg:function(){var t=this;uni.chooseImage({count:6,success:function(e){var s=e.tempFilePaths;uni.showLoading({mask:!0,title:t.$t("common.loading")});for(var i=function(e){uni.uploadFile({url:t.$apiAddr+"/api/index/upload",name:"file",filePath:s[e],success:function(i){var a=JSON.parse(i.data);t.imgList.push(a.data.url),t.fileList.push(a.data.path),e==s.length-1&&uni.hideLoading()},fail:function(){uni.showToast({icon:"none",title:t.$t("common.err")}),uni.hideLoading()}})},a=0;a<s.length;a++)i(a)},fail:function(){uni.showToast({icon:"none",title:t.$t("common.err")}),uni.hideLoading()},complete:function(){}})},delImg:function(t){this.imgList.splice(t,1),this.fileList.splice(t,1)},confirm:function(){var t=this;this.form.images=this.fileList,this.loading=!0,(0,a.ItemShare)(this.form).then((function(e){t.loading=!1,uni.navigateTo({url:"../success/index?type=3&id=".concat(t.form.id)}),setTimeout((function(){t.imgList=[],t.fileList=[]}),100)})).catch((function(){t.loading=!1}))}}});e.default=n}
+```

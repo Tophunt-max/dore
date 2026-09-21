@@ -8,6 +8,12 @@ interface TopBarProps {
   actionLabel?: string;
   onAction?: () => void;
   transparent?: boolean;
+  /**
+   * Match ORich sub-page navbars, which pass `background:"#ffffff"`. Defaults
+   * to the page background (#F8F8F8) to preserve existing screens.
+   */
+  white?: boolean;
+  onBack?: () => void;
 }
 
 export function TopBar({
@@ -16,12 +22,23 @@ export function TopBar({
   actionLabel,
   onAction,
   transparent = false,
+  white = false,
+  onBack,
 }: TopBarProps) {
   return (
-    <View style={[styles.container, transparent && styles.transparent]}>
+    <View
+      style={[
+        styles.container,
+        white && styles.whiteBg,
+        transparent && styles.transparent,
+      ]}
+    >
       <View style={styles.side}>
         {canGoBack ? (
-          <Pressable hitSlop={12} onPress={() => router.back()}>
+          <Pressable
+            hitSlop={12}
+            onPress={() => (onBack ? onBack() : router.back())}
+          >
             <Text style={styles.back}>‹</Text>
           </Pressable>
         ) : null}
@@ -47,6 +64,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: theme.spacing.lg,
     backgroundColor: theme.colors.background,
+  },
+  whiteBg: {
+    backgroundColor: theme.colors.surface,
   },
   transparent: {
     backgroundColor: 'transparent',

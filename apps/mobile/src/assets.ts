@@ -70,6 +70,8 @@ export const assets = {
   vipGold: require('../assets/orich/image/account/icon_gold.png'),
   arrowRight: require('../assets/orich/image/home/icon_Arrow_right.png'),
   arrowGrey: require('../assets/orich/image/home/icon_Arrow.png'),
+  // Grey right chevron used by ORich list rows (`u-icon arrow-right #B9B9B9`).
+  caretRight: require('../assets/orich/image/icon_CaretRight.png'),
   categoryAll: require('../assets/orich/image/home/icon_Category.png'),
   // ORich `.ltab-item-active` underline (34x12rpx) and the `.lgoods-btn` chevron.
   select: require('../assets/orich/image/icon_Select.png'),
