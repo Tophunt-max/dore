@@ -118,6 +118,43 @@ const financeItem = (p) => {
   };
 };
 
+/** The account payload -> the reference's user-info shape. */
+const userShape = (r) => {
+  const res = r || {};
+  const u = res.user || res;
+  const c = res.counts || {};
+  return {
+    ...u,
+    name: u.username || '',
+    nickname: u.username || '',
+    mobile: u.phone || '',
+    imgUrl: u.avatar || '',
+    headimgurl: u.avatar || '',
+    money: major(u.balance_minor),
+    balance: major(u.balance_minor),
+    invite_code: u.invite_code || '',
+    status: 1,
+    // 1 marks a brand-new user; it drives the home guide overlay
+    new: (c.orders || 0) === 0 ? 1 : 0,
+    order_count: c.orders || 0,
+    win_count: c.wins || 0,
+    team_count: c.team || 0,
+    // balances the reference broke out separately; the vuapp wallet is a single
+    // ledger, so the withdrawable amount is the balance and the rest are zero
+    cashOut: major(u.balance_minor),
+    today_cost: 0,
+    finance_all_price: 0,
+    finance_all_income: 0,
+    finance_day_income: 0,
+    return_amount: 0,
+    return_cap: 0,
+    return_income: 0,
+    return_rate: 0,
+    vip_img: '',
+    vip_level: u.vip_level || 0,
+  };
+};
+
 /** A winner row -> the reference's "latest winners" ticker shape. */
 const winnerItem = (w) => {
   const it = w || {};
@@ -194,17 +231,58 @@ const MAP = {
   Logout: `() => post('/api/auth/logout', { refresh: readRefresh() }).then((r) => { clearTokens(); return r; })`,
 
   // --- account
-  userAccount: `() => get('/api/account')`,
-  UserInfo: `() => get('/api/account')`,
+  userAccount: `() => get('/api/account').then(userShape)`,
+  UserInfo: `() => get('/api/account').then(userShape)`,
   AccountEdit: `(d = {}) => put('/api/account/username', { username: d.name || d.username })`,
-  UserBalance: `() => get('/api/wallet')`,
-  userConsume: `() => get('/api/wallet/transactions')`,
-  userRebateList: `() => get('/api/wallet/transactions')`,
-  myTeam: `() => get('/api/team')`,
-  userInviteTop: `() => get('/api/referrals')`,
-  userInviteList: `() => get('/api/referrals')`,
-  userShare: `() => get('/api/my-shares')`,
-
+  UserBalance: `() => get('/api/wallet').then((r) => ({ ...(r || {}), money: major((r || {}).balance_minor), balance: major((r || {}).balance_minor) }))`,
+  userConsume: `() =>
+    get('/api/wallet/transactions').then((r) => ({
+      ...(r || {}),
+      list: listOf(r, 'transactions', 'txns', 'list').map((x) => ({ ...x, price: major(x.amount_minor) })),
+    }))`,
+  userRebateList: `() =>
+    get('/api/wallet/transactions').then((r) => ({
+      ...(r || {}),
+      list: listOf(r, 'transactions', 'txns', 'list').map((x) => ({ ...x, price: major(x.amount_minor) })),
+    }))`,
+  myTeam: `(d = {}) =>
+    get('/api/team', d).then((r) => {
+      const res = r || {};
+      const members = listOf(res, 'members', 'team', 'list').map((m) => ({
+        ...m,
+        name: m.username || m.name || '',
+        nickname: m.username || '',
+        headimgurl: m.avatar || '',
+        mobile: m.phone || '',
+        money: major(m.balance_minor),
+      }));
+      const direct = members.filter((m) => (m.level || 1) === 1);
+      return {
+        ...res,
+        list: members,
+        count_1: res.direct_count != null ? res.direct_count : direct.length,
+        count_2: res.indirect_count != null ? res.indirect_count : members.length - direct.length,
+        myachievement: major(res.my_volume_minor),
+        teamachievement: major(res.team_volume_minor),
+        reward: major(res.reward_minor),
+      };
+    })`,
+  userInviteTop: `() =>
+    get('/api/referrals').then((r) => {
+      const res = r || {};
+      const list = listOf(res, 'referrals', 'list');
+      return {
+        ...res,
+        list,
+        invite: res.total != null ? res.total : list.length,
+        reward: major(res.reward_minor),
+        inviteurl: res.invite_url || res.inviteurl || '',
+      };
+    })`,
+  userInviteList: `() =>
+    get('/api/referrals').then((r) => ({ list: listOf(r, 'referrals', 'list') }))`,
+  userShare: `() =>
+    get('/api/my-shares').then((r) => ({ list: listOf(r, 'shares', 'orders', 'list').map(goodsItem) }))`,
   // --- addresses
   AddressList: `() => get('/api/addresses')`,
   AddAddress: `(d = {}) => post('/api/addresses', d)`,
@@ -267,8 +345,26 @@ const MAP = {
   GetLottery: `(d = {}) => (d.id ? post('/api/goods/' + d.id + '/draw', d) : Promise.resolve({ list: [] }))`,
   // --- orders
   AddOrder: `(d = {}) => post('/api/orders', d)`,
-  userOrder: `(d = {}) => get('/api/orders', d)`,
-  orderDetail: `(d = {}) => (d.id ? get('/api/orders/' + d.id) : get('/api/orders'))`,
+  userOrder: `(d = {}) =>
+    get('/api/orders', d).then((r) => {
+      const list = listOf(r, 'orders').map(goodsItem);
+      return { list, cardList: list, count: list.length };
+    })`,
+  orderDetail: `(d = {}) =>
+    (d.id || d.dumid ? get('/api/orders/' + (d.id || d.dumid)) : get('/api/orders')).then((r) => {
+      const row = (r && (r.order || r.orders)) || r || {};
+      const it = goodsItem(Array.isArray(row) ? row[0] : row);
+      return {
+        ...it,
+        dumid: it.id,
+        // the detail screen reads addr.name / addr.mobile and walks logdetail
+        addr: row.address || {},
+        logdetail: listOf(row, 'logs', 'logdetail'),
+        logcount: listOf(row, 'logs', 'logdetail').length,
+        lucklottery: row.lucky_code || '',
+        status: row.status || it.status || 1,
+      };
+    })`,
   itemEdit: `(d = {}) => post('/api/orders', d)`,
   GetResult: `(d = {}) => (d.id ? get('/api/orders/' + d.id + '/ranking') : Promise.resolve({ list: [] }))`,
   UserJoin: `(d = {}) => get('/api/orders', d)`,
@@ -295,18 +391,48 @@ const MAP = {
     })`,
   financeBuy: `(d = {}) => post('/api/finance/order', d)`,
   myFinanceList: `() =>
-    get('/api/finance/orders/mine').then((r) => ({ list: listOf(r, 'orders', 'products').map(financeItem) }))`,
-  financeOrderRecent: `() => get('/api/finance/orders/mine')`,
-
+    get('/api/finance/orders/mine').then((r) => ({
+      list: listOf(r, 'orders', 'products', 'list').map(financeItem),
+    }))`,
+  financeOrderRecent: `() =>
+    get('/api/finance/orders/mine').then((r) => ({
+      list: listOf(r, 'orders', 'products', 'list').map(financeItem),
+    }))`,
   // --- tasks / vip
-  taskList: `() => get('/api/tasks')`,
+  taskList: `() =>
+    get('/api/tasks').then((r) => ({
+      ...(r || {}),
+      list: listOf(r, 'tasks', 'list').map((t) => ({
+        ...t,
+        name: t.title || t.name || '',
+        reward: major(t.reward_minor),
+        status: t.claimed ? 2 : 1,
+      })),
+    }))`,
   taskReceive: `(d = {}) => (d.id ? post('/api/tasks/' + d.id + '/claim', d) : Promise.resolve({}))`,
   // --- wallet / payment
-  bankList: `() => get('/api/beneficiaries')`,
+  bankList: `() =>
+    get('/api/beneficiaries').then((r) => ({
+      ...(r || {}),
+      list: listOf(r, 'beneficiaries', 'list').map((b) => ({
+        ...b,
+        name: b.holder || b.name || '',
+        bank_name: b.bank || b.bank_name || '',
+        bank_no: b.account || b.bank_no || '',
+      })),
+    }))`,
   bankadd: `(d = {}) => post('/api/beneficiaries', d)`,
   bankDel: `(d = {}) => (d.id ? del('/api/beneficiaries/' + d.id) : Promise.resolve({}))`,
-  rechargeList: `() => get('/api/recharge/records')`,
-  cashList: `() => get('/api/withdraw/records')`,
+  rechargeList: `() =>
+    get('/api/recharge/records').then((r) => ({
+      ...(r || {}),
+      list: listOf(r, 'records', 'recharges', 'list').map((x) => ({ ...x, price: major(x.amount_minor) })),
+    }))`,
+  cashList: `() =>
+    get('/api/withdraw/records').then((r) => ({
+      ...(r || {}),
+      list: listOf(r, 'records', 'withdrawals', 'list').map((x) => ({ ...x, price: major(x.amount_minor) })),
+    }))`,
   userWithdraw: `(d = {}) => post('/api/withdraw', d)`,
   addRechargePay: `(d = {}) => post('/api/recharge', d)`,
   getUserAfs: `() => get('/api/payments')`,
@@ -331,11 +457,21 @@ const MAP = {
           g = { category: topic, image_url: '/static/image/icon_faq.png', chr: [] };
           groups.push(g);
         }
-        g.chr.push({ que_id: a.id, title: a.title });
+        g.chr.push({ que_id: topic + ':' + a.id, title: a.title });
       }
       return groups;
     })`,
-  getAnswer: `(d = {}) => (d.id || d.topic ? get('/api/help/' + (d.id || d.topic)) : get('/api/help'))`,
+  getAnswer: `(d = {}) => {
+    const raw = String(d.id || d.topic || '');
+    const [topic, id] = raw.includes(':') ? raw.split(':') : [raw, raw];
+    return get('/api/help/' + encodeURIComponent(topic))
+      .then((r) => {
+        const list = listOf(r, 'articles');
+        const found = list.find((a) => String(a.id) === String(id)) || list[0] || {};
+        return { ...found, que_info: found.body || found.content || '', que_title: found.title || '' };
+      })
+      .catch(() => ({ que_info: '' }));
+  }`,
 };
 
 /**
