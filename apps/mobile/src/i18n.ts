@@ -692,6 +692,19 @@ export const catalog = {
     zh: '这里只显示管理员发布的合作方信息内容。',
   },
   'finance.information': { en: 'Information', hi: 'जानकारी', zh: '信息' },
+  'finance.totalIncome': {
+    en: 'Total holdings',
+    hi: 'कुल होल्डिंग',
+    zh: '总持有',
+  },
+  'finance.principal': { en: 'Principal', hi: 'मूलधन', zh: '本金' },
+  'finance.count': { en: 'Orders', hi: 'ऑर्डर', zh: '订单' },
+  'finance.ordersTab': { en: 'My orders', hi: 'मेरे ऑर्डर', zh: '我的订单' },
+  'finance.noOrders': {
+    en: 'No informational orders yet.',
+    hi: 'अभी कोई ऑर्डर नहीं।',
+    zh: '暂无订单。',
+  },
   'finance.informationOnly': {
     en: 'Information only',
     hi: 'केवल जानकारी',
