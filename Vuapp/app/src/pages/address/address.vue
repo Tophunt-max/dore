@@ -1,42 +1,83 @@
 <script setup lang="ts">
+// Faithful port of ORich pages/address/address.
 import { ref } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
-import { api } from '@/api/request';
+import { onShow, onLoad } from '@dcloudio/uni-app';
+import { AddressList, AddressUpdate, AddressDelete } from '@/api/orich';
+
 const list = ref<any[]>([]);
-async function load() {
-  const res = await api.get('/api/addresses');
-  if (res.ok) list.value = res.addresses;
-}
+const pickMode = ref(false);
+
+onLoad((q: any) => {
+  pickMode.value = !!q?.pick;
+});
 onShow(load);
-function add() {
-  uni.navigateTo({ url: '/pages/address/add' });
+
+async function load() {
+  const r: any = await AddressList();
+  if (r.ok) list.value = r.addresses || [];
 }
-async function del(id: number) {
-  const res = await api.del(`/api/addresses/${id}`);
-  if (res.ok) load();
+function add() {
+  uni.navigateTo({ url: './add' });
+}
+function edit(a: any) {
+  uni.navigateTo({ url: `./add?id=${a.id}` });
+}
+async function setDefault(a: any) {
+  await AddressUpdate(a.id, { ...a, is_default: 1 });
+  load();
+}
+function del(a: any) {
+  uni.showModal({
+    title: '',
+    content: 'Remove this address?',
+    success: async (r) => {
+      if (r.confirm) {
+        await AddressDelete(a.id);
+        load();
+      }
+    },
+  });
+}
+function pick(a: any) {
+  if (!pickMode.value) return;
+  uni.setStorageSync('picked_address', a);
+  uni.navigateBack();
 }
 </script>
+
 <template>
-  <view class="page">
-    <view v-for="a in list" :key="a.id" class="card acard">
-      <view class="arow">
-        <text class="an">{{ a.name }} · {{ a.phone }}</text>
-        <text v-if="a.is_default" class="def">Default</text>
+  <view class="address">
+    <navbar :title="$t('address.title')" background="#ffffff" />
+    <view v-for="a in list" :key="a.id" class="content" @click="pick(a)">
+      <view class="top">
+        <view class="top_name">{{ a.name }}</view>
+        <view class="top_number">{{ a.phone }}</view>
+        <image src="/static/image/account/icon_leftarrow.png" mode="aspectFit" @click.stop="edit(a)" />
       </view>
-      <text class="al">{{ a.line }}, {{ a.city }} {{ a.state }} - {{ a.pincode }}</text>
-      <text class="del" @click="del(a.id)">Delete</text>
+      <view class="middle">
+        <view class="middle_content">{{ a.line }}{{ a.city ? ', ' + a.city : '' }}{{ a.state ? ', ' + a.state : '' }} - {{ a.pincode }}</view>
+      </view>
+      <view class="bottom">
+        <view :class="a.is_default ? 'bottom-select' : 'bottom-radio'" @click.stop="setDefault(a)">
+          <view class="bottom-circle" />
+        </view>
+        <view class="round">{{ $t('address.round') }}</view>
+        <view class="delete" @click.stop="del(a)">{{ $t('address.deletes') }}</view>
+      </view>
     </view>
-    <view v-if="!list.length" class="nodata">No addresses yet</view>
-    <view class="addbtn primary-btn" @click="add">+ Add Address</view>
+    <view v-if="!list.length" class="nodata">{{ $t('common.nodata') }}</view>
+    <view class="addbtn">
+      <overbtn :btnText="$t('address.btntitle')" :fontSize="30" btnType="submit" @btnAction="add" />
+    </view>
   </view>
 </template>
+
+<style>
+@import './address.css';
+</style>
+
 <style scoped>
-.page { min-height: 100vh; padding: 20rpx; }
-.acard { padding: 30rpx; margin-bottom: 16rpx; position: relative; }
-.arow { display: flex; align-items: center; }
-.an { font-size: 30rpx; font-weight: 700; }
-.def { margin-left: 16rpx; font-size: 22rpx; color: #fff; background: #ee5016; padding: 2rpx 14rpx; border-radius: 8rpx; }
-.al { display: block; margin-top: 14rpx; color: #666; font-size: 28rpx; }
-.del { position: absolute; right: 30rpx; bottom: 30rpx; color: #ff5c5c; font-size: 26rpx; }
-.addbtn { height: 88rpx; line-height: 88rpx; margin-top: 30rpx; font-size: 30rpx; }
+.address { min-height: 100vh; background: #f9f9f9; padding-bottom: 180rpx; }
+.round { margin-left: 12rpx; font-size: 26rpx; color: #17273a; }
+.addbtn { position: fixed; left: 30rpx; right: 30rpx; bottom: 40rpx; height: 92rpx; }
 </style>

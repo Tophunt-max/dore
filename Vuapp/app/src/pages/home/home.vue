@@ -83,7 +83,7 @@ function changLang(code: string) {
 
     <view id="toTop" class="toTop">
       <view v-if="bannerList.length" class="banner">
-        <u-swiper class="banner-swiper" height="300" :list="bannerList" img-mode="scaleToFill" />
+        <u-swiper class="banner-swiper" height="278" :list="bannerList" img-mode="scaleToFill" />
       </view>
 
       <view class="tab">
@@ -215,6 +215,16 @@ function changLang(code: string) {
 <style scoped>
 /* small extras for reused elements */
 .home-background { background: linear-gradient(180deg, #ff7d4d, #ee5016) !important; }
+/* keep the scrolling notice on a single line like the original */
+.toast { margin: 20rpx 0; }
+.toast-swiper-item-main,
+.toast-swiper-item-main .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 26rpx;
+  line-height: 60rpx;
+}
 .home-lang { display: flex; flex-direction: row; align-items: center; padding-right: 20rpx; }
 .home-lang text { font-size: 26rpx; margin-right: 6rpx; }
 .tab { display: flex; flex-direction: row; align-items: center; justify-content: center; padding: 26rpx 30rpx; background-color: #fff; margin: 20rpx; border-radius: 16rpx; }

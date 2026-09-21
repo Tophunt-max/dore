@@ -1,109 +1,137 @@
 <script setup lang="ts">
+// Faithful port of ORich pages/goods/comfirm (confirm order).
 import { ref, computed } from 'vue';
 import { onLoad, onShow } from '@dcloudio/uni-app';
-import { api } from '@/api/request';
+import { GoodsDetail, AddressList, AddOrder, Wallet } from '@/api/orich';
 import { formatMinor } from '@/utils/money';
-import { useUserStore } from '@/store/user';
 
-const store = useUserStore();
 const goods = ref<any>(null);
 const slots = ref(1);
 const address = ref<any>(null);
-
-onLoad(async (q) => {
-  const res = await api.get(`/api/goods/${q?.id}`);
-  if (res.ok) goods.value = res.goods;
-});
-onShow(async () => {
-  const res = await api.get('/api/addresses');
-  if (res.ok && res.addresses.length) address.value = res.addresses.find((a: any) => a.is_default) || res.addresses[0];
-  store.refreshBalance();
-});
+const balanceMinor = ref(0);
+const loading = ref(false);
 
 const total = computed(() => (goods.value ? goods.value.price_minor * slots.value : 0));
 
-async function pay() {
+onLoad((q: any) => {
+  GoodsDetail({ id: q?.id }).then((r: any) => {
+    if (r.ok) goods.value = r.goods;
+  });
+});
+onShow(async () => {
+  const a: any = await AddressList();
+  if (a.ok && (a.addresses || []).length) {
+    address.value = a.addresses.find((x: any) => x.is_default) || a.addresses[0];
+  }
+  const w: any = await Wallet();
+  if (w.ok) balanceMinor.value = w.balance_minor;
+});
+
+function toAddress() {
+  uni.navigateTo({ url: '../address/address?pick=1' });
+}
+function dec() {
+  if (slots.value > 1) slots.value--;
+}
+function inc() {
+  slots.value++;
+}
+async function paynow() {
   if (!goods.value) return;
-  if (total.value > store.balanceMinor) {
+  if (total.value > balanceMinor.value) {
     uni.showModal({
-      title: 'Insufficient balance',
-      content: 'Please recharge your wallet to continue.',
+      title: '',
+      content: 'Insufficient balance, please recharge',
       confirmText: 'Recharge',
-      success: (r) => r.confirm && uni.navigateTo({ url: '/pages/payment/recharge' }),
+      success: (r) => r.confirm && uni.navigateTo({ url: '../payment/recharge' }),
     });
     return;
   }
-  uni.showLoading({ title: '...' });
-  const res = await api.post('/api/orders', {
-    goods_id: goods.value.id,
-    slots: slots.value,
-    address_id: address.value?.id,
-  });
-  uni.hideLoading();
-  if (res.ok) {
-    store.refreshBalance();
-    uni.redirectTo({ url: `/pages/success/index?type=1&id=${goods.value.id}` });
-  } else {
-    uni.showToast({ title: res.error || 'Failed', icon: 'none' });
-  }
+  loading.value = true;
+  const r: any = await AddOrder({ goods_id: goods.value.id, slots: slots.value, address_id: address.value?.id });
+  loading.value = false;
+  if (r.ok) uni.redirectTo({ url: `../success/index?type=1&id=${goods.value.id}` });
+  else uni.showToast({ title: r.error || 'Failed', icon: 'none' });
 }
 </script>
 
 <template>
-  <view v-if="goods" class="page">
-    <view class="addr card" @click="() => uni.navigateTo({ url: '/pages/address/address' })">
-      <block v-if="address">
-        <text class="an">{{ address.name }} · {{ address.phone }}</text>
-        <text class="al">{{ address.line }}, {{ address.city }} {{ address.pincode }}</text>
-      </block>
-      <text v-else class="al">+ Add delivery address</text>
+  <view v-if="goods" class="comfirm">
+    <navbar :title="$t('goods.otitle')" background="#ffffff" />
+
+    <view class="addr" @click="toAddress">
+      <template v-if="address">
+        <view class="addr-name">{{ address.name }} · {{ address.phone }}</view>
+        <view class="addr-line">{{ address.line }}, {{ address.city }} - {{ address.pincode }}</view>
+      </template>
+      <view v-else class="addr-line">+ {{ $t('order.addrTip') }}</view>
     </view>
 
-    <view class="g card">
-      <image class="gimg" :src="goods.image" mode="aspectFill" />
-      <view class="gi">
-        <text class="gt">{{ goods.title }}</text>
-        <text class="price">{{ formatMinor(goods.price_minor) }}/slot</text>
+    <view class="comfirm-title"><view class="comfirm-op" />{{ $t('goods.det') }}</view>
+    <view class="detail">
+      <view class="goods">
+        <image :src="goods.image" mode="aspectFill" />
+        <view class="goods-desc">
+          <view class="goods-title">
+            <view class="goods-title-text otw">{{ goods.title }}</view>
+            <view class="goods-num">x{{ slots }}</view>
+          </view>
+          <view class="goods-price">
+            <view class="goods-price-old">{{ formatMinor(goods.market_price_minor) }}</view>
+            <view class="goods-price-new">{{ formatMinor(goods.price_minor) }}</view>
+          </view>
+        </view>
       </view>
     </view>
 
-    <view class="qty card">
-      <text>Slots</text>
-      <view class="stepper">
-        <text class="sbtn" @click="slots > 1 ? slots-- : null">−</text>
-        <text class="sval">{{ slots }}</text>
-        <text class="sbtn" @click="slots++">+</text>
+    <image class="c-divider" src="/static/image/goods/img_Dividingline.png" mode="widthFix" />
+
+    <view class="qty">
+      <view class="qty-label">Quantity</view>
+      <view class="qty-box">
+        <view class="qty-btn" @click="dec">−</view>
+        <view class="qty-val">{{ slots }}</view>
+        <view class="qty-btn" @click="inc">+</view>
       </view>
     </view>
 
-    <view class="sum card">
-      <view class="srow"><text>Total</text><text class="price">{{ formatMinor(total) }}</text></view>
-      <view class="srow"><text class="muted">Wallet</text><text class="muted">{{ formatMinor(store.balanceMinor) }}</text></view>
+    <view class="pay">
+      <view class="comfirm-title"><view class="comfirm-op" />{{ $t('goods.paym') }}</view>
+      <view class="pay-wallet">
+        <view class="pay-wallet-name">Wallet</view>
+        <view class="pay-wallet-bal">{{ formatMinor(balanceMinor) }}</view>
+      </view>
     </view>
 
-    <view class="footer">
-      <text class="ftotal">{{ formatMinor(total) }}</text>
-      <view class="pay brand-btn" @click="pay">Pay Now</view>
+    <view class="btn">
+      <view class="btn-buy">
+        <view class="btn-price">
+          <view class="btn-price-new">{{ formatMinor(total) }}</view>
+        </view>
+        <view class="btn-btn">
+          <overbtn :loading="loading" :btnText="$t('goods.payn')" :fontSize="28" btnType="submit" @btnAction="paynow" />
+        </view>
+      </view>
     </view>
   </view>
 </template>
 
+<style>
+@import './comfirm.css';
+</style>
+
 <style scoped>
-.page { min-height: 100vh; padding-bottom: 140rpx; background: #f6f6f6; }
-.card { margin: 20rpx; padding: 30rpx; }
-.addr { display: flex; flex-direction: column; }
-.an { font-size: 30rpx; font-weight: 700; }
-.al { margin-top: 10rpx; font-size: 26rpx; color: #666; }
-.g { display: flex; align-items: center; }
-.gimg { width: 140rpx; height: 140rpx; border-radius: 8rpx; margin-right: 20rpx; }
-.gt { font-size: 30rpx; font-weight: 700; }
-.price { color: #ee5016; font-weight: 700; display: block; margin-top: 10rpx; }
-.qty { display: flex; align-items: center; justify-content: space-between; }
-.stepper { display: flex; align-items: center; }
-.sbtn { width: 60rpx; height: 60rpx; line-height: 56rpx; text-align: center; border: 2rpx solid #eee; border-radius: 8rpx; font-size: 40rpx; }
-.sval { width: 100rpx; text-align: center; font-size: 32rpx; }
-.srow { display: flex; justify-content: space-between; padding: 12rpx 0; font-size: 30rpx; }
-.footer { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; padding: 20rpx 30rpx; background: #fff; }
-.ftotal { flex: 1; font-size: 40rpx; font-weight: 900; color: #ee5016; }
-.pay { width: 260rpx; height: 88rpx; line-height: 88rpx; font-size: 32rpx; font-weight: 700; }
+.comfirm { min-height: 100vh; background: #fff; padding-bottom: 140rpx; }
+.addr { padding: 30rpx; border-bottom: 2rpx solid #f5f5f5; }
+.addr-name { font-size: 30rpx; font-weight: 700; color: #17273a; }
+.addr-line { margin-top: 10rpx; font-size: 26rpx; color: #666; }
+.qty { display: flex; align-items: center; justify-content: space-between; padding: 24rpx 30rpx; }
+.qty-label { font-size: 30rpx; color: #17273a; }
+.qty-box { display: flex; align-items: center; }
+.qty-btn { width: 62rpx; height: 62rpx; line-height: 58rpx; text-align: center; border: 2rpx solid #eee; border-radius: 8rpx; font-size: 36rpx; }
+.qty-val { width: 90rpx; text-align: center; font-size: 32rpx; }
+.pay-wallet { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 0; }
+.pay-wallet-name { font-size: 28rpx; color: #17273a; }
+.pay-wallet-bal { font-size: 28rpx; color: #ee5016; font-weight: 700; }
+.btn { position: fixed; left: 0; right: 0; bottom: 0; height: 98rpx; background: #fff; box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06); }
 </style>

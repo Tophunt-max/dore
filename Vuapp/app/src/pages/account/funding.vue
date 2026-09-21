@@ -1,38 +1,62 @@
 <script setup lang="ts">
+// Faithful port of ORich pages/account/funding (wallet ledger).
 import { ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
-import { api } from '@/api/request';
+import { Funding } from '@/api/orich';
 import { formatMinor } from '@/utils/money';
-const txns = ref<any[]>([]);
-onShow(async () => {
-  const res = await api.get('/api/wallet/transactions');
-  if (res.ok) txns.value = res.transactions;
-});
-const label: Record<string, string> = {
-  recharge: 'Recharge', withdraw: 'Withdrawal', order: 'Order', refund: 'Refund', reward: 'Reward', task: 'Task reward', referral: 'Referral', finance: 'Finance', game: 'Game',
+
+const list = ref<any[]>([]);
+const labels: Record<string, string> = {
+  recharge: 'Recharge',
+  withdraw: 'Withdrawal',
+  order: 'Order',
+  refund: 'Refund',
+  reward: 'Reward',
+  task: 'Task reward',
+  referral: 'Referral',
+  finance: 'Finance',
+  game: 'Game',
 };
+
+onShow(async () => {
+  const r: any = await Funding();
+  if (r.ok) list.value = r.transactions || [];
+});
 </script>
+
 <template>
-  <view class="page">
-    <view v-for="t in txns" :key="t.id" class="row card">
-      <view class="l">
-        <text class="t">{{ label[t.type] || t.type }}</text>
-        <text class="muted">{{ new Date(t.created_at * 1000).toLocaleString() }}</text>
+  <view class="funding">
+    <navbar :title="$t('account.fundingrecords')" background="#ffffff" />
+    <view class="funding_main">
+      <view v-for="t in list" :key="t.id" class="funding_item">
+        <view class="funding_item_left">
+          <view class="funding_item_title">{{ labels[t.type] || t.type }}</view>
+          <view class="funding_item_time">{{ new Date(t.created_at * 1000).toLocaleString() }}</view>
+        </view>
+        <view class="funding_item_right">
+          <view class="funding_item_amount" :class="{ neg: t.amount_minor < 0 }">
+            {{ t.amount_minor >= 0 ? '+' : '' }}{{ formatMinor(t.amount_minor) }}
+          </view>
+          <view class="funding_item_balance">{{ formatMinor(t.balance_after) }}</view>
+        </view>
       </view>
-      <view class="r">
-        <text class="amt" :class="{ neg: t.amount_minor < 0 }">{{ t.amount_minor >= 0 ? '+' : '' }}{{ formatMinor(t.amount_minor) }}</text>
-        <text class="muted">Bal {{ formatMinor(t.balance_after) }}</text>
-      </view>
+      <view v-if="!list.length" class="nodata">{{ $t('common.nodata') }}</view>
     </view>
-    <view v-if="!txns.length" class="nodata">No transactions</view>
   </view>
 </template>
+
+<style>
+@import './funding.css';
+</style>
+
 <style scoped>
-.page { min-height: 100vh; padding: 20rpx; }
-.row { display: flex; justify-content: space-between; padding: 24rpx; margin-bottom: 12rpx; }
-.t { font-size: 28rpx; font-weight: 700; }
-.muted { display: block; margin-top: 6rpx; font-size: 22rpx; color: #b9b9b9; }
-.r { text-align: right; }
-.amt { font-size: 30rpx; font-weight: 700; color: #2bbf6a; }
-.amt.neg { color: #ff5c5c; }
+.funding { min-height: 100vh; background: #f9f9f9; }
+.funding_main { background: #fff; margin-top: 16rpx; padding: 0 30rpx; }
+.funding_item { display: flex; align-items: center; justify-content: space-between; padding: 26rpx 0; border-bottom: 2rpx solid #f5f5f5; }
+.funding_item_title { font-size: 30rpx; color: #17273a; font-weight: 700; }
+.funding_item_time { margin-top: 8rpx; font-size: 24rpx; color: #b9b9b9; }
+.funding_item_right { text-align: right; }
+.funding_item_amount { font-size: 30rpx; font-weight: 700; color: #2bbf6a; }
+.funding_item_amount.neg { color: #ff5c5c; }
+.funding_item_balance { margin-top: 8rpx; font-size: 24rpx; color: #b9b9b9; }
 </style>

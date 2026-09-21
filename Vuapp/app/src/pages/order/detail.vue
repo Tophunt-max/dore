@@ -1,47 +1,100 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+// Faithful port of ORich pages/order/detail.
+import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
-import { api } from '@/api/request';
+import { OrderDetail } from '@/api/orich';
 import { formatMinor } from '@/utils/money';
+
 const order = ref<any>(null);
-onLoad(async (q) => {
-  const res = await api.get(`/api/orders/${q?.id}`);
-  if (res.ok) order.value = res.order;
+const statusText = computed(() => {
+  const s = order.value?.status;
+  if (s === 'won') return 'You won';
+  if (s === 'lost') return 'Not winning';
+  return 'Waiting for draw';
 });
-function ranking() {
-  uni.navigateTo({ url: `/pages/order/discount?id=${order.value.id}` });
+
+onLoad((q: any) => {
+  OrderDetail({ id: q?.id }).then((r: any) => {
+    if (r.ok) order.value = r.order;
+  });
+});
+
+function toGoods() {
+  if (order.value) uni.navigateTo({ url: `../goods/goods?id=${order.value.goods_id}` });
+}
+function toRanking() {
+  if (order.value) uni.navigateTo({ url: `../order/discount?id=${order.value.id}` });
 }
 </script>
+
 <template>
-  <view v-if="order" class="page">
-    <view class="card top">
-      <image class="img" :src="order.image" mode="aspectFill" />
-      <view class="i">
-        <text class="t">{{ order.title }}</text>
-        <text class="muted">Issue {{ order.issue }}</text>
-        <text class="st" :class="order.status">{{ order.status }}</text>
+  <view v-if="order" class="detail">
+    <navbar :title="$t('order.dtitle')" background="#ffffff" />
+
+    <view class="detail_main">
+      <view class="detail_main_item">
+        <view class="detail_main_title">
+          <view class="detail_main_title_font">{{ $t('order.status') }}</view>
+          <view class="detail_main_status">{{ statusText }}</view>
+        </view>
+      </view>
+      <view class="border" />
+
+      <view class="detail_main_item item_list" @click="toGoods">
+        <view class="detail_main_info">
+          <view class="detail_main_info_icon"><image :src="order.image" mode="aspectFill" /></view>
+          <view class="detail_main_info_mation">
+            <view class="detail_main_info_mation_name">{{ order.title }}</view>
+            <view class="detail_main_info_mation_phone">{{ $t('order.numbers') }} {{ order.slots }}</view>
+            <view class="detail_main_info_mation_address">{{ $t('goods.issue') }}{{ order.issue }}</view>
+          </view>
+        </view>
+      </view>
+      <view class="border" />
+
+      <view class="detail_main_order">
+        <view class="detail_main_title">
+          <view class="detail_main_title_font">{{ $t('order.order') }}</view>
+        </view>
+        <view class="detail_main_info_mation_line">
+          <view class="line">{{ $t('common.price') }}: {{ formatMinor(order.amount_minor) }}</view>
+          <view class="line">{{ $t('order.numbers') }} {{ order.slots }}</view>
+          <view class="line">{{ $t('order.time') }} {{ new Date(order.created_at * 1000).toLocaleString() }}</view>
+          <view class="line">#{{ order.id }}</view>
+        </view>
       </view>
     </view>
-    <view class="card rows">
-      <view class="r"><text class="muted">Order ID</text><text>#{{ order.id }}</text></view>
-      <view class="r"><text class="muted">Slots</text><text>{{ order.slots }}</text></view>
-      <view class="r"><text class="muted">Amount</text><text class="price">{{ formatMinor(order.amount_minor) }}</text></view>
-      <view class="r"><text class="muted">Date</text><text>{{ new Date(order.created_at * 1000).toLocaleString() }}</text></view>
+
+    <view class="detail_share" @click="toRanking">
+      <view class="detail_share_left">
+        <view class="detail_share_left_title">{{ $t('order.productDetail') }}</view>
+      </view>
+      <u-icon name="arrow-right" color="#b9b9b9" size="14" />
     </view>
-    <view class="rankbtn card" @click="ranking">View participation ranking ›</view>
   </view>
 </template>
+
+<style>
+@import './detail.css';
+</style>
+
 <style scoped>
-.page { min-height: 100vh; padding: 20rpx; }
-.card { background: #fff; border-radius: 16rpx; margin-bottom: 20rpx; padding: 30rpx; }
-.top { display: flex; }
-.img { width: 160rpx; height: 160rpx; border-radius: 8rpx; margin-right: 24rpx; }
-.i { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-.t { font-size: 32rpx; font-weight: 700; }
-.muted { color: #b9b9b9; font-size: 24rpx; }
-.st { font-size: 26rpx; color: #fea326; }
-.st.won { color: #ee5016; font-weight: 700; }
-.r { display: flex; justify-content: space-between; padding: 16rpx 0; font-size: 28rpx; }
-.price { color: #ee5016; font-weight: 700; }
-.rankbtn { text-align: center; color: #ee5016; font-size: 28rpx; }
+.detail { min-height: 100vh; background: #f9f9f9; }
+.detail_main { background: #fff; margin-bottom: 16rpx; }
+.detail_main_item,
+.detail_main_order { padding: 26rpx 30rpx; }
+.detail_main_title { display: flex; align-items: center; justify-content: space-between; }
+.detail_main_title_font { font-size: 30rpx; font-weight: 700; color: #17273a; }
+.detail_main_status { font-size: 28rpx; color: #ee5016; }
+.border { height: 2rpx; background: #f5f5f5; }
+.detail_main_info { display: flex; }
+.detail_main_info_icon { width: 150rpx; height: 150rpx; margin-right: 22rpx; }
+.detail_main_info_icon uni-image { width: 100%; height: 100%; border-radius: 10rpx; }
+.detail_main_info_mation_name { font-size: 30rpx; font-weight: 700; color: #17273a; }
+.detail_main_info_mation_phone,
+.detail_main_info_mation_address { margin-top: 10rpx; font-size: 26rpx; color: #b9b9b9; }
+.detail_main_info_mation_line { margin-top: 16rpx; }
+.detail_main_info_mation_line .line { padding: 10rpx 0; font-size: 28rpx; color: #666; }
+.detail_share { display: flex; align-items: center; justify-content: space-between; padding: 30rpx; background: #fff; }
+.detail_share_left_title { font-size: 30rpx; color: #17273a; }
 </style>

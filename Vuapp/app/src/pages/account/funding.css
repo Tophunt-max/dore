@@ -1,0 +1,9 @@
+.funding{position:relative;background:#f8f8f8}
+.funding .list{background:#fff;padding:0 30rpx}
+.funding .list .item{padding:20rpx 0}
+.funding .list .item .item-menu{display:flex;flex-direction:row;align-items:center;justify-content:space-between;width:100%}
+.funding .list .item .item-key{width:400rpx;font-size:32rpx;font-family:Roboto,Roboto-Medium;font-weight:700;color:#444}
+.funding .list .item .item-value{font-size:32rpx;font-family:Roboto,Roboto-Regular;font-weight:400;color:#ff5c5c;letter-spacing:0rpx}
+.funding .list .item .item-text{font-size:32rpx;font-family:Roboto,Roboto-Regular;color:#ee5016}
+.funding .list .item .item-text{margin-top:10rpx;font-size:26rpx;font-family:Roboto,Roboto-Regular;color:#b9b9b9}
+.funding .list .item:not(:last-child){border-bottom:1rpx solid #ececec}
