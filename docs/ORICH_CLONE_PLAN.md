@@ -19,7 +19,7 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 4 | address/add | `/addresses/add` | ⬜ |
 | 5 | goods/goods | `/products/[id]` | ✅ (prior) |
 | 6 | goods/comfirm | `/checkout/[orderId]` | ⬜ |
-| 7 | goods/calculation | `/calculation` | ⬜ |
+| 7 | goods/calculation | `/calculation` | ✅ |
 | 8 | index/index | `/(tabs)` | ✅ (legacy noop) |
 | 9 | order/detail | `/orders/[orderId]` | ✅ |
 | 10 | order/record | `/orders` | ✅ |
