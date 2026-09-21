@@ -211,6 +211,11 @@ export const catalog = {
     hi: 'भुगतान रिकॉर्ड',
     zh: '付款记录',
   },
+  'payment.tsuccess': { en: 'Success', hi: 'सफल', zh: '成功' },
+  'payment.tfail': { en: 'Failed', hi: 'विफल', zh: '失败' },
+  'payment.tprocessing': { en: 'Processing', hi: 'प्रक्रियाधीन', zh: '处理中' },
+  'payment.orderno': { en: 'Order no.', hi: 'ऑर्डर नं.', zh: '订单号' },
+  'payment.payamount': { en: 'Amount', hi: 'राशि', zh: '金额' },
   'payment.status': {
     en: 'Payment status',
     hi: 'भुगतान स्थिति',
