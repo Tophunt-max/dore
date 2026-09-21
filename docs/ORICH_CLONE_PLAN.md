@@ -45,8 +45,8 @@ Legend: ✅ done · ⬜ todo · ⭐ intentional Oriva enhancement kept
 | 30 | invitation/invitation | `/referrals` | ⬜ |
 | 31 | help/help | `/help` | ✅ |
 | 32 | help/help_detail | `/help/[topic]` | ✅ |
-| 33 | payment/payrecord | `/payments` | ⬜ |
-| 34 | payment/cashrecord | `/wallet/withdrawals` | ⬜ |
+| 33 | payment/payrecord | `/payments` | ✅ |
+| 34 | payment/cashrecord | `/wallet/withdrawals` | ✅ |
 | 35 | payform/payform | in-app forms | ⭐ web-view orig |
 | 36 | login/regist | `/(auth)/verify-otp` | ⬜ |
 | 37 | prize/prize | `/prizes` | ⬜ |
