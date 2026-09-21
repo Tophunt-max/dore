@@ -191,21 +191,22 @@ export default function AccountScreen() {
 
 const styles = StyleSheet.create({
   root: { backgroundColor: '#f9f9f9', paddingBottom: rpx(60) },
+  // .mine_user { height:568rpx; padding-top:158rpx }
   header: {
-    height: rpx(500),
-    paddingTop: rpx(40),
+    height: rpx(568),
+    paddingTop: rpx(158),
   },
   headerImage: { resizeMode: 'cover' },
+  // .mine_setting { top:128rpx; right:24rpx }
   setting: {
     position: 'absolute',
-    top: rpx(28),
+    top: rpx(120),
     right: rpx(24),
   },
   settingIcon: { width: ICON, height: ICON },
   userMain: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: rpx(40),
   },
   avatar: {
     width: rpx(120),
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
   },
   vipArrow: { width: ARROW, height: ARROW },
   orderCard: {
-    marginTop: rpx(-120),
+    marginTop: rpx(-86),
     marginLeft: rpx(16),
     marginRight: rpx(12),
     backgroundColor: '#fff',
@@ -307,7 +308,7 @@ const styles = StyleSheet.create({
   },
   walletCount: {
     width: rpx(266),
-    fontSize: rpx(46),
+    fontSize: rpx(52),
     fontFamily: theme.typography.family.bold,
     color: theme.colors.primary,
   },
