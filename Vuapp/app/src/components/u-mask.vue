@@ -5,6 +5,7 @@
     :style="[maskStyle, zoomStyle]"
     @touchmove="stopPropagation(), preventDefault()"
     @click="click"
+    :hover-stop-propagation="true"
   >
     <slot></slot>
   </view>

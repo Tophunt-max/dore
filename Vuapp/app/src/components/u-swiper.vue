@@ -55,7 +55,7 @@
         class="u-indicator-item-round"
         :class="{ 'u-indicator-item-round-active': index == uCurrent }"
       ></view>
-      <view v-if="'number' == mode" class="u-indicator-item-number">{{ uCurrent + 1 }}{{ list.length }}</view>
+      <view v-if="'number' == mode" class="u-indicator-item-number">{{ uCurrent + 1 }}/{{ list.length }}</view>
     </view>
   </view>
 </template>

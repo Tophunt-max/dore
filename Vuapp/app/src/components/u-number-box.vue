@@ -18,6 +18,7 @@
       :cursor-spacing="getCursorSpacing"
       @blur="onBlur"
       @focus="onFocus"
+      type="number"
      />
     <view
       class="u-icon-plus"

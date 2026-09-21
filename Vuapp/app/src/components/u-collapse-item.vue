@@ -5,6 +5,7 @@
       :style="[headStyle]"
       :hover-class="hoverClass"
       @click.stop="headClick($event)"
+      :hover-stay-time="200"
     >
       <template v-if="!$slots['title-all']">
         <view

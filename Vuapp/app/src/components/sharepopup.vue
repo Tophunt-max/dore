@@ -35,8 +35,8 @@
     </u-popup>
     <view v-show="posterShow && imgVal" class="poster_pop">
       <view class="poster">
-        <image v-if="2 == shareType" :src="whatsappImg" @load="imgVal = true" />
-        <image v-else :src="posterImg" @load="imgVal = true" />
+        <image v-if="2 == shareType" :src="whatsappImg" @load="imgVal = true" mode="heightFix" />
+        <image v-else :src="posterImg" @load="imgVal = true" mode="heightFix" />
       </view>
     </view>
   </view>

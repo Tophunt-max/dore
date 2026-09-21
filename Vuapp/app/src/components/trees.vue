@@ -22,9 +22,10 @@
           :data-index="item.attrs.index"
           @load="loadImg"
           @error="error"
+          data-source="img"
          />
       </view>
-      <text v-else-if="'text' == item.type" :key="'1--1' + __gen">{{ item.text }}</text>
+      <text v-else-if="'text' == item.type" :key="'1--1' + __gen" :decode="true">{{ item.text }}</text>
       <text v-else-if="'br' == item.name" :key="'1--1' + __gen"></text>
       <view
         v-else-if="(item.lazyLoad && !item.attrs.autoplay || 'video' == item.name && !loadVideo) && void 0 == ctrl[index]"
@@ -52,6 +53,7 @@
         :data-i="index"
         @error="error"
         @play="play"
+        data-source="video"
       ></video>
       <audio
         v-else-if="'audio' == item.name"
@@ -69,6 +71,7 @@
         :data-id="item.attrs.id"
         @error.native="error(item)"
         @play.native="play(item)"
+        data-source="audio"
       ></audio>
       <view
         v-else-if="'a' == item.name"
@@ -78,6 +81,7 @@
         :id="item.attrs.id"
         :data-attrs="item.attrs"
         @click.stop="linkpress(item)"
+        hover-class="_hover"
       >
         <trees class="_span" c="_span" :nodes="item.children"></trees>
       </view>

@@ -105,11 +105,15 @@ function propNames(body) {
 }
 
 function buildSfc(bundle, d, ctx) {
-  const viewSrc = bundle.renderSource(d.render, 'view');
   const opts = bundle.resolveOptions(d.options);
-  // the view-layer half of the same SFC carries its own scope id, and that is
-  // where the stylesheet is filed
-  const viewScope = bundle.describe(d.mod, d.name, 'view').scope;
+
+  // The view-layer half of the same SFC is a separate compilation: its own
+  // render module id and its own scope id. The scope is where the stylesheet is
+  // filed, and the render is the only place static attributes (an
+  // `<image src="...">`) and the literal text between interpolations survive.
+  const viewDesc = bundle.describe(d.mod, d.name, 'view');
+  const viewSrc = bundle.renderSource(viewDesc.render || d.render, 'view');
+  const viewScope = viewDesc.scope;
 
   const t = new Transpiler({
     asset: ctx.assetOf,

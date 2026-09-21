@@ -112,17 +112,18 @@ class Bundle {
     const body = this.module(modId, which);
     if (!body) return d;
 
-    const ids = /var\s+[\w$]+\s*=\s*s\("([^"]+)"\)\s*,\s*[\w$]+\s*=\s*s\("([^"]+)"\)/.exec(body);
+    // the require alias differs per bundle: `s` in app-service.js, `e` in app-view.js
+    const ids = /var\s+[\w$]+\s*=\s*[\w$]+\("([^"]+)"\)\s*,\s*[\w$]+\s*=\s*[\w$]+\("([^"]+)"\)/.exec(body);
     if (ids) { d.render = ids[1]; d.options = ids[2]; }
     const sc = /Object\([\w$]+\["a"\]\)\([^;]*?,"([0-9a-f]{6,10})"/.exec(body);
     if (sc) d.scope = sc[1];
 
     if (d.render) {
       const rmod = this.module(d.render, which);
-      const cm = /var\s+[\w$]+\s*=\s*\{(?=[^{}]*s\(")/.exec(rmod);
+      const cm = /var\s+[\w$]+\s*=\s*\{(?=[^{}]*[\w$]\(")/.exec(rmod);
       if (cm) {
         const block = balanced(rmod, cm.index + cm[0].length - 1);
-        const re = /(?:"([^"]+)"|([\w$]+))\s*:\s*s\("([^"]+)"\)\.default/g;
+        const re = /(?:"([^"]+)"|([\w$]+))\s*:\s*[\w$]+\("([^"]+)"\)\.default/g;
         let c;
         while ((c = re.exec(block))) d.components[c[1] || c[2]] = c[3];
       }
@@ -159,7 +160,7 @@ class Bundle {
     if (/data\s*[:(]|methods\s*:\s*\{|computed\s*:\s*\{|props\s*:\s*[{[]/.test(body)) {
       return { id, body };
     }
-    const m = /var\s+[\w$]+\s*=\s*s\("([^"]+)"\)/.exec(body);
+    const m = /var\s+[\w$]+\s*=\s*[\w$]+\("([^"]+)"\)/.exec(body);
     if (m) return this.resolveOptions(m[1], which, depth + 1);
     return { id, body };
   }

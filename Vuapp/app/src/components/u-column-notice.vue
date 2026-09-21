@@ -20,6 +20,7 @@
       :vertical="vertical"
       :interval="duration"
       @change="change"
+      :circular="true"
     >
       <swiper-item v-for="(item, index) in list" :key="index" class="u-swiper-item">
         <view

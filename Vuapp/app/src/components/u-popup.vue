@@ -1,5 +1,10 @@
 <template>
-  <view v-if="visibleSync" class="u-drawer" :style="[customStyle, { zIndex: uZindex - 1 }]">
+  <view
+    v-if="visibleSync"
+    class="u-drawer"
+    :style="[customStyle, { zIndex: uZindex - 1 }]"
+    :hover-stop-propagation="true"
+  >
     <u-mask
       :duration="duration"
       :custom-style="maskCustomStyle"
@@ -31,11 +36,11 @@
           :size="closeIconSize"
           @click="close"
         ></u-icon>
-        <scroll-view class="u-drawer__scroll-view">
+        <scroll-view class="u-drawer__scroll-view" scroll-y="true">
           <slot></slot>
         </scroll-view>
       </view>
-      <scroll-view v-else class="u-drawer__scroll-view">
+      <scroll-view v-else class="u-drawer__scroll-view" scroll-y="true">
         <slot></slot>
       </scroll-view>
       <view class="u-close" :class="['u-close--' + closeIconPos]" @click="close">

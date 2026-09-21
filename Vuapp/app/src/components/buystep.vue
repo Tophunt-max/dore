@@ -4,15 +4,15 @@
       <view class="step-op1"></view>
       <view class="step-op2"></view>
       <view class="step-item">
-        <image />
+        <image src="/static/image/home/icon_1GroupBuy.png" mode="widthFix" />
         <view>{{ $t('home.step1') }}</view>
       </view>
       <view class="step-item">
-        <image />
+        <image src="/static/image/home/icon_WinnerDrawn.png" mode="widthFix" />
         <view>{{ $t('home.step2') }}</view>
       </view>
       <view class="step-item">
-        <image />
+        <image src="/static/image/home/icon_FreeShipping.png" mode="widthFix" />
         <view>{{ $t('home.step3') }}</view>
       </view>
     </template>
@@ -36,15 +36,15 @@
       <view class="step-op1"></view>
       <view class="step-op2"></view>
       <view class="step-item">
-        <image />
+        <image src="/static/image/invite/icon_Sharelink.png" mode="widthFix" />
         <view>{{ $t('invite.slink') }}</view>
       </view>
       <view class="step-item">
-        <image />
+        <image src="/static/image/invite/icon_Registion.png" mode="widthFix" />
         <view>{{ $t('invite.reg') }}</view>
       </view>
       <view class="step-item">
-        <image />
+        <image src="/static/image/invite/icon_Earnrewards.png" mode="widthFix" />
         <view>{{ $t('invite.rew') }}</view>
       </view>
     </template>

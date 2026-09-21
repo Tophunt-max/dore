@@ -12,7 +12,7 @@
           :style="'background:' + broadcastStylees.back_color + ';font-size:28rpx;'"
         >
           <text class="iconfont icon-guangbozheng-"></text>
-          <text>{{ broadcast_tit }}</text>
+          <text>{{ broadcast_tit }}:</text>
         </view>
         <view
           class="boradcast_text_left_rig"
