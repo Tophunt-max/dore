@@ -1,371 +1,229 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { onShow, onPullDownRefresh } from '@dcloudio/uni-app';
-import { api } from '@/api/request';
+// Faithful port of ORich pages/home/home (verbatim CSS in ./home.css).
+import { ref, computed } from 'vue';
+import { onShow, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app';
+import { HomeData } from '@/api/orich';
+import { LOCALES, setLocale, currentLocale } from '@/locale';
 import { formatMinor } from '@/utils/money';
 
-interface Goods {
-  id: number;
-  title: string;
-  image: string;
-  price_minor: number;
-  market_price_minor: number;
-  total_slots: number;
-  filled_slots: number;
-  issue: string;
+const H = '/static/image/home';
+const bannerList = ref<any[]>([]);
+const newsList = ref<string[]>([]);
+const newbieList = ref<any[]>([]);
+const highList = ref<any[]>([]);
+const financeList = ref<any[]>([]);
+const goodsList = ref<any[]>([]);
+const showLang = ref(false);
+const navBg = ref('transparent');
+const titleColor = ref('#ffffff');
+const ltabIndex = ref(0);
+
+const reLanguage = computed(() => (LOCALES.find((l) => l.code === currentLocale())?.label) || 'English');
+
+const quickNav = [
+  { img: `${H}/icon_1GroupBuy.png`, text: 'Group Buy', fn: () => uni.navigateTo({ url: '/pages/prize/prize' }) },
+  { img: `${H}/icon_Category.png`, text: 'Finance', fn: () => uni.navigateTo({ url: '/pages/finance/flist' }) },
+  { img: `${H}/high.png`, text: 'Hot', fn: () => uni.switchTab({ url: '/pages/task/task' }) },
+  { img: `${H}/icon_news.png`, text: 'Game', fn: () => uni.navigateTo({ url: '/pages/game/game' }) },
+];
+const ltabs = ['home.lnew', 'home.lhot', 'home.lsoon'];
+
+function progress(g: any) {
+  return Math.min(100, Math.round(((g.filled_slots || 0) / (g.total_slots || 1)) * 100));
 }
-
-const banners = ref<any[]>([]);
-const notices = ref<any[]>([]);
-const newbie = ref<Goods[]>([]);
-const high = ref<Goods[]>([]);
-const latest = ref<Goods[]>([]);
-const finance = ref<any[]>([]);
-const loading = ref(true);
-
-async function load() {
-  const res = await api.get('/api/home');
-  if (res.ok) {
-    banners.value = res.banners || [];
-    notices.value = res.notices || [];
-    newbie.value = res.newbie || [];
-    high.value = res.high || [];
-    latest.value = res.latest || [];
-    finance.value = res.finance || [];
-  }
-  loading.value = false;
+function load() {
+  HomeData().then((r: any) => {
+    if (!r || r.ok === false) return;
+    bannerList.value = (r.banners || []).map((b: any) => b.image);
+    newsList.value = (r.notices || []).map((n: any) => n.text);
+    newbieList.value = r.newbie || [];
+    highList.value = r.high || [];
+    financeList.value = r.finance || [];
+    goodsList.value = r.latest || [];
+  });
 }
-
 onShow(load);
-onPullDownRefresh(async () => {
-  await load();
-  uni.stopPullDownRefresh();
+onPullDownRefresh(() => {
+  load();
+  setTimeout(() => uni.stopPullDownRefresh(), 600);
+});
+onPageScroll((e: any) => {
+  const on = e.scrollTop > 60;
+  navBg.value = on ? '#ffffff' : 'transparent';
+  titleColor.value = on ? '#17273a' : '#ffffff';
 });
 
-function progress(g: Goods) {
-  return Math.min(100, Math.round((g.filled_slots / g.total_slots) * 100));
-}
-function openGoods(id: number) {
+function toGoods(id: number) {
   uni.navigateTo({ url: `/pages/goods/goods?id=${id}` });
 }
-function goInvite() {
+function toInvite() {
   uni.navigateTo({ url: '/pages/invitation/invitation' });
 }
-function goFinance() {
+function toFinance() {
   uni.navigateTo({ url: '/pages/finance/flist' });
+}
+function changLang(code: string) {
+  setLocale(code);
+  showLang.value = false;
 }
 </script>
 
 <template>
   <view class="home">
+    <navbar :isBack="false" :titleColor="titleColor" :background="navBg" :title="$t('common.orich')">
+      <template #right>
+        <view class="home-lang" @click="showLang = true">
+          <text :style="{ color: titleColor }">{{ reLanguage }}</text>
+          <u-icon name="arrow-down" :color="titleColor" size="28" />
+        </view>
+      </template>
+    </navbar>
+
     <view class="home-background" />
-    <view class="nav-logo">
-      <image class="logo" src="/static/logo.png" mode="heightFix" />
-    </view>
 
-    <!-- banner -->
-    <swiper class="banner" :indicator-dots="true" :autoplay="true" :interval="3500" circular indicator-active-color="#ee5016">
-      <swiper-item v-for="b in banners" :key="b.id">
-        <image class="banner-img" :src="b.image" mode="aspectFill" />
-      </swiper-item>
-      <swiper-item v-if="!banners.length">
-        <image class="banner-img" src="/static/image/home/banner.png" mode="aspectFill" />
-      </swiper-item>
-    </swiper>
+    <view id="toTop" class="toTop">
+      <view v-if="bannerList.length" class="banner">
+        <u-swiper class="banner-swiper" height="300" :list="bannerList" img-mode="scaleToFill" />
+      </view>
 
-    <!-- quick tabs -->
-    <view class="qtab card">
-      <view class="qtab-item" @click="goFinance">
-        <image src="/static/image/home/finance.png" mode="aspectFit" />
-        <text>Finance</text>
-      </view>
-      <view class="qtab-item" @click="() => uni.navigateTo({ url: '/pages/prize/prize' })">
-        <image src="/static/image/home/prize.png" mode="aspectFit" />
-        <text>Prizes</text>
-      </view>
-      <view class="qtab-item" @click="() => uni.switchTab({ url: '/pages/task/task' })">
-        <image src="/static/image/home/task.png" mode="aspectFit" />
-        <text>Tasks</text>
-      </view>
-      <view class="qtab-item" @click="() => uni.navigateTo({ url: '/pages/game/game' })">
-        <image src="/static/image/home/game.png" mode="aspectFit" />
-        <text>Game</text>
-      </view>
-    </view>
-
-    <!-- notice -->
-    <view v-if="notices.length" class="toast card">
-      <image class="toast-icon" src="/static/image/icon_news.png" mode="aspectFit" />
-      <swiper class="toast-swiper" vertical :autoplay="true" :interval="3000" circular :disable-touch="true">
-        <swiper-item v-for="n in notices" :key="n.id">
-          <text class="toast-text">{{ n.text }}</text>
-        </swiper-item>
-      </swiper>
-    </view>
-
-    <!-- invite -->
-    <view class="invite" @click="goInvite">
-      <image class="invite-icon" src="/static/image/home/invite.png" mode="aspectFit" />
-      <text class="invite-main">Invite friends & earn rewards</text>
-      <view class="invite-btn">Go</view>
-    </view>
-
-    <!-- newbie zone -->
-    <view v-if="newbie.length" class="glist">
-      <view class="header">
-        <text class="header-title">Newbie Zone</text>
-      </view>
-      <scroll-view class="row" scroll-x>
-        <view v-for="g in newbie" :key="g.id" class="gcard" @click="openGoods(g.id)">
-          <image class="gcard-img" :src="g.image" mode="aspectFill" />
-          <text class="gcard-name">{{ g.title }}</text>
-          <text class="price">{{ formatMinor(g.price_minor) }}</text>
-        </view>
-      </scroll-view>
-    </view>
-
-    <!-- hot draws -->
-    <view v-if="high.length" class="glist">
-      <view class="header">
-        <text class="header-title">Hot Draws</text>
-      </view>
-      <view v-for="g in high" :key="g.id" class="litem" @click="openGoods(g.id)">
-        <image class="litem-img" :src="g.image" mode="aspectFill" />
-        <view class="litem-right">
-          <text class="lgoods-title">{{ g.title }}</text>
-          <view class="prog">
-            <view class="prog-bar"><view class="prog-fill" :style="{ width: progress(g) + '%' }" /></view>
-            <text class="prog-text">{{ progress(g) }}%</text>
-          </view>
-          <view class="litem-price">
-            <text class="price">{{ formatMinor(g.price_minor) }}</text>
-            <text class="market">{{ formatMinor(g.market_price_minor) }}</text>
-          </view>
+      <view class="tab">
+        <view v-for="(q, i) in quickNav" :key="i" class="tab-item" @click="q.fn()">
+          <image :src="q.img" mode="aspectFit" />
+          <view class="tab-item-text">{{ q.text }}</view>
         </view>
       </view>
-    </view>
 
-    <!-- latest -->
-    <view v-if="latest.length" class="glist">
-      <view class="header"><text class="header-title">Latest</text></view>
-      <view v-for="g in latest" :key="g.id" class="litem" @click="openGoods(g.id)">
-        <image class="litem-img" :src="g.image" mode="aspectFill" />
-        <view class="litem-right">
-          <text class="lgoods-title">{{ g.title }}</text>
-          <text class="muted">Issue {{ g.issue }}</text>
-          <view class="prog">
-            <view class="prog-bar"><view class="prog-fill" :style="{ width: progress(g) + '%' }" /></view>
-            <text class="prog-text">{{ progress(g) }}%</text>
+      <view v-if="newsList.length" class="toast">
+        <swiper class="toast-swiper" vertical circular :autoplay="true" :interval="3000" :disable-touch="true">
+          <swiper-item v-for="(n, i) in newsList" :key="i">
+            <view class="toast-swiper-item">
+              <view class="toast-swiper-item-img"><image :src="`${H}/icon_news.png`" mode="aspectFit" /></view>
+              <view class="toast-swiper-item-main"><text class="name">{{ n }}</text></view>
+            </view>
+          </swiper-item>
+        </swiper>
+      </view>
+
+      <view class="invite" @click="toInvite">
+        <view class="invite-icon"><image :src="`${H}/icon_1GroupBuy.png`" mode="aspectFit" /></view>
+        <view class="invite-main">{{ $t('home.invitemoney') }}</view>
+        <view class="invite-btn">{{ $t('home.gotitle') }}</view>
+      </view>
+
+      <view v-if="newbieList.length" class="glist">
+        <view class="header">
+          <view class="header-title">{{ $t('home.newbie') }}</view>
+          <view class="header-right">{{ $t('home.more') }}</view>
+        </view>
+        <scroll-view class="main" scroll-x>
+          <view v-for="g in newbieList" :key="g.id" class="item" @click="toGoods(g.id)">
+            <view class="item-show"><image :src="g.image" mode="aspectFill" /></view>
+            <view class="item-text">
+              <view class="item-name otw">{{ g.title }}</view>
+              <view class="item-count">{{ formatMinor(g.price_minor) }}</view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view v-if="highList.length" class="glist high">
+        <view class="header">
+          <view class="header-title">{{ $t('home.high') }}</view>
+          <view class="header-right">{{ $t('home.more') }}</view>
+        </view>
+        <scroll-view class="main" scroll-x>
+          <view v-for="g in highList" :key="g.id" class="item" @click="toGoods(g.id)">
+            <view class="item-show"><image :src="g.image" mode="aspectFill" /></view>
+            <view class="item-text">
+              <view class="item-name otw">{{ g.title }}</view>
+              <view class="item-count">{{ formatMinor(g.price_minor) }}</view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view v-if="financeList.length" class="finance">
+        <view class="finance-header">
+          <view class="finance-header-item">
+            <view class="title">{{ $t('finance.htitle') }}</view>
+          </view>
+          <view class="finance-header-item" @click="toFinance">
+            <view class="more">{{ $t('home.more') }}</view>
           </view>
         </view>
+        <scroll-view class="finance-main" scroll-x>
+          <view v-for="f in financeList" :key="f.id" class="finance-main-card" @click="toFinance">
+            <view class="finance-main-card-content">
+              <view class="ctitle otw">{{ f.title }}</view>
+              <view class="linepro"><lineprogress :percent="60" /></view>
+              <view class="ditem">
+                <text class="ditem-title">{{ (f.rate_bps / 100).toFixed(1) }}% APR · {{ f.term_days }}d</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="home-list">
+        <view class="ltab">
+          <view class="ltab-price">{{ $t('home.all') }}</view>
+          <view class="ltab-tab">
+            <view
+              v-for="(t, i) in ltabs"
+              :key="i"
+              class="ltab-item"
+              :class="{ 'ltab-item-active': ltabIndex === i }"
+              @click="ltabIndex = i"
+            >
+              <view class="ltab-item-text">{{ $t(t) }}</view>
+            </view>
+          </view>
+        </view>
+        <view v-for="g in goodsList" :key="g.id" class="litem" @click="toGoods(g.id)">
+          <view class="litem-left">
+            <image class="litem-img" :src="g.image" mode="aspectFill" />
+          </view>
+          <view class="litem-right">
+            <view class="lgoods-title otw">{{ g.title }}</view>
+            <view class="lgoods-end">{{ $t('home.needed') }} {{ g.total_slots - g.filled_slots }}</view>
+            <view class="lgoods-precent">
+              <view class="lgoods-progress"><lineprogress :percent="progress(g)" /></view>
+              <view class="lgoods-progress-text">{{ progress(g) }}%</view>
+            </view>
+            <view class="litem-price"><text class="price">{{ formatMinor(g.price_minor) }}</text></view>
+          </view>
+        </view>
+        <view v-if="!goodsList.length" class="nodata">{{ $t('common.nodata') }}</view>
       </view>
     </view>
 
-    <view v-if="loading" class="nodata">Loading...</view>
-    <view class="pad" />
+    <view v-if="showLang" class="lang-mask" @click="showLang = false">
+      <view class="lang-box" @click.stop>
+        <view v-for="l in LOCALES" :key="l.code" class="lang-item" :class="{ on: currentLocale() === l.code }" @click="changLang(l.code)">
+          {{ l.label }}
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
-<style scoped lang="scss">
-.home {
-  position: relative;
-  min-height: 100vh;
-  padding: 0 20rpx 120rpx;
-  background-color: #f6f6f6;
-}
-.home-background {
-  height: 330rpx;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: linear-gradient(180deg, #ff7d4d, #ee5016);
-}
-.nav-logo {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100rpx;
-}
-.logo {
-  height: 60rpx;
-}
-.banner {
-  width: 100%;
-  height: 278rpx;
-  border-radius: 16rpx;
-  overflow: hidden;
-}
-.banner-img {
-  width: 100%;
-  height: 100%;
-}
-.qtab {
-  display: flex;
-  justify-content: space-around;
-  padding: 26rpx 0;
-  margin-top: 20rpx;
-}
-.qtab-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.qtab-item image {
-  width: 72rpx;
-  height: 72rpx;
-}
-.qtab-item text {
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  color: #4f4f4f;
-}
-.toast {
-  display: flex;
-  align-items: center;
-  padding: 16rpx 20rpx;
-  margin-top: 20rpx;
-}
-.toast-icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-right: 16rpx;
-}
-.toast-swiper {
-  flex: 1;
-  height: 44rpx;
-}
-.toast-text {
-  font-size: 26rpx;
-  color: #ee5016;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.invite {
-  height: 100rpx;
-  background: #ffe9e1;
-  border-radius: 10rpx;
-  margin-top: 20rpx;
-  display: flex;
-  align-items: center;
-  padding: 0 30rpx;
-}
-.invite-icon {
-  width: 64rpx;
-  height: 56rpx;
-}
-.invite-main {
-  flex: 1;
-  margin-left: 24rpx;
-  font-size: 30rpx;
-  color: #ee5016;
-}
-.invite-btn {
-  width: 110rpx;
-  height: 54rpx;
-  background: #ee5016;
-  border-radius: 199rpx;
-  line-height: 54rpx;
-  color: #fff;
-  text-align: center;
-  font-size: 26rpx;
-}
-.glist {
-  margin-top: 28rpx;
-}
-.header {
-  padding: 10rpx 6rpx 16rpx;
-}
-.header-title {
-  font-size: 34rpx;
-  font-weight: 700;
-  color: #17273a;
-}
-.row {
-  white-space: nowrap;
-}
-.gcard {
-  display: inline-block;
-  width: 220rpx;
-  margin-right: 20rpx;
-  background: #fff;
-  border-radius: 12rpx;
-  padding: 16rpx;
-  vertical-align: top;
-}
-.gcard-img {
-  width: 188rpx;
-  height: 188rpx;
-  border-radius: 8rpx;
-}
-.gcard-name {
-  display: block;
-  width: 188rpx;
-  font-size: 26rpx;
-  margin-top: 10rpx;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.litem {
-  display: flex;
-  padding: 24rpx;
-  background: #fff;
-  border-radius: 12rpx;
-  margin-bottom: 16rpx;
-}
-.litem-img {
-  width: 184rpx;
-  height: 184rpx;
-  border-radius: 8rpx;
-  margin-right: 24rpx;
-}
-.litem-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.lgoods-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #000;
-}
-.prog {
-  display: flex;
-  align-items: center;
-  margin: 14rpx 0;
-}
-.prog-bar {
-  flex: 1;
-  height: 12rpx;
-  background: #f0f0f0;
-  border-radius: 12rpx;
-  overflow: hidden;
-}
-.prog-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ffe44b, #fea326);
-}
-.prog-text {
-  width: 80rpx;
-  text-align: right;
-  font-size: 24rpx;
-  color: #b9b9b9;
-}
-.litem-price {
-  display: flex;
-  align-items: center;
-}
-.market {
-  margin-left: 20rpx;
-  font-size: 26rpx;
-  color: #b9b9b9;
-  text-decoration: line-through;
-}
-.pad {
-  height: 40rpx;
-}
+<style>
+/* Verbatim ORich home scoped CSS (scope stripped; namespaced by .home) */
+@import './home.css';
+</style>
+
+<style scoped>
+/* small extras for reused elements */
+.home-background { background: linear-gradient(180deg, #ff7d4d, #ee5016) !important; }
+.home-lang { display: flex; flex-direction: row; align-items: center; padding-right: 20rpx; }
+.home-lang text { font-size: 26rpx; margin-right: 6rpx; }
+.tab { display: flex; flex-direction: row; align-items: center; justify-content: center; padding: 26rpx 30rpx; background-color: #fff; margin: 20rpx; border-radius: 16rpx; }
+.tab .tab-item { flex: 1; text-align: center; }
+.tab .tab-item image { width: 84rpx; height: 84rpx; }
+.finance .finance-main-card .linepro { width: 320rpx; margin: 16rpx 0; }
+.lgoods-progress { flex: 1; }
+.lang-mask { position: fixed; inset: 0; z-index: 99999; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-start; justify-content: flex-end; }
+.lang-box { margin-top: 120rpx; margin-right: 24rpx; background: #fff; border-radius: 16rpx; overflow: hidden; min-width: 220rpx; }
+.lang-item { padding: 28rpx 40rpx; font-size: 30rpx; border-bottom: 2rpx solid #f5f5f5; }
+.lang-item.on { color: #ee5016; font-weight: 700; }
 </style>
