@@ -1,9 +1,0 @@
-package com.nostra13.dcloudimageloader.core.decode;
-
-import android.graphics.Bitmap;
-import java.io.IOException;
-
-/* JADX INFO: loaded from: classes.dex */
-public interface ImageDecoder {
-    Bitmap decode(ImageDecodingInfo imageDecodingInfo) throws IOException;
-}
